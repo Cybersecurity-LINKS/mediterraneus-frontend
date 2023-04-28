@@ -14,10 +14,11 @@ contract ERC721Base is
     
     using SafeMath for uint256;
 
-    address private _owner;
     string private _name;
     string private _symbol;
+    address private _owner;
     address private _factory;
+    uint256 private _price;
     bool private initialized = false;
 
     event NFTminted(
@@ -25,6 +26,14 @@ contract ERC721Base is
         string name, 
         string symbol,
         address factory
+    );  
+
+    event NFTpriceUpdated(
+        address indexed owner,
+        string name, 
+        string symbol,
+        uint256 oldPrice,
+        uint256 newPrice
     );  
 
     modifier onlyNFTOwner() {
@@ -37,15 +46,17 @@ contract ERC721Base is
         string calldata name, 
         string calldata symbol,
         address factory,
-        string memory _tokenURI
+        string memory _tokenURI,
+        uint256 initialPrice
     ) external returns (bool) {
         require(owner != address(0), "Invalid NFT owner: zero address not valid!");
         require(!initialized, "ERC721 Token instance already initialized");
 
-        _owner = owner;
         _name = name;
         _symbol = symbol;
+        _owner = owner;
         _factory = factory;
+        _price = initialPrice;
         safeMint(_owner, _tokenURI);
         initialized = true;
 
@@ -57,6 +68,12 @@ contract ERC721Base is
         require(!initialized, "ERC721 Token instance already initialized");
         _safeMint(to, 1);
         _setTokenURI(1, _tokenURI);
+    }
+
+    function setPrice(uint256 price_) external onlyNFTOwner {
+        require(price_ >= 0, "NFT cost cannot be negative");
+        require(price_!= _price, "New price equal to old price!");
+        _price = price_;
     }
 
     function getNFTname() external view returns(string memory) {
@@ -72,9 +89,18 @@ contract ERC721Base is
         return ownerOf(tokenID);
     }
 
-    function changeNFTOwnership(address from, address to, uint256 tokenId) external onlyNFTOwner {
+    function buyNFT(uint256 tokenId) external payable{
+        require(msg.sender != address(0), "Invalid Address(0)");
+        require(msg.sender != _owner, "Cannot sell NFT to myself");
         require(tokenId == 1, "Cannot transfer this tokenId");
-        safeTransferFrom(from, to, tokenId);
+        require(msg.value >= _price, "Not enough funds to buy this awesome NFT");
+        _transfer(_owner, msg.sender, tokenId);
+        _owner = msg.sender;
+        payable(_owner).transfer(msg.value);
+    }
+
+    function getNFTprice() external view returns(uint256) {
+        return _price;
     }
 
     // The following functions are overrides required by Solidity.

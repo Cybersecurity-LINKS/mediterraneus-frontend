@@ -17,11 +17,11 @@ interface IERC721Base {
         string calldata name, 
         string calldata symbol,
         address factory,
-        string memory _tokenURI
+        string memory _tokenURI,
+        uint256 initialPrice
     ) external returns (bool);
 
     function getNFTname() external view returns(string memory);
     function getNFTsymbol() external view returns(string memory);
     function getNFTOwner(uint256 tokenID) external view returns(address);
-    function changeNFTOwnership(address from, address to, uint256 tokenId) external;
 }
