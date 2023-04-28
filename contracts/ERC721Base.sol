@@ -45,7 +45,6 @@ contract ERC721Base is
         _owner = owner;
         _name = name;
         _symbol = symbol;
-        new ERC721(_name, _symbol);
         _factory = factory;
         safeMint(_owner, _tokenURI);
         initialized = true;

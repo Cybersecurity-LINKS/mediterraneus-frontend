@@ -4,6 +4,12 @@ require('dotenv').config();
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.18",
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 1,
+    },
+  },
   networks: {
     'shimmerevm-testnet': {
       url: 'https://json-rpc.evm.testnet.shimmer.network',

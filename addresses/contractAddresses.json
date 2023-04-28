@@ -1,0 +1,16 @@
+{
+  "addresses": [
+    {
+      "contract": "Deployer",
+      "address": "0x8894C98D47300157AD6D950dBd10c9f7D16f45dD"
+    },
+    {
+      "contract": "ERC721Base",
+      "address": "0x56761272c9A2873b36a980E0A9100EF79aEB86d6"
+    },
+    {
+      "contract": "ERC721Factory",
+      "address": "0x4d24B56D2347F08584d5da3CeBdc27c32CC6FaE4"
+    }
+  ]
+}

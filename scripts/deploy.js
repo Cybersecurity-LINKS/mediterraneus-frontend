@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat");
-const { fs } = require("fs");
+const fs = require("fs");
 
 async function main() {
     var obtainedAddresses = {
@@ -12,21 +12,25 @@ async function main() {
   
     const Deployer = await ethers.getContractFactory("Deployer");
     let token = await Deployer.deploy();
-    obtainedAddresses.addresses.push({contract: "Deployer", address: token});
+    obtainedAddresses.addresses.push({contract: "Deployer", address: token.address});
     console.log("Deployer address:", token.address);
     
     const ERC721Base = await ethers.getContractFactory("ERC721Base");
     const baseAddress = await ERC721Base.deploy();
-    obtainedAddresses.addresses.push({contract: "ERC721Base", address: baseAddress});
+    obtainedAddresses.addresses.push({contract: "ERC721Base", address: baseAddress.address});
     console.log("ERC721Base address:", baseAddress.address);
 
     const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
     token = await ERC721Factory.deploy(baseAddress.address);
-    obtainedAddresses.addresses.push({contract: "ERC721Factory", address: token});
+    obtainedAddresses.addresses.push({contract: "ERC721Factory", address: token.address});
     console.log("ERC721Factory address:", token.address);
 
-    const json = JSON.stringify(obtainedAddresses);
-    fs.writeFile('../addresses/contractAddresses.json', json, 'utf8');
+    const json = JSON.stringify(obtainedAddresses, null, 2);
+    await fs.promises.writeFile(__dirname.replace('scripts','addresses/contractAddresses.json'), json)
+    .catch((err) => {
+      console.log("Error in writing addresses file!", err);
+    });
+    console.log("Addresses file correctly generated. Have a look in the ../addresses folder");
   }
   
   main()
