@@ -1,6 +1,9 @@
 const { ethers } = require("hardhat");
 
 async function main() {
+    let rawdata = fs.readFileSync(__dirname.replace('scripts','addresses/contractAddresses.json'));
+    let addresses = JSON.parse(rawdata);
+    
     const erc721BaseAddress = '0xf35b6df2c9e61eaef5aa41490bd62cb7a0648226';
     const Box = await ethers.getContractFactory('ERC721Base');
     const box = await Box.attach(erc721BaseAddress);

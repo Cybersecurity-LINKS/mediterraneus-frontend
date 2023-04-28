@@ -10,20 +10,33 @@ async function main() {
     const Box = await ethers.getContractFactory('ERC721Factory');
     const box = await Box.attach(erc721Factory);
 
-    const baseContractAddress = await box.getBaseContractAddress();
-    console.log("BaseContract addres: ", baseContractAddress);
-
     await box.deployERC721Contract(
         "Davide",
         "DVD",
         "ipfs://QmV7QK5LHBG28R5aJW8R4oFGHpaNYrq9va89Lkhmw2cDvT",
-        "0xfe67F0dCc01974c2CC79D9D019f8177624D2Af07"
+        process.env.ADDRESS_DAVIDE_2.toString()
     ); 
     console.log("New ERC721 NFT contract deployed successfully!");
 
     const newNFTCount = await box.getNFTCreatedCount();
     const newNFTaddresses = await box.getNFTCreatedAddress();
     console.log("Deployed NFT addresses: " + newNFTaddresses.toString() + " Num: " + newNFTCount.toNumber());
+
+    var newNFTcontract = {
+        ERC721Factory: erc721Factory,
+        deployedNFTContracts: {
+            NFTowner: process.env.ADDRESS_DAVIDE_2.toString(),
+            NFTcontractAddress: newNFTaddresses
+        }
+    };
+    addresses.addresses[2] = newNFTcontract;
+
+    rawdata = JSON.stringify(addresses, null, 2);
+    await fs.promises.writeFile(__dirname.replace('scripts','addresses/contractAddresses.json'), rawdata)
+    .catch((err) => {
+      console.log("Error in writing addresses file!", err);
+    });
+    console.log("Addresses file correctly updated with new contract info. Have a look in the ../addresses folder");
 }
 
 main()
