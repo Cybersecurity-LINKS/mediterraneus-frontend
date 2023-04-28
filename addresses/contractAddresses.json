@@ -1,16 +1,13 @@
 {
   "addresses": [
     {
-      "contract": "Deployer",
-      "address": "0x8894C98D47300157AD6D950dBd10c9f7D16f45dD"
+      "Deployer": "0xafCDCA0969b8f583eff5614770b1F522370376fE"
     },
     {
-      "contract": "ERC721Base",
-      "address": "0x56761272c9A2873b36a980E0A9100EF79aEB86d6"
+      "ERC721Base": "0x40E4497b6dE9f8e1e14bAEf13CC021D9091ee6D0"
     },
     {
-      "contract": "ERC721Factory",
-      "address": "0x4d24B56D2347F08584d5da3CeBdc27c32CC6FaE4"
+      "ERC721Factory": "0x0F7AC8641D627a6296dc12C5aFc6d972Ece397DD"
     }
   ]
 }

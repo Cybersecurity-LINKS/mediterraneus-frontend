@@ -12,17 +12,17 @@ async function main() {
   
     const Deployer = await ethers.getContractFactory("Deployer");
     let token = await Deployer.deploy();
-    obtainedAddresses.addresses.push({contract: "Deployer", address: token.address});
+    obtainedAddresses.addresses.push({Deployer: token.address});
     console.log("Deployer address:", token.address);
     
     const ERC721Base = await ethers.getContractFactory("ERC721Base");
     const baseAddress = await ERC721Base.deploy();
-    obtainedAddresses.addresses.push({contract: "ERC721Base", address: baseAddress.address});
+    obtainedAddresses.addresses.push({ERC721Base: baseAddress.address});
     console.log("ERC721Base address:", baseAddress.address);
 
     const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
     token = await ERC721Factory.deploy(baseAddress.address);
-    obtainedAddresses.addresses.push({contract: "ERC721Factory", address: token.address});
+    obtainedAddresses.addresses.push({ERC721Factory: token.address});
     console.log("ERC721Factory address:", token.address);
 
     const json = JSON.stringify(obtainedAddresses, null, 2);

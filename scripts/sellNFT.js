@@ -5,7 +5,7 @@ async function main() {
     const Box = await ethers.getContractFactory('ERC721Base');
     const box = await Box.attach(erc721BaseAddress);
 
-    const res = await box.changeNFTOwnership("0xfe67F0dCc01974c2CC79D9D019f8177624D2Af07", "0xF9692336D7f37336C2061a545D8b2895B1415EFe", 1);
+    const res = await box.changeNFTOwnership("0xfe67F0dCc01974c2CC79D9D019f8177624D2Af07", "0x648D9eC3a95521258fa50a4d19CCAC0e7D92a8aa", 1);
 
     console.log(res);
 }
