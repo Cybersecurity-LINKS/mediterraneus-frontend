@@ -17,7 +17,7 @@ async function main() {
     console.log("\towner: ", NFTowner);
     console.log("\tname: ", NFTname);
     console.log("\tsymbol: ", NFTsymbol);
-    console.log("\tprice (wei): ", NFTprice.toNumber());
+    console.log("\tprice (SMR): ", NFTprice.toNumber());
 }
 
 main()
