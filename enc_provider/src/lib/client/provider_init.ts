@@ -10,11 +10,11 @@ import { Account } from 'web3-core'
 import { EVMAccount } from '../faucet';
 import fs from 'fs';
 
-export class ProviderInit {
+export class Provider {
   public client: IClient;
   public indexer: IndexerPluginClient;
 
-  private evmAccount: Account;
+  public evmAccount: Account;
 
   private evmAccountObj: EVMAccount = new EVMAccount();
   public isWalletInitialized;
