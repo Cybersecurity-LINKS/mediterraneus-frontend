@@ -18,7 +18,9 @@ app.post('/api/encrypt', function (req, res, next) {
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
     let Iprovider = new ProviderInit();
-    
-    Iprovider.createEVMaddress(); 
-    Iprovider.createWallet();
+    if(Iprovider.isWalletInitialized === false)
+      Iprovider.createEVMAccount(); 
+    else{
+      console.log("Utilizing EVM address: ", Iprovider.getEVMaddress);
+    }
   });

@@ -24,6 +24,7 @@ import { Converter, WriteStream } from '@iota/util.js';
 import type { IotaWallet } from './';
 // eslint-disable-next-line import/no-unresolved
 import { SimpleBufferCursor } from './simple-buffer-cursor';
+import { IEVMAccount } from '../interfaces';
 
 export class SendFundsTransaction {
   private wallet: IotaWallet;
@@ -207,4 +208,9 @@ export class SendFundsTransaction {
 
     await this.wallet.client.blockSubmit(block);
   }
+}
+
+export class EVMAccount implements IEVMAccount {
+  address: string;
+  private_key: string;
 }
