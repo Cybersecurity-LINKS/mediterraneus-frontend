@@ -1,0 +1,19 @@
+{
+  "addresses": [
+    {
+      "Deployer": "0x0318b9c3f2B319F37f6Dfc3605f46f23634BABC4"
+    },
+    {
+      "ERC721Base": "0x14fb2Bd52D92Dd1651F1D1Ad5Ac7475509c6A46F"
+    },
+    {
+      "ERC721Factory": "0x5F2f35b3c89f5Fdf972b5202A4073Da4dc80fA94",
+      "deployedNFTContracts": {
+        "NFTowner": "0xfe67F0dCc01974c2CC79D9D019f8177624D2Af07",
+        "NFTcontractAddress": [
+          "0x9A9a73Ca43Da7eC464fef7220CDfB2422FEda04a"
+        ]
+      }
+    }
+  ]
+}
