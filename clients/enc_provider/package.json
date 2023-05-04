@@ -1,0 +1,30 @@
+{
+  "name": "enc_provider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "enc_provider.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node --esm ./src/enc_provider.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@iota/client": "^3.0.0-rc.5",
+    "@iota/crypto.js": "^1.8.6",
+    "@iota/iota.js": "^2.0.0-rc.1",
+    "@iota/util.js": "^2.0.0-rc.2",
+    "eciesjs": "^0.3.16",
+    "ethereumjs-util": "^7.1.5",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "morgan": "^1.10.0",
+    "web3": "^1.9.0",
+    "web3-core": "^1.9.0",
+    "web3-eth-accounts": "1.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
