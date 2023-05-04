@@ -8,10 +8,10 @@ export class EncryptData {
     public _encrypt(private_key: string, data: string): string {
         let privKeyB = Converter.hexToBytes(private_key);
         new SimpleBufferCursor().writeUint8Array(privKeyB);
+
         let pubKey = privateToPublic(Buffer.from(privKeyB));
 
-        let encryptedData = encrypt(pubKey, Buffer.from(data));
-
+        let encryptedData = encrypt(pubKey.toString('hex'), Buffer.from(data));
         return encryptedData.toString('hex');
     }
 }

@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import { Provider } from './lib/client/';
 import Accounts from 'web3-eth-accounts'
 import { EncryptData } from './lib/provider_utils';
+import { EncResponse } from './lib/interfaces/IencResponse';
 
 // init express
 const app = new express();
@@ -18,7 +19,7 @@ app.get('/hello', function (req, res, next) {
 })
 
 app.post('/api/encrypt', [
-  check('evmAddress').notEmpty(),
+  check('evmAddress').notEmpty().isString(),
   check('signature').notEmpty().isString(),
   check('dataToEncrypt').notEmpty()
 ], function (req, res) {
@@ -29,12 +30,14 @@ app.post('/api/encrypt', [
   
   const signer = new Accounts().recover(req.body.dataToEncrypt, req.body.signature);
 
-  if(signer !== req.evmAddress) {
-    return res.status(400).json({error: `Signature validation failed. Provided source signer is ${req.body.evmAddress}`});
+  if(signer !== req.body.evmAddress) {
+    return res.status(400).json({error: `Signature validation failed. Provided source signer is ${req.body.evmAddress} but got ${signer}`});
   } else {
-    const priv_key = new Provider().evmAccount.privateKey;
-    let encryptedData = new EncryptData()._encrypt(priv_key, req.body.dataToEncrypt);
-    return res.status(201).json(encryptedData).end();
+    const provider = new Provider('/src/lib/client');
+    let response: EncResponse = new EncResponse();
+    response.encryptedData = new EncryptData()._encrypt(provider.evmAccount.privateKey, req.body.dataToEncrypt);
+    response.from = provider.evmAccount.address;
+    return res.status(201).json(response).end();
   }
 
 })
@@ -43,7 +46,7 @@ app.post('/api/encrypt', [
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
     
-    let Iprovider = new Provider();
+    let Iprovider = new Provider('/src/lib/client');
     if(Iprovider.isWalletInitialized === false)
       Iprovider.createEVMAccount(); 
     else{

@@ -18,11 +18,14 @@ export class Provider {
 
   private evmAccountObj: EVMAccount = new EVMAccount();
   public isWalletInitialized;
+  private basePath: string;
 
-  constructor() {
+  constructor(path: string) {
     let rawdata: string;
+    this.basePath = path;
     try {
-      rawdata = fs.readFileSync(__dirname.replace('/src/lib/client','/EVMaddress.json'), 'utf-8');
+      console.log(__dirname);
+      rawdata = fs.readFileSync(__dirname.replace(path, '/EVMaddress.json'), 'utf-8');
     }catch(err) {
       rawdata = undefined;
       console.log(err.message);
@@ -81,7 +84,7 @@ export class Provider {
       this.isWalletInitialized = true;
 
       const json = JSON.stringify(this.evmAccountObj, null, 2);
-      await fs.promises.writeFile(__dirname.replace('/src/lib/client','/EVMaddress.json'), json)
+      await fs.promises.writeFile(__dirname.replace(this.basePath,'/EVMaddress.json'), json)
       .catch((err) => {
         console.log("Error in writing EVM address file!", err);
       });
