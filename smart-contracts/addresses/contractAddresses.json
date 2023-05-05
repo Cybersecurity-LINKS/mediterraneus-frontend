@@ -1,19 +1,13 @@
 {
   "addresses": [
     {
-      "Deployer": "0x0318b9c3f2B319F37f6Dfc3605f46f23634BABC4"
+      "Deployer": "0x0353dbfF7c26adF6244eBED4D8c436F42C7143cD"
     },
     {
-      "ERC721Base": "0x14fb2Bd52D92Dd1651F1D1Ad5Ac7475509c6A46F"
+      "ERC721Base": "0xB545ddb23602a2f80175edF727359856d8e7C67C"
     },
     {
-      "ERC721Factory": "0x5F2f35b3c89f5Fdf972b5202A4073Da4dc80fA94",
-      "deployedNFTContracts": {
-        "NFTowner": "0xfe67F0dCc01974c2CC79D9D019f8177624D2Af07",
-        "NFTcontractAddress": [
-          "0x9A9a73Ca43Da7eC464fef7220CDfB2422FEda04a"
-        ]
-      }
+      "ERC721Factory": "0xeA0863F01AEF308867e5084975B5E0D0aC084EDd"
     }
   ]
 }

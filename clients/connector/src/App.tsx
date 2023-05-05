@@ -5,6 +5,7 @@ import { Display } from './components/Display'
 import { MetaMaskError } from './components/MetaMaskError'
 import { MetaMaskContextProvider } from './hooks/useMetaMask'
 import { Container, Row } from 'react-bootstrap';
+import Publish from './components/Publish/Publish';
 
 export const App = () => {
 
@@ -13,8 +14,11 @@ export const App = () => {
         <Navigation />
         <Container fluid>
           <Row>
-            <Display /> 
+            <Display />
+            <Row className="d-flex justify-content-center mt-3"> 
+              <Publish />
               {/* application */}
+            </Row>
           </Row>
           <Row className="fixed-bottom">
             <MetaMaskError />

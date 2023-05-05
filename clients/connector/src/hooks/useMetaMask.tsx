@@ -2,9 +2,11 @@ import { useState, useEffect, createContext, PropsWithChildren, useContext } fro
 
 import detectEthereumProvider from '@metamask/detect-provider'
 import { formatBalance } from '@/utils'
+import { BrowserProvider, ethers } from 'ethers'
 
 interface MetaMaskData {
   wallet: typeof initialState
+  provider: BrowserProvider | null
   hasProvider: boolean | null
   error: boolean
   errorMessage: string
@@ -24,6 +26,9 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
   const [isConnecting, setIsConnecting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+
+  
   useEffect(() => {
     const refreshAccounts = (accounts: any) => {
       if (accounts.length > 0) {
@@ -56,6 +61,14 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
       }
     }
 
+    const initializeProvider = async() => {
+      let tmp = new ethers.BrowserProvider(window.ethereum)
+      setProvider(tmp);
+      // // Prompt user for account connections
+      // await provider.send("eth_requestAccounts", []);
+    }
+    
+    initializeProvider();
     getProvider()
 
     return () => {
@@ -96,6 +109,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
     <MetaMaskContext.Provider
       value={{
         wallet,
+        provider,
         hasProvider,
         error: !!errorMessage,
         errorMessage,

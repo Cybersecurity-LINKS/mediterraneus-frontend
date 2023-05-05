@@ -42,7 +42,7 @@ contract ERC721Factory is Ownable, Deployer{
         string memory symbol,
         string memory tokenURI,
         address owner
-    ) public onlyOwner returns(address erc721Instance){
+    ) public returns(address erc721Instance){
         require(baseContractInfo.baseAddress != address(0), "DeployER721Contract: invalid base address");
         require(baseContractInfo.isActive, "DeployERC721Contract: Base contract not active");
         require(owner != address(0), "address(0) cannot be an owner");
@@ -64,7 +64,7 @@ contract ERC721Factory is Ownable, Deployer{
         emit NFTCreated(erc721Instance, baseContractInfo.baseAddress, name, owner, symbol, tokenURI, msg.sender);
     }
 
-    function addERC721Basetemplate(address _baseAddress) public onlyOwner {
+    function addERC721Basetemplate(address _baseAddress) internal onlyOwner {
         require(_baseAddress != address(0), "Address(0) NOT allowed for base NFTcontract");
         require(_isContract(_baseAddress), "Provided address is NOT a contract");
         baseContractInfo = ContractBase(_baseAddress, true);
