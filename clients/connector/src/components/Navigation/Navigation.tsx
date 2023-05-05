@@ -1,38 +1,45 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatAddress } from '@/utils'
-import styles from './Navigation.module.css'
+
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import Button from 'react-bootstrap/Button';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 export const Navigation = () => {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
 
   return (
-    <div className={styles.navigation}>
-      <div className={styles.flexContainer}>
-        <div className={styles.leftNav}>Vite + React & MetaMask</div>
-        <div className={styles.rightNav}>
-          {!hasProvider &&
-            <a href="https://metamask.io" target="_blank">
-              Install MetaMask
-            </a>
-          }
-          {window.ethereum?.isMetaMask && wallet.accounts.length < 1 &&
-            <button disabled={isConnecting} onClick={connectMetaMask}>
-              Connect MetaMask
-            </button>
-          }
-          {hasProvider && wallet.accounts.length > 0 &&
-            <a
-              className="text_link tooltip-bottom"
-              href={`https://etherscan.io/address/${wallet}`}
-              target="_blank"
-              data-tooltip="Open in Block Explorer"
-            >
-              {formatAddress(wallet.accounts[0])}
-            </a>
-          }
-        </div>
-      </div>
-    </div>
-  )
+    <Navbar bg="light" variant="light">
+    <Container>
+      <Navbar.Brand className="float-left mr-2">Sedimark Connector</Navbar.Brand>
+      <Nav className='float-right mr-2'>
+      {!hasProvider &&
+        <Nav.Link href="https://metamask.io" target="_blank">Install MetaMask</Nav.Link>
+      }
+      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 &&
+        <Button variant="primary"disabled={isConnecting}  onClick={connectMetaMask}>
+          Connect MetaMask
+        </Button>
+      }
+      {hasProvider && wallet.accounts.length > 0 &&
+        <OverlayTrigger  
+          placement="bottom"
+          overlay={<Tooltip>Open in Block Explorer</Tooltip>}
+        >
+          <Nav.Link 
+            className="text_link tooltip-bottom"
+            target="_blank"
+            href={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>
+            {formatAddress(wallet.accounts[0])}
+          </Nav.Link>
+        </OverlayTrigger>
+      }
+      </Nav>
+    </Container>
+  </Navbar>
+  );
 }
