@@ -2,11 +2,15 @@ import { useState, useEffect, createContext, PropsWithChildren, useContext } fro
 
 import detectEthereumProvider from '@metamask/detect-provider'
 import { formatBalance } from '@/utils'
-import { BrowserProvider, ethers } from 'ethers'
+import { BrowserProvider, JsonRpcApiProviderOptions, JsonRpcProvider, ethers } from 'ethers'
+
+
+const shimmerJsonRpcUrl = import.meta.env.VITE_SHIMMER_JSON_RPC_URL as string;
 
 interface MetaMaskData {
   wallet: typeof initialState
   provider: BrowserProvider | null
+  shimmerProvider: JsonRpcProvider
   hasProvider: boolean | null
   error: boolean
   errorMessage: string
@@ -27,6 +31,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
   const [errorMessage, setErrorMessage] = useState('')
 
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [shimmerProvider, setShimmerProvider] = useState<JsonRpcProvider>(new ethers.JsonRpcProvider(shimmerJsonRpcUrl));
 
   
   useEffect(() => {
@@ -67,9 +72,14 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
       // // Prompt user for account connections
       // await provider.send("eth_requestAccounts", []);
     }
+
+    const initializeProviderShimmer = async() => {
+      setShimmerProvider(new JsonRpcProvider(shimmerJsonRpcUrl.toString()));
+    }
     
+    initializeProviderShimmer();
     initializeProvider();
-    getProvider()
+    getProvider();
 
     return () => {
       window.ethereum?.removeListener('accountsChanged', refreshAccounts)
@@ -110,6 +120,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
       value={{
         wallet,
         provider,
+        shimmerProvider,
         hasProvider,
         error: !!errorMessage,
         errorMessage,

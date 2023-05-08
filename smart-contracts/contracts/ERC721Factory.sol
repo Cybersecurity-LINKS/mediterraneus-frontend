@@ -11,7 +11,9 @@ contract ERC721Factory is Ownable, Deployer{
     using SafeMath for uint256;
 
     uint256 private currentNFTCount;
-    address[] private createdERC721List;
+    mapping(address => address) public createdERC721List;
+    mapping(address => address) public eRC721_to_owner;
+    address[] public erc721addresses;
 
     struct ContractBase {
         address baseAddress;
@@ -50,7 +52,9 @@ contract ERC721Factory is Ownable, Deployer{
         erc721Instance = deploy(baseContractInfo.baseAddress);
         require(erc721Instance != address(0), "deployERC721Contract: Failed to deploy new ERC721 contract");
         
-        createdERC721List.push(erc721Instance);
+        erc721addresses.push(erc721Instance);
+        createdERC721List[erc721Instance] = erc721Instance;
+        eRC721_to_owner[erc721Instance] = owner;
         currentNFTCount += 1;
         IERC721Base ierc721Instance = IERC721Base(erc721Instance);
         require(ierc721Instance.initialize(
@@ -84,8 +88,16 @@ contract ERC721Factory is Ownable, Deployer{
         return currentNFTCount;
     }
 
-    function getNFTCreatedAddress() external view returns(address[] memory) {
-        return createdERC721List;
+    function getAllNFTCreatedAddress() external view returns(address[] memory) {
+        return erc721addresses;
+    }
+
+    function getNFTCreatedAddress(address creator) external view returns(address[] memory ret) {
+        for(uint256 i = 0; i < currentNFTCount; i++) {
+            if(creator == eRC721_to_owner[erc721addresses[i]])
+                ret[i] = erc721addresses[i];
+        }
+        return ret;
     }
 
     function getBaseContractAddress() external view returns(address) {

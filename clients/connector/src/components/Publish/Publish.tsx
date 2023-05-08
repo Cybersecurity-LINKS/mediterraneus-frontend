@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
 import { getContractABI, getContractAddress } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
 
-function Publish() {
+export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
     const [NFTsymbol, setNFTsymbol] = useState("");
     const [NFTuri, setNFTuri] = useState("");
@@ -20,22 +20,27 @@ function Publish() {
             event.preventDefault();
             const contractABI = await getContractABI("ERC721Factory");
             const contractAddress = getContractAddress("ERC721Factory");
-            console.log(contractAddress);
-            console.log(contractABI);
+            // console.log(contractAddress);
+            // console.log(contractABI);
 
             const signer = await provider!.getSigner();
 
             let contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
+
             await contractIstance.deployERC721Contract(
                 NFTname,
                 NFTsymbol,
-                NFTuri,
+                NFTuri.toString(),
                 wallet.accounts[0]
             ); 
             console.log("New ERC721 NFT contract deployed successfully!");
             
-            let newERC721Address: string[] = await contractIstance.getNFTCreatedAddress();
-            console.log(newERC721Address);
+            await contractIstance.on("NFTCreated", async (erc721Instance, newERC721baseAddress, name, owner, symbol, tokenURI, sender, event) => {
+                console.log(erc721Instance, newERC721baseAddress, name, owner, symbol, tokenURI, sender, event);
+                // let newERC721Address: string[] = await contractIstance.getNFTCreatedAddress();
+                // console.log(newERC721Address);
+            });
+
         } catch (err) {
             console.log(err);
         }
@@ -71,5 +76,3 @@ function Publish() {
         </>
     );
 }
-
-export default Publish;
