@@ -75,7 +75,7 @@ contract ERC721Factory is Ownable, Deployer{
         emit Base721Added(baseContractInfo.baseAddress, baseContractInfo.isActive);
     }
 
-    function _isContract(address account) internal view returns (bool){
+    function _isContract(address account) internal view onlyOwner returns (bool){
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
         assembly {
