@@ -1,25 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "../interfaces/IERC721Base.sol";
+import "../interfaces/IERC721Factory.sol";
 
 contract ERC721Base is 
-    ERC721("Base", "BaseSymbol"), 
-    ERC721URIStorage, 
-    ERC721Burnable {
+    Initializable, 
+    ERC721Upgradeable,
+    ERC721URIStorageUpgradeable {
     
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
 
-    string private _name;
-    string private _symbol;
-    address private _owner;
     address private _factory;
     uint256 private _price;
-    bool private initialized = false;
+
+    address[] private deployedERC20Tokens;
 
     event NFTminted(
         address indexed owner,
@@ -48,48 +47,73 @@ contract ERC721Base is
         address factory,
         string memory _tokenURI,
         uint256 initialPrice
-    ) external returns (bool) {
+    ) external initializer {
         require(owner != address(0), "Invalid NFT owner: zero address not valid!");
-        require(!initialized, "ERC721 Token instance already initialized");
 
-        _name = name;
-        _symbol = symbol;
-        _owner = owner;
+        __ERC721_init(name, symbol);
         _factory = factory;
         _price = initialPrice;
-        safeMint(_owner, _tokenURI);
-        initialized = true;
+        safeMint(owner, _tokenURI);
 
-        emit NFTminted(_owner, _name, _symbol, _factory);
-        return initialized;
+        emit NFTminted(owner, name, symbol, _factory);
     }
 
     function safeMint(address to, string memory _tokenURI) internal {
-        require(!initialized, "ERC721 Token instance already initialized");
         _safeMint(to, 1);
         _setTokenURI(1, _tokenURI);
+    }
+
+    function createDataToken(
+        string memory name,
+        string memory symbol,
+        // address owner should be already msg.sender
+        // erc721baseaddress_ provided by the factory contract
+        uint256 maxSupply_,
+        uint256 initialSupply_
+    ) external onlyNFTOwner returns (address erc20token) {
+        require(maxSupply_ > 0 && initialSupply_ >= 0, "Cap and initial supply not valid");
+        // already checked by the onlyNFTOwner modifier
+        // require(msg.sender != address(0), "ERC721Base: Minter cannot be address(0)");
+
+        erc20token = IERC721Factory(_factory).deployERC20Contract(
+            name,
+            symbol,
+            msg.sender,
+            maxSupply_,
+            initialSupply_
+        );
+        deployedERC20Tokens.push(erc20token);
+        return erc20token;
     }
 
     function setPrice(uint256 price_) external onlyNFTOwner {
         require(price_ >= 0, "NFT cost cannot be negative");
         require(price_!= _price, "New price equal to old price!");
+        uint256 oldPrice = _price;
         _price = price_;
+        emit NFTpriceUpdated(
+            ownerOf(1),
+            name(), 
+            symbol(),
+            oldPrice,
+            _price
+        ); 
     }
 
     function getNFTname() external view returns(string memory) {
-        return _name;
+        return name();
     }
 
     function getNFTsymbol() external view returns(string memory) {
-        return _symbol;
+        return symbol();
     }
 
-    function getNFTOwner(uint256 tokenID) external view returns(address){
-        require(tokenID == 1, "Invalid NFT token ID");
-        return ownerOf(tokenID);
+    function getNFTowner() external view returns (address owner) {
+        return ownerOf(1);
     }
 
     function buyNFT(uint256 tokenId) external payable{
+        address _owner = ownerOf(1);
         require(msg.sender != address(0), "Invalid Address(0)");
         require(msg.sender != _owner, "Cannot sell NFT to myself");
         require(tokenId == 1, "Cannot transfer this tokenId");
@@ -105,14 +129,14 @@ contract ERC721Base is
 
     // The following functions are overrides required by Solidity.
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) onlyNFTOwner {
+    function _burn(uint256 tokenId) internal override(ERC721URIStorageUpgradeable, ERC721Upgradeable) onlyNFTOwner {
         super._burn(tokenId);
     }
 
     function tokenURI(uint256 tokenId)
         public
         view
-        override(ERC721, ERC721URIStorage)
+        override(ERC721URIStorageUpgradeable, ERC721Upgradeable)
         returns (string memory)
     {
         return super.tokenURI(tokenId);
