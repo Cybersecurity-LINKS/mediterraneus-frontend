@@ -52,30 +52,27 @@ contract ERC721Base is
 
     function initialize(
         address owner,
-        string calldata name, 
-        string calldata symbol,
+        string calldata name_, 
+        string calldata symbol_,
         address factory,
         string memory _tokenURI,
         uint256 initialPrice
-    ) external initializer {
+    ) external initializer returns(bool) {
         require(owner != address(0), "Invalid NFT owner: zero address not valid!");
 
-        __ERC721_init(name, symbol);
+        __ERC721_init(name_, symbol_);
+        __ERC721URIStorage_init();
         _factory = factory;
         _price = initialPrice;
-        safeMint(owner, _tokenURI);
-
-        emit NFTminted(owner, name, symbol, _factory);
-    }
-
-    function safeMint(address to, string memory _tokenURI) internal {
-        _safeMint(to, 1);
+        _safeMint(owner, 1);
         _setTokenURI(1, _tokenURI);
+        emit NFTminted(owner, name_, symbol_, _factory);
+        return true;
     }
 
     function createDataToken(
-        string memory name,
-        string memory symbol,
+        string calldata name,
+        string calldata symbol,
         // address owner should be already msg.sender
         // address erc721address_, // it is the NFT contract that is calling the factory function. So it will be msg.sender on the other side
         uint256 maxSupply_,
@@ -110,14 +107,6 @@ contract ERC721Base is
         ); 
     }
 
-    function getNFTname() external view returns(string memory) {
-        return name();
-    }
-
-    function getNFTsymbol() external view returns(string memory) {
-        return symbol();
-    }
-
     function getNFTowner() external view returns (address owner) {
         return ownerOf(1);
     }
@@ -142,6 +131,10 @@ contract ERC721Base is
     }
 
     // The following functions are overrides required by Solidity.
+    function burn(uint256 tokenId) external onlyNFTOwner {
+        _burn(tokenId);
+    }
+
 
     function _burn(uint256 tokenId) internal override(ERC721URIStorageUpgradeable, ERC721Upgradeable) onlyNFTOwner {
         super._burn(tokenId);

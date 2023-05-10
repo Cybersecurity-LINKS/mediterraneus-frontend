@@ -23,14 +23,12 @@ export const Catalogue = () => {
 
         const getNFTinfo = async (contractAddress: string): Promise<IDataOffering> => {
             const contractABI = await getContractABI("ERC721Base");
-            console.log(contractAddress)
             let contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
             let a = await contractIstance.getAddress()
-            console.log(a);
             let NFTinfo: IDataOffering = {
                 NFTaddress: contractAddress,
-                NFTname: await contractIstance.getNFTname(),
-                NFTsymbol: await contractIstance.getNFTsymbol(),
+                NFTname: await contractIstance.name(),
+                NFTsymbol: await contractIstance.symbol(),
                 DTcontractAddress: await contractIstance.getDTaddress()
             };
             return NFTinfo;

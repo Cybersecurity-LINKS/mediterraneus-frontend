@@ -119,6 +119,12 @@ contract ERC20Base is
         require(sent, "Failed to withdraw");
     }
 
+    function burn(uint256 amount) external {
+        require(msg.sender == _allowedMinter, "NOT ALLOWED TO BURN");
+        _burn(msg.sender, amount);
+    }
+
+
     /*
         Support for EIP-2612 
         https://eips.ethereum.org/EIPS/eip-2612

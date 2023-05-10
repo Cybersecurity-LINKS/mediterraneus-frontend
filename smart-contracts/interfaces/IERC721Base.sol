@@ -19,9 +19,7 @@ interface IERC721Base {
         address factory,
         string memory _tokenURI,
         uint256 initialPrice
-    ) external;
+    ) external returns(bool);
 
-    function getNFTname() external view returns(string memory);
-    function getNFTsymbol() external view returns(string memory);
     function getNFTowner() external view returns (address owner);
 }

@@ -62,7 +62,8 @@ export const Publish = () => {
                     let erc20ContractIstance = new ethers.Contract(newERC20address_, ERC20baseABI, signer);
                     
                     const res = await erc20ContractIstance.getAllowedMinter();
-                    console.log(`Allowed minter is ${res}`);
+                    const name = await erc20ContractIstance.name();
+                    console.log(`Allowed minter of token ${name} is ${res}`);
                 });
             });
         } catch (err) {
