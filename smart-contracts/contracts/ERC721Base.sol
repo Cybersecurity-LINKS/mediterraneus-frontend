@@ -35,6 +35,16 @@ contract ERC721Base is
         uint256 newPrice
     );  
 
+    event TokenCreated(
+        string name,
+        string symbol,
+        address owner,
+        address erc721address_, 
+        address newERC20Address,
+        uint256 maxSupply_,
+        uint256 initialSupply_
+    );
+
     modifier onlyNFTOwner() {
         require(msg.sender == ownerOf(1), "Not the NFT owner!");
         _;
@@ -67,7 +77,7 @@ contract ERC721Base is
         string memory name,
         string memory symbol,
         // address owner should be already msg.sender
-        // erc721baseaddress_ provided by the factory contract
+        // address erc721address_, // it is the NFT contract that is calling the factory function. So it will be msg.sender on the other side
         uint256 maxSupply_,
         uint256 initialSupply_
     ) external onlyNFTOwner returns (address erc20token) {
@@ -78,12 +88,12 @@ contract ERC721Base is
         erc20token = IERC721Factory(_factory).deployERC20Contract(
             name,
             symbol,
-            msg.sender,
-            maxSupply_,
-            initialSupply_
+            msg.sender, // == new DT owner = NFTowner
+            initialSupply_,
+            maxSupply_
         );
         deployedERC20Tokens.push(erc20token);
-        return erc20token;
+        emit TokenCreated(name, symbol, msg.sender, address(this), erc20token, initialSupply_, maxSupply_);
     }
 
     function setPrice(uint256 price_) external onlyNFTOwner {
@@ -125,6 +135,10 @@ contract ERC721Base is
 
     function getNFTprice() external view returns(uint256) {
         return _price;
+    }
+
+    function getDTaddress() external view returns (address erc20address) {
+        return deployedERC20Tokens[0];
     }
 
     // The following functions are overrides required by Solidity.

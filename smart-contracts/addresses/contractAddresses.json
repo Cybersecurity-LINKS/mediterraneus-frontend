@@ -1,13 +1,16 @@
 {
   "addresses": [
     {
-      "Deployer": "0x453a3D49a09C13fae53D13304b858c9C8FB76960"
+      "Deployer": "0xeCD7273e47Bc77b0C022118BD7BB5bC9540Ad384"
     },
     {
-      "ERC721Base": "0xA92B15E53C1570c57a502Ed62fc4878cc90ED4e5"
+      "ERC721Base": "0x98a60BFCC31141B059224380bFE88FA3B5d93fb5"
     },
     {
-      "ERC721Factory": "0x63aAAE8641E4c3E7C3B1FBf0e3bBfd28E09D151D"
+      "ERC20Base": "0x77EFd57CBaD7354F1a5a59787Fc5e532c6025292"
+    },
+    {
+      "ERC721Factory": "0x72ABD0fe53C10f79D277aaFDa160e31dE6d8FdC1"
     }
   ]
 }

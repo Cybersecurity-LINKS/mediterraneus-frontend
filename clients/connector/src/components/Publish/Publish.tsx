@@ -2,7 +2,7 @@ import { MouseEvent, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { ethers } from 'ethers';
+import { BigNumberish, Numeric, ethers } from 'ethers';
 import { getContractABI, getContractAddress } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
 
@@ -10,6 +10,12 @@ export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
     const [NFTsymbol, setNFTsymbol] = useState("");
     const [NFTuri, setNFTuri] = useState("");
+
+    const [DTname, setDTname] = useState("");
+    const [DTsymbol, setDTsymbol] = useState("");
+    const [DTinitialSupply, setDTinitialSupply] = useState<BigInt>(BigInt(0));
+    const [DTmaxSupply, setDTmaxSupply] = useState<BigInt>(BigInt(0));
+
     const [errors, setErrors] = useState({});
     const [published, setPublished] = useState(false);
 
@@ -32,15 +38,39 @@ export const Publish = () => {
                 NFTsymbol,
                 NFTuri.toString(),
                 wallet.accounts[0]
-            ); 
-            console.log("New ERC721 NFT contract deployed successfully!");
+            );
             
-            await contractIstance.on("NFTCreated", async (erc721Instance, newERC721baseAddress, name, owner, symbol, tokenURI, sender, event) => {
-                console.log(erc721Instance, newERC721baseAddress, name, owner, symbol, tokenURI, sender, event);
-                // let newERC721Address: string[] = await contractIstance.getNFTCreatedAddress();
-                // console.log(newERC721Address);
-            });
+            await contractIstance.on("ERC20ContractDeployed", async (erc20Instance, minter_, name_, symbol_, initialSupply_) => {
+                console.log(erc20Instance, minter_, name_, symbol_, initialSupply_);
+            })
 
+            await contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, sender, event) => {
+                console.log("New ERC721 NFT contract deployed successfully!");
+                console.log(newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, sender, event);
+                /**
+                * Given the new NFT contract address create also the required DT.
+                */
+                const ERC721baseABI = await getContractABI("ERC721Base");
+                let erc721ContractIstance = new ethers.Contract(newERC721Contract, ERC721baseABI, signer);
+                            
+                await erc721ContractIstance.createDataToken(
+                    DTname,
+                    DTsymbol,
+                    DTinitialSupply,
+                    DTmaxSupply
+                );
+                await erc721ContractIstance.on("TokenCreated", async (name_, symbol_, owner_, NFTcontractAddress_, newERC20address_, maxSupply_, initialSupply_, event) => {
+                    console.log(name_, symbol_, owner_, NFTcontractAddress_, newERC20address_, maxSupply_, initialSupply_, event);
+                    /**
+                     * Given the new DT contract address wait for minting.
+                     */
+                    const ERC20baseABI = await getContractABI("ERC20Base");
+                    let erc20ContractIstance = new ethers.Contract(newERC20address_, ERC20baseABI, signer);
+                    
+                    const res = await erc20ContractIstance.getAllowedMinter();
+                    console.log(`Allowed minter is ${res}`);
+                });
+            });
         } catch (err) {
             console.log(err);
         }
@@ -48,7 +78,7 @@ export const Publish = () => {
 
     return (
         <>
-        <Card style={{width: '80rem'}}>
+        <Card style={{width: '80rem'}} className='mb-5'>
         <Card.Body>
             <Card.Title>Publish new Data NFT</Card.Title>
         </Card.Body>
@@ -68,8 +98,31 @@ export const Publish = () => {
                 <Form.Control size="lg" type="input" placeholder="Enter the NFT metadata URI" onChange={(event) => { setNFTuri(event.target.value) }} />
             </Form.Group>
 
+            <Card.Body>
+                <Card.Title>Create your fungible Data Token</Card.Title>
+                <Form.Group className="mb-3 mt-3" controlId="formDTname">
+                    <Form.Label>DataToken Name</Form.Label>
+                    <Form.Control size="lg" type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="formDTsymbol">
+                    <Form.Label>DataToken Symbol</Form.Label>
+                    <Form.Control size="lg" type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="formDTinitialSupply">
+                    <Form.Label>Initial Supply</Form.Label>
+                    <Form.Control size="lg" type="input" placeholder="Enter the DT initial supply" onChange={(event) => { setDTinitialSupply(BigInt(event.target.value)) }} />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="formDTmaxSupply">
+                    <Form.Label>Maximum Supply</Form.Label>
+                    <Form.Control size="lg" type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
+                </Form.Group>
+            </Card.Body>
+
             <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { handleSubmit(event) }}>
-                Create Data NFT
+                Submit
             </Button>
             </Form>
         </Card>

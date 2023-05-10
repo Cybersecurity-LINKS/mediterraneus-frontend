@@ -10,7 +10,10 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
                 <Card.Title>NFT Name: {props.NFTdataobj.NFTname}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">NFT Symbol: {props.NFTdataobj.NFTsymbol}</Card.Subtitle>
                 <Card.Text>
-                    {props.NFTdataobj.NFTaddress} Some short description
+                    {props.NFTdataobj.NFTaddress} <br></br> Some short description
+                </Card.Text>
+                <Card.Text>
+                    Data Token: {props.NFTdataobj.DTcontractAddress} 
                 </Card.Text>
                 <Card.Link href="#" target="_blank">NFT Metadata URI</Card.Link>
             </Card.Body>

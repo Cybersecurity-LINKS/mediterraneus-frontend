@@ -13,5 +13,5 @@ interface IERC20Base {
         address erc721baseaddress_,
         uint256 maxSupply_,
         uint256 initialSupply_
-    ) external;
+    ) external returns (bool);
 }

@@ -89,7 +89,7 @@ contract ERC721Factory is Ownable, Deployer{
         string memory name_,
         string memory symbol_,
         address minter_, // minter = DT owner = NFT owner
-        // address erc721baseaddress_,
+        // address erc721address_, // should be the calling NFT contract = msg.sender
         uint256 maxSupply_,
         uint256 initialSupply_
     ) external returns (address erc20Instance) {
@@ -98,21 +98,22 @@ contract ERC721Factory is Ownable, Deployer{
 
         erc20Instance = deploy(base20ContractInfo.baseAddress);
         require(erc20Instance != address(0), "deployERC20Contract: Failed to deploy new ERC20 contract");
-
+        
         erc20addresses.push(erc20Instance);
         createdERC20List[erc20Instance] = erc20Instance;
         eRC20_to_owner[erc20Instance] = minter_;
 
         IERC20Base ierc20Instance = IERC20Base(erc20Instance);
-        ierc20Instance.initialize(
+        require(ierc20Instance.initialize(
             name_,
             symbol_,
             minter_,
-            base721ContractInfo.baseAddress,
+            msg.sender,
             maxSupply_,
             initialSupply_
-        );
+        ), "DT initialization failed!");
         emit ERC20ContractDeployed(erc20Instance, minter_, name_, symbol_, initialSupply_);
+        return erc20Instance;
     }
 
     function addERC721Basetemplate(address _baseAddress) internal onlyOwner {
@@ -161,4 +162,18 @@ contract ERC721Factory is Ownable, Deployer{
     function getBase20ContractAddress() external view returns(address) {
         return base20ContractInfo.baseAddress;
     }
+
+    /**
+     * @dev fallback function
+     *      this is a default fallback function in which receives
+     *      the collected ether.
+     */
+    fallback() external payable {}
+
+    /**
+     * @dev receive function
+     *      this is a default receive function in which receives
+     *      the collected ether.
+     */
+    receive() external payable {}
 }

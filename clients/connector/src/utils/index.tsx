@@ -3,7 +3,8 @@ import contractAddresses from '../../../../smart-contracts/addresses/contractAdd
 const enum CONTRACT_ADRRESS{
   "Deployer" = 0,
   "ERC721Base" = 1,
-  "ERC721Factory" = 2
+  "ERC20Base" = 2,
+  "ERC721Factory" = 3
 }
 
 export const formatBalance = (rawBalance: string) => {

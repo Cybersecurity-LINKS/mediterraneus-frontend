@@ -7,13 +7,13 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "../interfaces/IERC721Base.sol";
 
-contract ERC20Template is
+contract ERC20Base is
     Initializable,
     ERC20Upgradeable {
 
     using SafeMathUpgradeable for uint256;
 
-    address private _erc721base;
+    address private _erc721address;
     address private _allowedMinter;
     uint256 private _maxSupply;
     
@@ -27,34 +27,34 @@ contract ERC20Template is
     mapping(address => uint256) public nonces_;
 
     modifier onlyNFTOwner() {
-        require(msg.sender == IERC721Base(_erc721base).getNFTowner());
+        require(msg.sender == IERC721Base(_erc721address).getNFTowner());
         _;
     }
 
-    function intialize(
+    function initialize(
         string memory name_,
         string memory symbol_,
         address minter_, // minter = DT owner = NFT owner
-        address erc721baseaddress_,
+        address erc721address_,
         uint256 maxSupply_,
         uint256 initialSupply_
-    ) external initializer {
+    ) external initializer returns (bool){
         require(minter_ != address(0), "Minter cannot be 0x00!");
         require(
             minter_ != address(this),
             "Minter cannot be the contract address itself"
         );
+        require(minter_ == IERC721Base(erc721address_).getNFTowner(), "NOT THE NFT OWNER");
         require(
-            erc721baseaddress_ != address(0),
+            erc721address_ != address(0),
             "ERC721Factory address cannot be 0x00!"
         );
         require(maxSupply_ > 0, "The maximum supply must be > 0");
         require(initialSupply_ >= 0, "The initial supply cannot be negative");
         require(initialSupply_ <= maxSupply_, "The initial supply cannot exeed the total cap");
-        require(minter_ == IERC721Base(erc721baseaddress_).getNFTowner(), "NOT THE NFT OWNER");
 
         __ERC20_init(name_, symbol_);
-        _erc721base = erc721baseaddress_;
+        _erc721address = erc721address_;
         _allowedMinter = minter_;
         _maxSupply = maxSupply_;
         /**
@@ -65,19 +65,20 @@ contract ERC20Template is
          */
         _mint(_allowedMinter, initialSupply_ * 10 ** decimals());
         require(
-            totalSupply() == initialSupply_,
-            "Initial minting error: totalSupply does not match initialSuuply"
+            totalSupply() == initialSupply_ * 10 ** decimals(),
+            "Initial minting error: totalSupply does not match initialSupply"
         );
         require(
-            balanceOf(_allowedMinter) == initialSupply_,
+            balanceOf(_allowedMinter) == initialSupply_ * 10 ** decimals(),
             "Minting of datatoken failed"
         );
         nonces_[_allowedMinter] = 0;
         emit InitializedDT(name_, symbol_, minter_, initialSupply_);
+        return true;
     }
 
     function myMint(address account, uint256 amount) external {
-        require(account == IERC721Base(_erc721base).getNFTowner(), "NOT THE NFT OWNER = NOT A MINTER");
+        require(account == IERC721Base(_erc721address).getNFTowner(), "NOT THE NFT OWNER = NOT A MINTER");
         require(totalSupply().add(amount) <= _maxSupply, "Cannot exeed the cap");
         _mint(account, amount * 10 ** decimals());
         emit NewMint(account, amount);
@@ -105,8 +106,12 @@ contract ERC20Template is
         return amountToBuy;
     }
 
+    function getAllowedMinter() external view returns (address) {
+        return _allowedMinter;
+    } 
+
     /**
-    * Allow the (NFT owner/DT owner) of the contract to withdraw ETH
+    * Allow the (NFT owner/DT owner) of the contract to withdraw SMR
     */
     function withdraw() public onlyNFTOwner {
         require(address(this).balance > 0, "No balance to withdraw");
@@ -150,7 +155,7 @@ contract ERC20Template is
         bytes32 s
     ) external {
         require(deadline >= block.number, "ERC20DT EXPIRED");
-        require(owner == IERC721Base(_erc721base).getNFTowner(), "Owner not the NFT owner");
+        require(owner == IERC721Base(_erc721address).getNFTowner(), "Owner not the NFT owner");
         uint256 nonceBefore = nonces_[owner];
         bytes32 domain_separator = DOMAIN_SEPARATOR();
         bytes32 digest = keccak256(
@@ -179,4 +184,17 @@ contract ERC20Template is
         _approve(owner, spender, value);
     }
 
+    /**
+     * @dev fallback function
+     *      this is a default fallback function in which receives
+     *      the collected ether.
+     */
+    fallback() external payable {}
+
+    /**
+     * @dev receive function
+     *      this is a default receive function in which receives
+     *      the collected ether.
+     */
+    receive() external payable {}
 }

@@ -8,7 +8,8 @@ import { ethers } from "ethers";
 export interface IDataOffering {
     NFTaddress: string,
     NFTname: string,
-    NFTsymbol: string
+    NFTsymbol: string,
+    DTcontractAddress: string
 }
 
 export const Catalogue = () => {
@@ -29,7 +30,8 @@ export const Catalogue = () => {
             let NFTinfo: IDataOffering = {
                 NFTaddress: contractAddress,
                 NFTname: await contractIstance.getNFTname(),
-                NFTsymbol: await contractIstance.getNFTsymbol()
+                NFTsymbol: await contractIstance.getNFTsymbol(),
+                DTcontractAddress: await contractIstance.getDTaddress()
             };
             return NFTinfo;
         }
