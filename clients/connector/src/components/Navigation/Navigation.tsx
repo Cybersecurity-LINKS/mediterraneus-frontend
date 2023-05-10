@@ -16,7 +16,7 @@ export const Navigation = () => {
   return (
     <Navbar bg="light" variant="light">
     <Container>
-      <Navbar.Brand className="float-left mr-2">Sedimark Connector</Navbar.Brand>
+      <Navbar.Brand className="float-left mr-2">MARKETPLACE</Navbar.Brand>
       <Nav className="me-auto">
         <Nav.Link as={Link} to="/publish" >Publish</Nav.Link>
         <Nav.Link as={Link} to="/catalogue" >Catalogue</Nav.Link>

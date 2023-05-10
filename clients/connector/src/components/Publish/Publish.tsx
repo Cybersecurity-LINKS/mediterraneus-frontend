@@ -50,7 +50,7 @@ export const Publish = () => {
         <>
         <Card style={{width: '80rem'}}>
         <Card.Body>
-            <Card.Title>Publish new Data NFT</Card.Title>
+            <Card.Title>Publish new Data/Service NFT</Card.Title>
         </Card.Body>
             <Form className="container mt-3 mb-3 ps-5 pe-5">
             <Form.Group className="mb-3" controlId="formNFTname">
