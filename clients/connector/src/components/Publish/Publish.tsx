@@ -2,7 +2,7 @@ import { MouseEvent, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { BigNumberish, Numeric, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { getContractABI, getContractAddress } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
 
@@ -26,8 +26,6 @@ export const Publish = () => {
             event.preventDefault();
             const contractABI = await getContractABI("ERC721Factory");
             const contractAddress = getContractAddress("ERC721Factory");
-            // console.log(contractAddress);
-            // console.log(contractABI);
 
             const signer = await provider!.getSigner();
 
@@ -39,10 +37,6 @@ export const Publish = () => {
                 NFTuri.toString(),
                 wallet.accounts[0]
             );
-            
-            await contractIstance.on("ERC20ContractDeployed", async (erc20Instance, minter_, name_, symbol_, initialSupply_) => {
-                console.log(erc20Instance, minter_, name_, symbol_, initialSupply_);
-            })
 
             await contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, sender, event) => {
                 console.log("New ERC721 NFT contract deployed successfully!");
