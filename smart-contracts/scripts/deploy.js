@@ -20,8 +20,13 @@ async function main() {
     obtainedAddresses.addresses.push({ERC721Base: baseAddress.address});
     console.log("ERC721Base address:", baseAddress.address);
 
+    const ERC20Base = await ethers.getContractFactory("ERC20Base");
+    const base20Address = await ERC20Base.deploy();
+    obtainedAddresses.addresses.push({ERC20Base: base20Address.address});
+    console.log("ERC20Base address:", base20Address.address);
+
     const ERC721Factory = await ethers.getContractFactory("ERC721Factory");
-    token = await ERC721Factory.deploy(baseAddress.address);
+    token = await ERC721Factory.deploy(baseAddress.address, base20Address.address);
     obtainedAddresses.addresses.push({ERC721Factory: token.address});
     console.log("ERC721Factory address:", token.address);
 

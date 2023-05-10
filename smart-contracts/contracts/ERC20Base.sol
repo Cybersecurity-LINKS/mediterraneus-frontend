@@ -17,7 +17,7 @@ contract ERC20Template is
     address private _allowedMinter;
     uint256 private _maxSupply;
     
-    // token price for ETH
+    // token price for SMR
     uint256 public tokensPerSMR = 100;
 
     event BuyDT(address from, address buyer, uint256 amountOfSMR, uint256 amountOfTokens);
