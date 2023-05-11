@@ -20,7 +20,11 @@ export const App = () => {
           {/* <Route path="users" element={<Users />}>
             <Route path=":id" element={<UserProfile />} />
           </Route> */}
-
+          <Route path="" element={
+            <Row>
+              <Display />
+            </Row>
+          }/>
           <Route path="publish" element={
             <>
               <Row>

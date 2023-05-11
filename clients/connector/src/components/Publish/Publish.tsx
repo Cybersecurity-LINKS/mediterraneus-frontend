@@ -88,6 +88,11 @@ export const Publish = () => {
                 <Form.Control size="lg" type="input" placeholder="Enter the NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
             </Form.Group>
 
+            <Form.Group className="mb-3" controlId="NFTdescription">
+                <Form.Label>NFT short description</Form.Label>
+                <Form.Control as="textarea" rows={3} />
+            </Form.Group>
+
             <Form.Group className="mb-3" controlId="formNFTuri">
                 <Form.Label>NFT Metadata URI</Form.Label>
                 <Form.Control size="lg" type="input" placeholder="Enter the NFT metadata URI" onChange={(event) => { setNFTuri(event.target.value) }} />

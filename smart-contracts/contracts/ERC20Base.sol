@@ -92,7 +92,7 @@ contract ERC20Base is
         require(msg.value > 0, "Send SMR to buy Data Tokens. Received 0 SMR");
 
         amountToBuy = msg.value * tokensPerSMR;
-        // If not enough minted DTs trigger the minting of some tokens
+        // TODO: If not enough minted DTs trigger the minting of some tokens
         // only if the MAX_SUPPLY has not been reached yet.
         require(
             balanceOf(_allowedMinter) >= amountToBuy, 

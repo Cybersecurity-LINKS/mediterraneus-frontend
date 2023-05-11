@@ -33,6 +33,21 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY_3],
     },
   },
+  etherscan: {
+    apiKey: {
+      'shimmerevm-testnet': 'ABCDE12345ABCDE12345ABCDE123456789'
+    },
+    customChains: [
+      {
+        network: 'shimmerevm-testnet',
+        chainId: 1071,
+        urls: {
+          apiURL: 'https://explorer.evm.testnet.shimmer.network/api',
+          browserURL: 'https://explorer.evm.testnet.shimmer.network/'
+        }
+      }
+    ]
+  }
 };
 
 
