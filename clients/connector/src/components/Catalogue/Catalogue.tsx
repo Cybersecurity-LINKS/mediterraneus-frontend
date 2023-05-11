@@ -1,4 +1,4 @@
-import { Col, Row } from "react-bootstrap";
+import { Alert, Col, Container, Row } from "react-bootstrap";
 import { DataOffering } from "./DataOffering";
 import { useEffect, useState } from "react";
 import { getContractABI, getContractAddress } from "@/utils";
@@ -9,6 +9,9 @@ export interface IDataOffering {
     NFTaddress: string,
     NFTname: string,
     NFTsymbol: string,
+    NFTmetadataURI: string,
+    DTname: string,
+    DTsymbol: string
     DTcontractAddress: string
 }
 
@@ -23,13 +26,20 @@ export const Catalogue = () => {
 
         const getNFTinfo = async (contractAddress: string): Promise<IDataOffering> => {
             const contractABI = await getContractABI("ERC721Base");
-            let contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
-            let a = await contractIstance.getAddress()
+            const contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
+            
+            const DTcontractABI = await getContractABI("ERC20Base");
+            const DTcontractAddress =  await contractIstance.getDTaddress();
+            const DTcontractIstance = new ethers.Contract(DTcontractAddress, DTcontractABI, shimmerProvider);
+            
             let NFTinfo: IDataOffering = {
                 NFTaddress: contractAddress,
                 NFTname: await contractIstance.name(),
                 NFTsymbol: await contractIstance.symbol(),
-                DTcontractAddress: await contractIstance.getDTaddress()
+                NFTmetadataURI: await contractIstance.tokenURI(1),
+                DTname: await DTcontractIstance.name(),
+                DTsymbol: await DTcontractIstance.symbol(),
+                DTcontractAddress: DTcontractAddress
             };
             return NFTinfo;
         }
@@ -58,13 +68,18 @@ export const Catalogue = () => {
         
     }, [dataOfferings.length]);
 
-    return (
+    return(
+        dataOfferings.length == 0 ? 
+        <Container className="mt-3">
+            <Row><Col md={{ span: 6, offset: 3 }}><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Col></Row>
+        </Container>
+            :
         <Row className="d-flex justify-content-center mt-3" md={columnsPerRow}> 
             {
-            dataOfferings.map((NFTdataobj, index) => (
-                <Col key={index}><DataOffering key={index} NFTdataobj={NFTdataobj} /></Col>  
-            ))
+                dataOfferings.map((NFTdataobj, index) => (
+                    <Col key={index}><DataOffering key={index} NFTdataobj={NFTdataobj} /></Col>  
+                ))
             }
         </Row>
-      );
+    )
 }

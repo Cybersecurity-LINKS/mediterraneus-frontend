@@ -1,13 +1,7 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
-import { formatAddress } from '@/utils'
-
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import Button from 'react-bootstrap/Button';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
+import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 
 export const Navigation = () => {
 
@@ -31,17 +25,31 @@ export const Navigation = () => {
         </Button>
       }
       {hasProvider && wallet.accounts.length > 0 &&
+        <>
         <OverlayTrigger  
-          placement="bottom"
-          overlay={<Tooltip>Open in Block Explorer</Tooltip>}
-        >
-          <Nav.Link 
-            className="text_link tooltip-bottom"
-            target="_blank"
-            href={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>
-            {formatAddress(wallet.accounts[0])}
-          </Nav.Link>
+              placement="right"
+              overlay={<Tooltip>Open in Block Explorer</Tooltip>}
+            > 
+        <Card style={{ width: '12rem' }} border="primary" bg="primary">
+          <Row xs="auto" className="mt-2 ms-2 me-2">
+            <Figure className='mt-2'>
+              <Figure.Image
+                width={30}
+                height={30}
+                src="../../public/metamasklogo.svg"
+              />
+            </Figure>
+            
+              <Nav.Link 
+                className="text_link tooltip-bottom text-white mt-1"
+                target="_blank"
+                href={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>
+                {formatAddress2(wallet.accounts[0])}
+              </Nav.Link>
+          </Row>
+        </Card>
         </OverlayTrigger>
+        </>
       }
       </Nav>
     </Container>

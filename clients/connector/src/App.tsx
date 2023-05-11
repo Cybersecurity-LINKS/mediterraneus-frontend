@@ -7,7 +7,7 @@ import { Publish} from './components/Publish';
 
 import { MetaMaskError } from './components/MetaMaskError'
 import { MetaMaskContextProvider } from './hooks/useMetaMask'
-import { Container, Row } from 'react-bootstrap';
+import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route } from 'react-router';
 
 export const App = () => {
@@ -17,26 +17,28 @@ export const App = () => {
         <Navigation />
         <Container fluid>
         <Routes>
-          {/* <Route path="users" element={<Users />}>
-            <Route path=":id" element={<UserProfile />} />
-          </Route> */}
           <Route path="" element={
             <Row>
-              <Display />
+              <ToastContainer>
+                    <Display />
+              </ToastContainer>
             </Row>
           }/>
           <Route path="publish" element={
             <>
-              <Row>
-                <Display />
-                <Row className="d-flex justify-content-center mt-3"> 
-                  <Publish />
+              <ToastContainer>
+                <Row className="d-flex justify-content-between">
+                  <Col sm={4}>
+                    <Display />
+                  </Col>
+                  <Col sm={8}>
+                    <Publish />
+                  </Col>
                 </Row>
-              </Row>
-            
-              <Row className="fixed-bottom">
-                <MetaMaskError />
-              </Row>
+                <Row className="fixed-bottom">
+                  <MetaMaskError />
+                </Row>
+              </ToastContainer>
             </>
             }
           />

@@ -1,7 +1,5 @@
 import { MouseEvent, useState } from 'react';
-import { Card } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import { Card, Button, Form } from 'react-bootstrap';
 import { ethers } from 'ethers';
 import { getContractABI, getContractAddress } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
@@ -73,7 +71,7 @@ export const Publish = () => {
 
     return (
         <>
-        <Card style={{width: '80rem'}} className='mb-5'>
+        <Card style={{width: '80rem'}} className='mb-5 mt-3'>
         <Card.Body>
             <Card.Title>Publish new Data/Service NFT</Card.Title>
         </Card.Body>

@@ -1,21 +1,31 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
-import styles from './Display.module.css'
 import { formatChainAsNum } from '@/utils'
+import { Figure, Toast } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 
 export const Display = () => {
 
   const { wallet } = useMetaMask()
 
-  return (
-    <div className={styles.display}>
-      {wallet.accounts.length > 0 &&
-        <>
-          <div>Wallet Accounts: {wallet.accounts[0]}</div>
-          <div>Wallet Balance: {wallet.balance}</div>
-          <div>Hex ChainId: {wallet.chainId}</div>
-          <div>Numeric ChainId: {formatChainAsNum(wallet.chainId)}</div>
-        </>
-      }
-    </div>
-  )
+    return (
+      <>
+        <Toast className='mt-3 ms-5'>
+          <Toast.Header closeButton={false}>
+            <Figure className='mt-2 ms-2 rounded me-2 bg-success '>
+              <Figure.Image
+                width={25}
+                height={30}
+                src="../../public/shimmerlogo.svg"
+                className="ms-3 me-3 mt-3 mb-3"
+              />
+            </Figure>
+            <strong className="mb-auto me-auto mt-auto text-black">IOTA Shimmer EVM Network</strong>
+          </Toast.Header>
+          <Toast.Body><strong>Wallet Accounts: </strong><Link target="_blank" to={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>{wallet.accounts[0]}</Link></Toast.Body>
+          <Toast.Body><strong>Wallet Balance: </strong> <br></br>{wallet.balance} SMR </Toast.Body>
+          <Toast.Body><strong>Hex ChainId: </strong> <br></br>{wallet.chainId}</Toast.Body>
+          <Toast.Body><strong>Numeric ChainId: </strong> <br></br>{formatChainAsNum(wallet.chainId)}</Toast.Body>
+        </Toast>
+      </>
+    );
 }

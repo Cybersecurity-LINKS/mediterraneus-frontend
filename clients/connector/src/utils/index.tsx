@@ -20,6 +20,9 @@ export const formatChainAsNum = (chainIdHex: string) => {
 export const formatAddress = (addr: string) => {
   return `${addr.substring(0, 8)}...`
 }
+export const formatAddress2 = (addr: string) => {
+  return `${addr.substring(0, 5)}...${addr.substring(38, 42)}`
+}
 
 export const getContractABI = async (contractName: string) => {
   try {
