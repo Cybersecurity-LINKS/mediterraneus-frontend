@@ -1,4 +1,4 @@
-import { Alert, Col, Container, Row } from "react-bootstrap";
+import { Alert, Col, Container, Row, Spinner } from "react-bootstrap";
 import { DataOffering } from "./DataOffering";
 import { useEffect, useState } from "react";
 import { getContractABI, getContractAddress } from "@/utils";
@@ -18,6 +18,7 @@ export interface IDataOffering {
 export const Catalogue = () => {
 
     const [dataOfferings, setDataOfferings] = useState<IDataOffering[]>([]);
+    const [loading, setLoading] = useState(true);
     const columnsPerRow = 4;
 
     const { shimmerProvider } = useMetaMask();
@@ -58,7 +59,8 @@ export const Catalogue = () => {
                     let l_dataoffering = await getNFTinfo(NFTaddresses[i]);
                     NFTobjs.push(l_dataoffering);
                 }
-                setDataOfferings(NFTobjs); 
+                setDataOfferings(NFTobjs);
+                setLoading(false); 
             } catch (error) {
                 console.log(error);
             }
@@ -69,17 +71,35 @@ export const Catalogue = () => {
     }, [dataOfferings.length]);
 
     return(
-        dataOfferings.length == 0 ? 
-        <Container className="mt-3">
-            <Row><Col md={{ span: 6, offset: 3 }}><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Col></Row>
-        </Container>
-            :
-        <Row className="d-flex justify-content-center mt-3" md={columnsPerRow}> 
+        <>
             {
-                dataOfferings.map((NFTdataobj, index) => (
-                    <Col key={index}><DataOffering key={index} NFTdataobj={NFTdataobj} /></Col>  
-                ))
+                loading ? 
+                <Container className="d-flex justify-content-center"><Spinner animation="grow" variant="warning" style={
+                    {width: '5rem', 
+                    height: '5rem', 
+                    position: 'absolute', 
+                    justifyContent: 'center',
+                    flex: 1,
+                    alignItems:'center',
+                    marginTop:270,
+                }}/></Container>
+                :
+                dataOfferings.length == 0 ? 
+                <Container className="mt-3">
+                    <Row><Col md={{ span: 6, offset: 3 }}><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Col></Row>
+                </Container>
+                    :
+                <Container className="d-flex justify-content-center mt-3">
+                <Row md={columnsPerRow}> 
+                    {
+                        dataOfferings.map((NFTdataobj, index) => (
+                            <Col key={index}><DataOffering key={index} NFTdataobj={NFTdataobj} /></Col>  
+                        ))
+                    }
+                </Row>
+                </Container>
             }
-        </Row>
+        </>
+        
     )
 }

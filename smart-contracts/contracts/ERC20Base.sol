@@ -18,7 +18,7 @@ contract ERC20Base is
     uint256 private _maxSupply;
     
     // token price for SMR
-    uint256 public tokensPerSMR = 100;
+    uint256 private tokensPerSMR; // 1 DT costs 0.01 SMR
 
     event BuyDT(address from, address buyer, uint256 amountOfSMR, uint256 amountOfTokens);
     event InitializedDT(string name, string symbol, address owner, uint256 initialSupply);
@@ -57,6 +57,7 @@ contract ERC20Base is
         _erc721address = erc721address_;
         _allowedMinter = minter_;
         _maxSupply = maxSupply_;
+        tokensPerSMR = 100; // 1 DT costs 0.01 SMR
         /**
          * minting is safe because we first check that the provided
          * minter_ address is actually also the NFT owner.
@@ -91,13 +92,14 @@ contract ERC20Base is
         require(msg.sender != address(0), "Invalid 0 address");
         require(msg.value > 0, "Send SMR to buy Data Tokens. Received 0 SMR");
 
-        amountToBuy = msg.value * tokensPerSMR;
+        amountToBuy = msg.value * tokensPerSMR; // send 0.01 SMR to get 1 DT
         // TODO: If not enough minted DTs trigger the minting of some tokens
         // only if the MAX_SUPPLY has not been reached yet.
         require(
             balanceOf(_allowedMinter) >= amountToBuy, 
             "Not enough remained minted Data Tokens. Cannot sell user's requested amount"
         );
+        require(amountToBuy > 0 , "Cannot buy 0 Data Tokens!");
 
         (bool sent) = transfer(msg.sender, amountToBuy);
         require(sent, "Failed to transfer Data Tokens to user");
@@ -108,6 +110,10 @@ contract ERC20Base is
 
     function getAllowedMinter() external view returns (address) {
         return _allowedMinter;
+    } 
+
+    function getRate() external view returns (uint256) {
+        return tokensPerSMR;
     } 
 
     /**

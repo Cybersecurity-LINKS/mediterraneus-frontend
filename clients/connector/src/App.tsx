@@ -26,8 +26,7 @@ export const App = () => {
           }/>
           <Route path="publish" element={
             <>
-              <ToastContainer>
-                <Row className="d-flex justify-content-between">
+                <Row className="d-flex justify-content-center">
                   <Col sm={4}>
                     <Display />
                   </Col>
@@ -38,11 +37,12 @@ export const App = () => {
                 <Row className="fixed-bottom">
                   <MetaMaskError />
                 </Row>
-              </ToastContainer>
             </>
             }
           />
-          <Route path="catalogue" element={<Catalogue/>} />
+          <Route path="catalogue" element={
+            <Catalogue/>
+          } />
         </Routes>
       </Container>
         
