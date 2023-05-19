@@ -1,14 +1,14 @@
 import { Card, OverlayTrigger, Tooltip, TooltipProps, Button } from "react-bootstrap";
 import { IDataOffering } from "./Catalogue";
 import { RefAttributes, MouseEvent } from "react";
-import { formatAddress2, getContractABI } from "@/utils";
+import { formatAddress2, getContractABI, getContractAddress, getDomainSeparator, getPermitDigest, getSemiPermitDigest } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
-import { ethers } from "ethers";
+import { AbiCoder, MaxUint256, TypedDataDomain, ethers, keccak256, recoverAddress, solidityPacked } from "ethers";
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
     
     const baseExplorerURL = "https://explorer.evm.testnet.shimmer.network/address/";
-    const { shimmerProvider, provider } = useMetaMask();
+    const { provider } = useMetaMask();
 
     const renderTooltip = (props: JSX.IntrinsicAttributes & TooltipProps & RefAttributes<HTMLDivElement>) => (
         <Tooltip id="button-tooltip" {...props}>
@@ -22,16 +22,29 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
             const DTcontractABI = await getContractABI("ERC20Base");
             const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, await provider?.getSigner());
             
-            // console.log((ethers.parseEther("0.01") * BigInt("100")))
-            // let res = await DTcontractIstance.balanceOf("0xE42AE5417Fd1eeeD1ED1ACd1f535315663758e66"); 
-            let res = await DTcontractIstance.buyDT({value: ethers.parseEther("0.01")}); 
-            // let res = await DTcontractIstance.getRate(); 
-            // let res = await DTcontractIstance.getAllowedMinter(); 
-            // console.log(ethers.toBigInt(res));
+            // get owner of DT
+            const ownerAddress = await DTcontractIstance.getDTowner();
 
-            DTcontractIstance.on("BuyDT", async (_allowedMinter, sender, value, amountToBuy, event) => {
-                console.log(_allowedMinter, sender, value, amountToBuy, event);
-            });
+            // get Exchange address and contract instance
+            const exchangeABI = await getContractABI("FixedRateExchange");
+            const exchangeAddress = getContractAddress("FixedRateExchange");
+            const exchangeContractIstance = new ethers.Contract(exchangeAddress!, exchangeABI, await provider?.getSigner())
+
+            const exchangeID_forthisDT = keccak256(
+                new AbiCoder().encode(
+                    ['address', 'address'],
+                    [props.NFTdataobj.DTcontractAddress, ownerAddress]
+                )
+            );
+            const res: BigInt = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
+            const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
+            console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${rate}`);  
+            
+            exchangeContractIstance.sellDT(exchangeID_forthisDT, 1, {value: ethers.parseEther((Number(res)/(1e18)).toString())});
+            exchangeContractIstance.on("SuccessfulSwap", (exchangeId, caller, exchangeOwner, dtamount, smrsent) => {
+                console.log(exchangeId, caller, exchangeOwner, dtamount, smrsent);
+            })
+
         }catch(err) {
             console.log(err);
         }

@@ -6,6 +6,25 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "erc20dt",
+          "type": "address"
+        }
+      ],
+      "name": "createdERC20List",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "string",
           "name": "name_",
           "type": "string"
@@ -17,17 +36,12 @@
         },
         {
           "internalType": "address",
-          "name": "minter_",
+          "name": "owner_",
           "type": "address"
         },
         {
           "internalType": "uint256",
           "name": "maxSupply_",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "initialSupply_",
           "type": "uint256"
         }
       ],
@@ -40,6 +54,25 @@
         }
       ],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "erc20dt",
+          "type": "address"
+        }
+      ],
+      "name": "eRC20_to_owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ],

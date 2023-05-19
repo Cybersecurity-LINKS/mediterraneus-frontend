@@ -75,10 +75,9 @@ contract ERC721Base is
         string calldata symbol,
         // address owner should be already msg.sender
         // address erc721address_, // it is the NFT contract that is calling the factory function. So it will be msg.sender on the other side
-        uint256 maxSupply_,
-        uint256 initialSupply_
+        uint256 maxSupply_
     ) external onlyNFTOwner returns (address erc20token) {
-        require(maxSupply_ > 0 && initialSupply_ >= 0, "Cap and initial supply not valid");
+        require(maxSupply_ > 0, "Cap and initial supply not valid");
         // already checked by the onlyNFTOwner modifier
         // require(msg.sender != address(0), "ERC721Base: Minter cannot be address(0)");
 
@@ -86,11 +85,10 @@ contract ERC721Base is
             name,
             symbol,
             msg.sender, // == new DT owner = NFTowner
-            initialSupply_,
             maxSupply_
         );
         deployedERC20Tokens.push(erc20token);
-        emit TokenCreated(name, symbol, msg.sender, address(this), erc20token, initialSupply_, maxSupply_);
+        emit TokenCreated(name, symbol, msg.sender, address(this), erc20token, 0, maxSupply_);
     }
 
     function setPrice(uint256 price_) external onlyNFTOwner {

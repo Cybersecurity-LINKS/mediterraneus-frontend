@@ -6,130 +6,139 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "../interfaces/IERC721Base.sol";
+import "../interfaces/IFactoryRouter.sol";
+import "../interfaces/IERC20Base.sol";
 
 contract ERC20Base is
     Initializable,
-    ERC20Upgradeable {
+    ERC20Upgradeable,
+    IERC20Base {
 
     using SafeMathUpgradeable for uint256;
 
     address private _erc721address;
-    address private _allowedMinter;
+    address private _owner;
+    address private _router;
     uint256 private _maxSupply;
     
-    // token price for SMR
-    uint256 private tokensPerSMR; // 1 DT costs 0.01 SMR
-
-    event BuyDT(address from, address buyer, uint256 amountOfSMR, uint256 amountOfTokens);
-    event InitializedDT(string name, string symbol, address owner, uint256 initialSupply);
-    event NewMint(address to, uint256 amount);
-
+    mapping(address => bool) private _allowedMinters;
     mapping(address => uint256) public nonces_;
 
-    modifier onlyNFTOwner() {
-        require(msg.sender == IERC721Base(_erc721address).getNFTowner());
+    struct FixedRate {
+        address fixedRateExchange;
+        bytes32 exchangeID;
+    }
+    FixedRate[] private fixedRateExchanges;
+
+    event InitializedDT(string name, string symbol, address owner, address erc721address, address router);
+    event Permit(address recoveredAddress, address owner, address spender, uint256 amount);
+    event PermitData(bytes32 domain_separator, bytes32 permit_gasg, bytes32 digest);
+    event FixedRateCreated(bytes32 exchangeID, address owner, address fixedRateAddress);
+
+    modifier onlyOwner() {
+        require(msg.sender == _owner);
         _;
     }
 
     function initialize(
         string memory name_,
         string memory symbol_,
-        address minter_, // minter = DT owner = NFT owner
+        address owner_, // minter = DT owner = NFT owner
         address erc721address_,
-        uint256 maxSupply_,
-        uint256 initialSupply_
+        address router_,
+        uint256 maxSupply_
     ) external initializer returns (bool){
-        require(minter_ != address(0), "Minter cannot be 0x00!");
-        require(
-            minter_ != address(this),
-            "Minter cannot be the contract address itself"
-        );
-        require(minter_ == IERC721Base(erc721address_).getNFTowner(), "NOT THE NFT OWNER");
+        require(owner_ != address(0), "Minter cannot be 0x00!");
+        require(owner_ == IERC721Base(erc721address_).getNFTowner(), "NOT THE NFT OWNER");
         require(
             erc721address_ != address(0),
-            "ERC721Factory address cannot be 0x00!"
+            "ERC721Factory address cannot be 0x00!" 
         );
+        require(router_ != address(0), "ERC20: ROUTER CANNOT BE THE 0 ADDRESS");
         require(maxSupply_ > 0, "The maximum supply must be > 0");
-        require(initialSupply_ >= 0, "The initial supply cannot be negative");
-        require(initialSupply_ <= maxSupply_, "The initial supply cannot exeed the total cap");
 
         __ERC20_init(name_, symbol_);
         _erc721address = erc721address_;
-        _allowedMinter = minter_;
+        _owner = owner_;
+        _router = router_;
         _maxSupply = maxSupply_;
-        tokensPerSMR = 100; // 1 DT costs 0.01 SMR
         /**
-         * minting is safe because we first check that the provided
-         * minter_ address is actually also the NFT owner.
          * ERC20 tokens have 18 decimals => Number of tokens minted = n * 10^18
          * This way the decimals are transparent to the clients.
          */
-        _mint(_allowedMinter, initialSupply_ * 10 ** decimals());
-        require(
-            totalSupply() == initialSupply_ * 10 ** decimals(),
-            "Initial minting error: totalSupply does not match initialSupply"
-        );
-        require(
-            balanceOf(_allowedMinter) == initialSupply_ * 10 ** decimals(),
-            "Minting of datatoken failed"
-        );
-        nonces_[_allowedMinter] = 0;
-        emit InitializedDT(name_, symbol_, minter_, initialSupply_);
+        nonces_[_owner] = 0;
+        emit InitializedDT(name_, symbol_, owner_, _erc721address, _router);
         return true;
     }
 
-    function myMint(address account, uint256 amount) external {
-        require(account == IERC721Base(_erc721address).getNFTowner(), "NOT THE NFT OWNER = NOT A MINTER");
-        require(totalSupply().add(amount) <= _maxSupply, "Cannot exeed the cap");
-        _mint(account, amount * 10 ** decimals());
-        emit NewMint(account, amount);
+    function _addMinter(address newminter) internal {
+        _allowedMinters[newminter] = true;
     }
 
-    /**
-    *  Allow users to buy data tokens for SMR
-    */
-    function buyDT() public payable returns (uint256 amountToBuy) {
-        require(msg.sender != address(0), "Invalid 0 address");
-        require(msg.value > 0, "Send SMR to buy Data Tokens. Received 0 SMR");
+    function isAllowedMinter(address isminter) internal view returns (bool) {
+        return _allowedMinters[isminter];
+    }
 
-        amountToBuy = msg.value * tokensPerSMR; // send 0.01 SMR to get 1 DT
-        // TODO: If not enough minted DTs trigger the minting of some tokens
-        // only if the MAX_SUPPLY has not been reached yet.
-        require(
-            balanceOf(_allowedMinter) >= amountToBuy, 
-            "Not enough remained minted Data Tokens. Cannot sell user's requested amount"
+    function isMinter(address isminter) external view returns(bool) {
+        return isAllowedMinter(isminter);
+    }
+    
+    function mint(address to, uint256 amount) external {
+        require(msg.sender == _owner || isAllowedMinter(msg.sender), "NOT ALLOWED TO MINT DTs");
+        require(totalSupply().add(amount) <= _maxSupply, "Cannot exceed the cap");
+        _mint(to, amount);
+    }
+
+    function createFixedRate(
+        address fixedRateAddress_,
+        uint256 fixedrate_,
+        uint256 giveMintPerm_toExchange
+    ) external onlyOwner returns (bytes32 exchangeID) {
+        if(giveMintPerm_toExchange > 0) _addMinter(fixedRateAddress_);
+        exchangeID = IFactoryRouter(_router).createFixedRate(
+            fixedRateAddress_,
+            _owner,
+            fixedrate_,
+            decimals(),
+            giveMintPerm_toExchange
         );
-        require(amountToBuy > 0 , "Cannot buy 0 Data Tokens!");
-
-        (bool sent) = transfer(msg.sender, amountToBuy);
-        require(sent, "Failed to transfer Data Tokens to user");
-
-        emit BuyDT(_allowedMinter, msg.sender, msg.value, amountToBuy);
-        return amountToBuy;
+        emit FixedRateCreated(exchangeID, _owner, fixedRateAddress_);
+        fixedRateExchanges.push(FixedRate(fixedRateAddress_, exchangeID));
     }
 
-    function getAllowedMinter() external view returns (address) {
-        return _allowedMinter;
+    function getDTowner() external view returns (address) {
+        return _owner;
     } 
 
-    function getRate() external view returns (uint256) {
-        return tokensPerSMR;
-    } 
+    function getMaxSupply() external view returns(uint256) {
+        return _maxSupply;
+    }
+
+    function balanceOf(address caller) public view override(ERC20Upgradeable, IERC20Base) returns(uint256) {
+        return super.balanceOf(caller);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public override(ERC20Upgradeable, IERC20Base) returns (bool){
+        return super.transferFrom(from, to, amount);
+    }
 
     /**
     * Allow the (NFT owner/DT owner) of the contract to withdraw SMR
     */
-    function withdraw() public onlyNFTOwner {
+    function withdraw() public onlyOwner {
         require(address(this).balance > 0, "No balance to withdraw");
         (bool sent,) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to withdraw");
     }
 
     function burn(uint256 amount) external {
-        require(msg.sender == _allowedMinter, "NOT ALLOWED TO BURN");
+        require(msg.sender == _owner, "NOT ALLOWED TO BURN");
         _burn(msg.sender, amount);
     }
-
 
     /*
         Support for EIP-2612 
@@ -156,7 +165,6 @@ contract ERC20Base is
         return domain;
     }
 
-
     function permit(
         address owner,
         address spender,
@@ -168,20 +176,22 @@ contract ERC20Base is
     ) external {
         require(deadline >= block.number, "ERC20DT EXPIRED");
         require(owner == IERC721Base(_erc721address).getNFTowner(), "Owner not the NFT owner");
+        require(value > 0, "Cannot permit 0 value");
         uint256 nonceBefore = nonces_[owner];
         bytes32 domain_separator = DOMAIN_SEPARATOR();
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                hex"1901",
-                domain_separator,
-                keccak256(abi.encode(
+        bytes32 permit_hash = keccak256(abi.encode(
                     keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
                     owner,
                     spender,
                     value,
                     nonceBefore,
                     deadline
-                ))
+                ));
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                domain_separator,
+                permit_hash
             )
         );
         nonces_[owner] += 1;
@@ -189,12 +199,19 @@ contract ERC20Base is
 
         address recoveredAddress = ecrecover(digest, v, r, s); 
         require(
-            recoveredAddress != address(0) && recoveredAddress == owner, 
+            recoveredAddress == owner, 
             "ERC20 datatoken: INVALID SIGNATURE IN ERC20-PERMIT"
         );
-
+        emit Permit(recoveredAddress, owner, spender, value);
+        emit PermitData(domain_separator, permit_hash, digest);
         _approve(owner, spender, value);
     }
+
+    function nonces(address requester) external view returns(uint256) {
+        return nonces_[requester];
+    }
+
+    // function approve()
 
     /**
      * @dev fallback function

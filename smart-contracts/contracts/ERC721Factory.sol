@@ -6,9 +6,10 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "./Deployer.sol";
 import "../interfaces/IERC721Base.sol";
+import "../interfaces/IERC721Factory.sol";
 import "../interfaces/IERC20Base.sol";
 
-contract ERC721Factory is Ownable, Deployer{
+contract ERC721Factory is Ownable, Deployer, IERC721Factory {
     using SafeMath for uint256;
 
     uint256 private currentNFTCount;
@@ -19,6 +20,8 @@ contract ERC721Factory is Ownable, Deployer{
     mapping(address => address) public createdERC20List;
     mapping(address => address) public eRC20_to_owner;
     address[] public erc20addresses;
+
+    address private _router;
 
     struct ContractBase {
         address baseAddress;
@@ -44,16 +47,17 @@ contract ERC721Factory is Ownable, Deployer{
         address contractAddress, 
         address contractOwner, 
         string name, 
-        string symbol, 
-        uint256 initialSupply
+        string symbol
     );
 
-    constructor(address _base721Address, address _base20Address) {
+    constructor(address _base721Address, address _base20Address, address router_) {
         require(_base721Address != address(0), "Invalid ERC721Base contract address");
         require(_base20Address != address(0), "Invalid ERC721Base contract address");
+        require(router_ != address(0), "Invalid router contract address");
         currentNFTCount = 0;
         addERC721Basetemplate(_base721Address);
         addERC20Basetemplate(_base20Address);
+        _router = router_;
     }
 
     function deployERC721Contract(
@@ -89,31 +93,30 @@ contract ERC721Factory is Ownable, Deployer{
     function deployERC20Contract(
         string memory name_,
         string memory symbol_,
-        address minter_, // minter = DT owner = NFT owner
+        address owner_, // minter = DT owner = NFT owner
         // address erc721address_, // should be the calling NFT contract = msg.sender
-        uint256 maxSupply_,
-        uint256 initialSupply_
+        uint256 maxSupply_
     ) external returns (address erc20Instance) {
         require(createdERC721List[msg.sender] == msg.sender, "Call coming from a non existing NFT contract deployed by this factory");
-        require(minter_ == IERC721Base(createdERC721List[msg.sender]).getNFTowner(), "Provided minter is not the NFT owner!");
+        require(owner_ == IERC721Base(createdERC721List[msg.sender]).getNFTowner(), "Provided minter is not the NFT owner!");
 
         erc20Instance = deploy(base20ContractInfo.baseAddress);
         require(erc20Instance != address(0), "deployERC20Contract: Failed to deploy new ERC20 contract");
         
         erc20addresses.push(erc20Instance);
         createdERC20List[erc20Instance] = erc20Instance;
-        eRC20_to_owner[erc20Instance] = minter_;
+        eRC20_to_owner[erc20Instance] = owner_;
 
         IERC20Base ierc20Instance = IERC20Base(erc20Instance);
         require(ierc20Instance.initialize(
             name_,
             symbol_,
-            minter_,
+            owner_,
             msg.sender,
-            maxSupply_,
-            initialSupply_
+            _router,
+            maxSupply_
         ), "DT initialization failed!");
-        emit ERC20ContractDeployed(erc20Instance, minter_, name_, symbol_, initialSupply_);
+        emit ERC20ContractDeployed(erc20Instance, owner_, name_, symbol_);
         return erc20Instance;
     }
 
