@@ -56,12 +56,12 @@
         },
         {
           "internalType": "string",
-          "name": "name",
+          "name": "name_",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "symbol",
+          "name": "symbol_",
           "type": "string"
         },
         {
@@ -73,11 +73,6 @@
           "internalType": "string",
           "name": "_tokenURI",
           "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "initialPrice",
-          "type": "uint256"
         }
       ],
       "name": "initialize",

@@ -14,11 +14,10 @@ interface IERC721Base {
 
     function initialize(
         address owner,
-        string calldata name, 
-        string calldata symbol,
+        string calldata name_, 
+        string calldata symbol_,
         address factory,
-        string memory _tokenURI,
-        uint256 initialPrice
+        string memory _tokenURI
     ) external returns(bool);
 
     function getNFTowner() external view returns (address owner);

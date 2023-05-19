@@ -84,8 +84,7 @@ contract ERC721Factory is Ownable, Deployer, IERC721Factory {
             name,
             symbol,
             address(this),
-            tokenURI,
-            1
+            tokenURI
         ), "Factory: Could not initialize New NFT contract");
         emit NFTCreated(erc721Instance, base721ContractInfo.baseAddress, name, owner, symbol, tokenURI, msg.sender);
     }

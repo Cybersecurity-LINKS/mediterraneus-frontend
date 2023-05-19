@@ -97,11 +97,13 @@ contract FixedRateExchange {
     }
 
     function calcDT_to_SMR(bytes32 exchangeID, uint256 dtamount) internal view returns(uint256 priceTopay) {
-        priceTopay = (dtamount.mul(exchanges[exchangeID].fixedRate));
+        priceTopay = (dtamount
+            .mul(exchanges[exchangeID].fixedRate)
+            .div(BASE));
     }
 
     function getSMRcostFor1DT(bytes32 exchangeId) external view activeExchange(exchangeId) returns(uint256) {
-        return calcDT_to_SMR(exchangeId, 1);
+        return calcDT_to_SMR(exchangeId, 1 * 10 ** exchanges[exchangeId].dtDecimals);
     }
 
     function getExchangeFixedRate(bytes32 exchangeId) external view activeExchange(exchangeId) returns(uint256) {
@@ -193,7 +195,7 @@ contract FixedRateExchange {
             v, r, s
         );
         (bool sent) = IERC20Base(dtaddress_).transferFrom(msg.sender, address(this), amount);
-        if(sent) exchanges[exchangeId].dtBalance = exchanges[exchangeId].dtBalance + amount;
+        if(sent) exchanges[exchangeId].dtBalance = (exchanges[exchangeId].dtBalance).add(amount);
         return sent; 
     } 
 

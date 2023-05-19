@@ -1,12 +1,11 @@
 import { Card, OverlayTrigger, Tooltip, TooltipProps, Button } from "react-bootstrap";
 import { IDataOffering } from "./Catalogue";
 import { RefAttributes, MouseEvent } from "react";
-import { formatAddress2, getContractABI, getContractAddress, getDomainSeparator, getPermitDigest, getSemiPermitDigest } from "@/utils";
+import { formatAddress2, getContractABI, getContractAddress } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
-import { AbiCoder, MaxUint256, TypedDataDomain, ethers, keccak256, recoverAddress, solidityPacked } from "ethers";
+import { AbiCoder, ethers, keccak256 } from "ethers";
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
-    
     const baseExplorerURL = "https://explorer.evm.testnet.shimmer.network/address/";
     const { provider } = useMetaMask();
 
@@ -19,6 +18,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
     const handleSubmit = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         try{
             event.preventDefault();
+            const signerAddress = (await provider?.getSigner())!.address;
             const DTcontractABI = await getContractABI("ERC20Base");
             const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, await provider?.getSigner());
             
@@ -40,10 +40,12 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering} ) => {
             const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
             console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${rate}`);  
             
-            exchangeContractIstance.sellDT(exchangeID_forthisDT, 1, {value: ethers.parseEther((Number(res)/(1e18)).toString())});
-            exchangeContractIstance.on("SuccessfulSwap", (exchangeId, caller, exchangeOwner, dtamount, smrsent) => {
-                console.log(exchangeId, caller, exchangeOwner, dtamount, smrsent);
-            })
+            exchangeContractIstance.sellDT(exchangeID_forthisDT, ethers.parseEther("1"), {value: res});
+            exchangeContractIstance.on("SuccessfulSwap", async (exchangeId, caller, exchangeOwner, dtamount, smrsent, event) => {
+                console.log(exchangeId, caller, exchangeOwner, dtamount, smrsent, event);
+                const newBalance = await DTcontractIstance.balanceOf(signerAddress);
+                console.log(newBalance);
+            })  
 
         }catch(err) {
             console.log(err);

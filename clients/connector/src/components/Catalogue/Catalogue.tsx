@@ -30,8 +30,8 @@ export const Catalogue = () => {
             const contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
             
             const DTcontractABI = await getContractABI("ERC20Base");
-            const DTcontractAddress =  await contractIstance.getDTaddress();
-            const DTcontractIstance = new ethers.Contract(DTcontractAddress, DTcontractABI, shimmerProvider);
+            const DTcontractAddress =  await contractIstance.getDTaddresses();
+            const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, shimmerProvider);
             
             let NFTinfo: IDataOffering = {
                 NFTaddress: contractAddress,
@@ -40,7 +40,7 @@ export const Catalogue = () => {
                 NFTmetadataURI: await contractIstance.tokenURI(1),
                 DTname: await DTcontractIstance.name(),
                 DTsymbol: await DTcontractIstance.symbol(),
-                DTcontractAddress: DTcontractAddress
+                DTcontractAddress: DTcontractAddress[0]
             };
             return NFTinfo;
         }
