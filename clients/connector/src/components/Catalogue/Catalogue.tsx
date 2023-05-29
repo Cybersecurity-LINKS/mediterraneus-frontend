@@ -89,7 +89,7 @@ export const Catalogue = () => {
                     <Row><Col md={{ span: 6, offset: 3 }}><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Col></Row>
                 </Container>
                     :
-                <Container className="d-flex justify-content-center mt-3">
+                <Container className="mt-3">
                 <Row md={columnsPerRow}> 
                     {
                         dataOfferings.map((NFTdataobj, index) => (

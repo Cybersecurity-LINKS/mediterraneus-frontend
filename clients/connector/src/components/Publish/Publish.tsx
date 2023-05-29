@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from 'react';
 import { Card, Button, Form } from 'react-bootstrap';
-import { FixedNumber, MaxUint256, ethers } from 'ethers';
+import { MaxUint256, ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
 
@@ -11,7 +11,6 @@ export const Publish = () => {
 
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
-    const [DTinitialSupply, setDTinitialSupply] = useState<BigInt>(BigInt(0));
     const [DTmaxSupply, setDTmaxSupply] = useState<BigInt>(BigInt(0));
 
     const [errors, setErrors] = useState({});
@@ -151,11 +150,6 @@ export const Publish = () => {
                 <Form.Group className="mb-3" controlId="formDTsymbol">
                     <Form.Label>DataToken Symbol</Form.Label>
                     <Form.Control size="lg" type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formDTinitialSupply">
-                    <Form.Label>Initial Supply</Form.Label>
-                    <Form.Control size="lg" type="input" placeholder="Enter the DT initial supply" onChange={(event) => { setDTinitialSupply(BigInt(event.target.value)) }} />
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formDTmaxSupply">
