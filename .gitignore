@@ -2,3 +2,4 @@ node_modules
 cache
 .env
 enc_provider/EVMaddress.json
+.sum
