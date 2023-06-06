@@ -24,15 +24,6 @@ import (
 * or information about the client that made the request.
  */
 
-func getRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got / request\n")
-	io.WriteString(w, "This is my website\n")
-}
-func getHello(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("got /hello request!\n")
-	io.WriteString(w, "Hello, HTTP!\n")
-}
-
 func uploadOfferingMsg(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("got /upload request!\n")
 	io.WriteString(w, "Hello, HTTP upload!\n")
@@ -87,8 +78,6 @@ func main() {
 	const addr = "192.168.94.194"
 	const port = "3333"
 
-	http.HandleFunc("/", getRoot)
-	http.HandleFunc("/hello", getHello)
 	http.HandleFunc("/uploadOfferingMsg", uploadOfferingMsg)
 
 	/**
