@@ -1,5 +1,5 @@
-import { MouseEvent, useState } from 'react';
-import { Card, Button, Form } from 'react-bootstrap';
+import { MouseEvent, useEffect, useState } from 'react';
+import { Card, Button, Form, InputGroup } from 'react-bootstrap';
 import { MaxUint256, ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
@@ -17,6 +17,32 @@ export const Publish = () => {
     const [published, setPublished] = useState(false);
 
     const { wallet, provider } = useMetaMask()
+
+    const [inputFile, setInputFile] = useState<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+        setInputFile(document.getElementById("uploadOffering") as HTMLInputElement);
+    }, []);
+
+    const handleUpload = async () => {
+        const formData = new FormData()
+        try{
+            if(inputFile != null && (inputFile?.files!.length > 1 || inputFile?.files!.length == 0)) {
+                throw "Cannot upload 0 files or more than 1 file"
+            } else {
+                let file = inputFile!.files?.[0] as Blob
+                formData.append("file", file);
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    console.log("Message from backend", xhr.response);
+                };
+                xhr.open("POST", "http://192.168.94.194:3333/uploadOfferingMsg", true);
+                xhr.send(formData);
+            }
+        }catch (err) {
+            throw err
+        }
+    }
 
     const handleSubmit = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         try{
@@ -138,6 +164,12 @@ export const Publish = () => {
             <Form.Group className="mb-3" controlId="formNFTuri">
                 <Form.Label>NFT Metadata URI</Form.Label>
                 <Form.Control size="lg" type="input" placeholder="Enter the NFT metadata URI" onChange={(event) => { setNFTuri(event.target.value) }} />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="uploadOffering">
+                <Form.Label>Upload the Offering Message (Offering + Policy)</Form.Label>
+                <Form.Control type="file" accept='.json'/>
+                <Button onClick={() => handleUpload()}>Upload</Button>
             </Form.Group>
 
             <Card.Body>
