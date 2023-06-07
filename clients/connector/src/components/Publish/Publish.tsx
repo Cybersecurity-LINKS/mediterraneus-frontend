@@ -1,5 +1,5 @@
 import { MouseEvent, useEffect, useState } from 'react';
-import { Card, Button, Form, InputGroup } from 'react-bootstrap';
+import { Card, Button, Form, InputGroup, Col, Row } from 'react-bootstrap';
 import { MaxUint256, ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
@@ -7,18 +7,19 @@ import { useMetaMask } from '@/hooks/useMetaMask';
 export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
     const [NFTsymbol, setNFTsymbol] = useState("");
-    const [NFTuri, setNFTuri] = useState("");
+    const [OfferingCID, setOfferingCID] = useState("");
 
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
     const [DTmaxSupply, setDTmaxSupply] = useState<BigInt>(BigInt(0));
+    const [AssetProviderURL, setAssetProviderURL] = useState("");
+
+    const [inputFile, setInputFile] = useState<HTMLInputElement | null>(null);
 
     const [errors, setErrors] = useState({});
     const [published, setPublished] = useState(false);
 
     const { wallet, provider } = useMetaMask()
-
-    const [inputFile, setInputFile] = useState<HTMLInputElement | null>(null);
 
     useEffect(() => {
         setInputFile(document.getElementById("uploadOffering") as HTMLInputElement);
@@ -32,12 +33,15 @@ export const Publish = () => {
             } else {
                 let file = inputFile!.files?.[0] as Blob
                 formData.append("file", file);
-                var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
-                    console.log("Message from backend", xhr.response);
-                };
-                xhr.open("POST", "http://192.168.94.194:3333/uploadOfferingMsg", true);
-                xhr.send(formData);
+                const response = await fetch("http://192.168.94.194:3333/uploadOfferingMsg",
+                    {
+                        body: formData,
+                        method: "POST"
+                    }
+                );
+                const result = await response.json()
+                console.log("Success, got:", result["CID"])
+                setOfferingCID(result["CID"])
             }
         }catch (err) {
             throw err
@@ -60,7 +64,7 @@ export const Publish = () => {
             await contractIstance.deployERC721Contract(
                 NFTname,
                 NFTsymbol,
-                NFTuri.toString(),
+                OfferingCID,
                 wallet.accounts[0]
             );
 
@@ -141,52 +145,87 @@ export const Publish = () => {
 
     return (
         <>
-        <Card style={{width: '80rem'}} className='mb-5 mt-3'>
+        <Card style={{width: '60rem'}} className='d-flex mb-5 mt-3'>
             <Card.Body>
                 <Card.Title>Publish new Data/Service NFT</Card.Title>
             </Card.Body>
-            <Form className="container mt-3 mb-3 ps-5 pe-5">
-            <Form.Group className="mb-3" controlId="formNFTname">
-                <Form.Label>NFT Name</Form.Label>
-                <Form.Control size="lg" type="input" placeholder="Enter the NFT Name" onChange={(event) => { setNFTname(event.target.value) }}/>
+            <Form className="mt-3 mb-3 ps-5 pe-5">
+            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
+                <Col sm={2}>
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>NFT Name</Form.Label>
+                </Col>
+                <Col sm={10}>
+                    <Form.Control size="lg" type="input" placeholder="Enter the NFT Name" onChange={(event) => { setNFTname(event.target.value) }}/>
+                </Col>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formNFTsymbol">
-                <Form.Label>NFT Symbol</Form.Label>
-                <Form.Control size="lg" type="input" placeholder="Enter the NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
+            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTsymbol">
+                <Col sm={2}> 
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>NFT Symbol</Form.Label> 
+                </Col>
+                <Col sm={10}>
+                    <Form.Control size="lg" type="input" placeholder="Enter the NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
+                </Col>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="NFTdescription">
-                <Form.Label>NFT short description</Form.Label>
-                <Form.Control as="textarea" rows={3} />
+            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadOffering">
+                <Col sm={4}>
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Upload Offering Message</Form.Label>
+                </Col>
+                <Col sm={8}>
+                    <div className='d-flex justify-content-center '>
+                        <Form.Control type="file" size="lg" accept='.json'/>
+                        <Button className="ms-5" variant='primary' onClick={() => handleUpload()}>Upload</Button>
+                    </div>
+                </Col>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formNFTuri">
-                <Form.Label>NFT Metadata URI</Form.Label>
-                <Form.Control size="lg" type="input" placeholder="Enter the NFT metadata URI" onChange={(event) => { setNFTuri(event.target.value) }} />
+            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
+                <Col sm={3}>
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Offering CID</Form.Label>
+                </Col>
+                <Col sm={9}>
+                    <Form.Control disabled={true} size="lg" type="text" placeholder="Upload Offering Message to get CID back" 
+                        value={OfferingCID.length == 0 ? "Upload Offering Message to get CID back" : OfferingCID} />
+                </Col>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="uploadOffering">
-                <Form.Label>Upload the Offering Message (Offering + Policy)</Form.Label>
-                <Form.Control type="file" accept='.json'/>
-                <Button onClick={() => handleUpload()}>Upload</Button>
-            </Form.Group>
-
+            <Card.Title>Create your fungible Data Token</Card.Title>
             <Card.Body>
-                <Card.Title>Create your fungible Data Token</Card.Title>
-                <Form.Group className="mb-3 mt-3" controlId="formDTname">
-                    <Form.Label>DataToken Name</Form.Label>
-                    <Form.Control size="lg" type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTname">
+                    <Col sm={3}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>DataToken Name</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control size="lg" type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
+                    </Col>
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formDTsymbol">
-                    <Form.Label>DataToken Symbol</Form.Label>
-                    <Form.Control size="lg" type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTsymbol">
+                    <Col sm={3}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>DataToken Symbol</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control size="lg" type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
+                    </Col>
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formDTmaxSupply">
-                    <Form.Label>Maximum Supply</Form.Label>
-                    <Form.Control size="lg" type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTmaxSupply">
+                    <Col sm={3}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Maximum Supply</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control size="lg" type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
+                    </Col>
+                </Form.Group>
+
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
+                    <Col sm={3}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Asset Provider URL</Form.Label>
+                    </Col>
+                    <Col sm={9}>
+                        <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setAssetProviderURL(event.target.value) }} />
+                    </Col>
                 </Form.Group>
             </Card.Body>
 

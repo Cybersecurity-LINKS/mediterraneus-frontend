@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -26,7 +25,6 @@ import (
 
 func uploadOfferingMsg(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("got /upload request!\n")
-	io.WriteString(w, "Hello, HTTP upload!\n")
 
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
@@ -58,7 +56,6 @@ func uploadOfferingMsg(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 	// local node is running on localhost:5001
 	sh := shell.NewShell("localhost:5001")
 	cid, err := sh.Add(strings.NewReader(string(fileBytes)))
@@ -69,12 +66,11 @@ func uploadOfferingMsg(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Printf("added %s\n", cid)
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(handler.Filename + " done, CID " + cid)
+		json.NewEncoder(w).Encode(map[string]string{"CID": cid})
 	}
 }
 
 func main() {
-
 	const addr = "192.168.94.194"
 	const port = "3333"
 
