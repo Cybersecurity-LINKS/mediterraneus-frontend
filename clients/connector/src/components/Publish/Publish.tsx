@@ -33,6 +33,7 @@ export const Publish = () => {
             } else {
                 let file = inputFile!.files?.[0] as Blob
                 formData.append("file", file);
+                console.log(file)
                 const response = await fetch("http://192.168.94.194:3333/uploadOfferingMsg",
                     {
                         body: formData,

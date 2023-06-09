@@ -46,6 +46,10 @@ var addAssetMetaCmd = &cobra.Command{
 			log.Fatal(err.Error())
 		}
 		fmt.Println("Success! Inserted Row with ID: ", lastID)
+		err = common.DbClose(db)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	},
 }
 
@@ -72,5 +76,6 @@ func addAsset(db *sql.DB, alias string, path string) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer stm.Close()
 	return res, nil
 }
