@@ -1,5 +1,6 @@
 # SC_DataMarketplace_samples
 Simple SCs for implementing a decentralized marketplace. Training repo 
+First sample implementation for what regards the external services (verification GW + sqlite db running bare)
 
 ## Requirements
 1. Solidity compiler
