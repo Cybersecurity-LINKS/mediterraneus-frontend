@@ -25,7 +25,8 @@ type verGw_resp struct {
 var publishOfferingCmd = &cobra.Command{
 	Use:   "publishOffering",
 	Short: "Publish an Offering together with its policies on the Private-IPFS",
-	Long: `Publish an Offering together with its policies on the Private-IPFS. The Offering defines the asset to be tokenized and 
+	Long: `
+	Publish an Offering together with its policies on the Private-IPFS. The Offering defines the asset to be tokenized and 
 	is strictly related to the Policies defined by the Data Owner. The Policies allow the Marketplace's Catalogue
 	to properly filter out the correct Offerings that may be later shown to potential buyers. The Offering together with the Policy
 	defines an Offering Message.
@@ -35,10 +36,9 @@ var publishOfferingCmd = &cobra.Command{
 	local Database, linking it to the correct Asset that the Data Owner wants to tokenize.
 	The Verification Gateway expects a .json file (relative/absolute path) that must be passed as argument to the command together with 
 	the Alias of the Asset that the CID must refer to, and also the DB filepath. 
+	
 	As an example:
 		connectordbcli publishOffering offeringMsg.json ASSET_DAVIDE ../test.db
-
-	--> In case restricted policies are specified by the Data Owner it is crucial to do NOT DISCOLE the received CID.
 	`,
 	Args: cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
