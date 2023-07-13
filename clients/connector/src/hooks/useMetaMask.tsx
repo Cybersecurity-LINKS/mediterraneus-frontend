@@ -2,7 +2,7 @@ import { useState, useEffect, createContext, PropsWithChildren, useContext } fro
 
 import detectEthereumProvider from '@metamask/detect-provider'
 import { formatBalance } from '@/utils'
-import { BrowserProvider, JsonRpcApiProviderOptions, JsonRpcProvider, ethers } from 'ethers'
+import { BrowserProvider, JsonRpcProvider, ethers } from 'ethers'
 
 
 const shimmerJsonRpcUrl = import.meta.env.VITE_SHIMMER_JSON_RPC_URL as string;

@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+
+  postgresdb:
+    image: postgres:latest
+    container_name: postgres-connectorDB
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PWD}
+      - POSTGRES_DB=${DB_NAME} 
+    ports:
+      - '127.0.0.1:1234:5432'
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql

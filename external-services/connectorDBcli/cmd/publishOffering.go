@@ -38,9 +38,9 @@ var publishOfferingCmd = &cobra.Command{
 	the Alias of the Asset that the CID must refer to, and also the DB filepath. 
 	
 	As an example:
-		connectordbcli publishOffering offeringMsg.json ASSET_DAVIDE ../test.db
+		connectordbcli publishOffering offeringMsg.json ASSET_DAVIDE
 	`,
-	Args: cobra.ExactArgs(3),
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		// check db file exists, if not throw error
 		exists := common.FileAlreadyExists(args[2])
@@ -52,7 +52,7 @@ var publishOfferingCmd = &cobra.Command{
 		if !exists {
 			log.Fatal("Provided LPath does not exist.")
 		}
-		db, err := common.DbConncect(args[2])
+		db, err := common.DbConncect()
 		if err != nil {
 			log.Fatal(err.Error())
 		}

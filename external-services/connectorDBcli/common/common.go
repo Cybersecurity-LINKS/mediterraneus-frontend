@@ -7,13 +7,44 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/spf13/viper"
 )
 
 var VerGWurl_upload = "http://192.168.94.194:3333/uploadOfferingMsg"
 
-func DbConncect(dbpath string) (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", dbpath)
+func getEnvVar(key string) (string, error, bool) {
+	viper.SetConfigFile("../.env")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		return "", err, true
+	}
+
+	value, ok := viper.Get(key).(string)
+	if !ok {
+		return "", nil, false
+	}
+	return value, nil, true
+}
+
+func DbConncect() (*sql.DB, error) {
+	driver, err, ok := getEnvVar("DB_DRIVER")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	if !ok {
+		fmt.Println("Value not found in env file")
+	}
+	user, _, _ := getEnvVar("DB_USER")
+	pwd, _, _ := getEnvVar("DB_PWD")
+	db_name, _, _ := getEnvVar("DB_name")
+	port, _, _ := getEnvVar("DB_PORT")
+
+	connStr := "postgresql://" + user + ":" + pwd + "@127.0.0.1:" + port + "/" + db_name + "?sslmode=disable"
+
+	db, err := sql.Open(driver, connStr)
 
 	if err != nil {
 		return nil, err

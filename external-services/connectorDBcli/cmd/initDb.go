@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
 )
 
@@ -17,30 +17,20 @@ import (
 var initDbCmd = &cobra.Command{
 	Use:   "initDb",
 	Short: "Initializes local DB for local Asset Metadata storage",
-	Long: `Initializes local DB for local Asset Metadata storage. To coorectly initialize the DB pass the path of where 
-	the DB files should be stored. For example: connectordbcli initDb ../test.db`,
-	Args: cobra.ExactArgs(1),
+	Long: `Initializes local DB for local Asset Metadata storage. 
+			For example: connectordbcli initDb`,
 	Run: func(cmd *cobra.Command, args []string) {
-		dbAlreadyexists := common.FileAlreadyExists(args[0])
-		if dbAlreadyexists {
-			log.Fatal("initDB: DB file already exists: ", args[0])
-		}
-		db, err := common.DbConncect(args[0])
+		db, err := common.DbConncect()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		res, err := DbInitOfferingMetaTable(db)
+		_, err = DbInitOfferingMetaTable(db)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		lastID, err := res.LastInsertId()
-		if err != nil {
-			fmt.Println("Error in initializing OfferingMeta table")
-			log.Fatal(err.Error())
-		}
-		fmt.Println("Success: Created ID row = ", lastID)
+		fmt.Println("Table initialized successfully")
 
 		err = common.DbClose(db)
 		if err != nil {
@@ -67,7 +57,7 @@ func DbInitOfferingMetaTable(db *sql.DB) (sql.Result, error) {
 	sts :=
 		`
 	DROP TABLE IF EXISTS offeringMetainfo;
-	CREATE TABLE offeringMetainfo(id INTEGER PRIMARY KEY, alias TEXT, localpath TEXT, cid TEXT);
+	CREATE TABLE offeringMetainfo(id SERIAL PRIMARY KEY, alias VARCHAR NOT NULL, localpath VARCHAR NOT NULL, cid VARCHAR NOT NULL)
 	`
 	res, err := db.Exec(sts)
 	if err != nil {
