@@ -1,2 +1,0 @@
-DROP TABLE IF EXISTS offeringMetainfo;
-CREATE TABLE offeringMetainfo(id SERIAL PRIMARY KEY, alias VARCHAR NOT NULL, localpath VARCHAR NOT NULL, cid VARCHAR NOT NULL);
