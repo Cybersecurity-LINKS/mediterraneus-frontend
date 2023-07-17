@@ -1,5 +1,3 @@
-import { Identity_InsertParameters } from '../__generated__';
-import db from '../dbconfig/dbconnector';
 import { getIdentity, insertIdentity } from '../models/db-operations'
 
 export interface TypedRequestBody<T> extends Express.Request {
@@ -15,27 +13,27 @@ export class IdentityController {
         pubkey: string,
         wallet_address: string
     }>, res) {
-        try {
-            console.log(req.body)
-            return await insertIdentity(
-                req.body.did, 
-                req.body.mnemonic, 
-                req.body.privkey, 
-                req.body.pubkey, 
-                req.body.wallet_address
-            )
-            res.send(200);
-        } catch (error) {
+        insertIdentity(
+            req.body.did, 
+            req.body.mnemonic, 
+            req.body.privkey, 
+            req.body.pubkey, 
+            req.body.wallet_address
+        ).then( (identity) => {
+            console.log("ciaoooo" + identity)
+            res.status(201).end();
+        }).catch((error) => {
             console.log(error)
-            res.status(400).send(error);
-        }
+            res.status(400).send(error).end();
+        })
     }
 
     public async get(req: TypedRequestBody<{did: string}>, res) {
-        try {
-            return await getIdentity(req.body.did)
-        } catch (error) {
-            res.status(400).send(error);
-        }
+        getIdentity(req.body.did).then( (did_get) => {
+            res.status(200).send(did_get).end();
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).send(error).end();
+        });
     }
 }

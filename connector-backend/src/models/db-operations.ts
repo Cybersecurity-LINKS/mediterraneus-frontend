@@ -7,7 +7,7 @@ export async function insertIdentity(
     pubkey: string,
     wallet_address: string
 ) {
-    return await identity(db).insert({
+    await identity(db).insert({
         did,
         mnemonic,
         privkey,
@@ -17,5 +17,5 @@ export async function insertIdentity(
   }
 
 export async function getIdentity(did_in: string) {
-    return await identity(db).find({did: did_in})
+    return await identity(db).findOne({did: did_in})
 }

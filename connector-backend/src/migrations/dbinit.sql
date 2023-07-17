@@ -1,4 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS connector AUTHORIZATION postgres;
 CREATE TABLE identity
 (
     did text PRIMARY KEY,

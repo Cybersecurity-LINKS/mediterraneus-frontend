@@ -1,7 +1,5 @@
 import { Router } from 'express';
 import { IdentityController } from '../controllers/controller';
-import bodyParser from 'body-parser';
-import db from '../dbconfig/dbconnector';
 
 const router = Router();
 const identityController = new IdentityController();
