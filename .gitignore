@@ -4,3 +4,5 @@ cache
 enc_provider/EVMaddress.json
 go.sum
 go.work.sum
+dist/
+postgresdata/
