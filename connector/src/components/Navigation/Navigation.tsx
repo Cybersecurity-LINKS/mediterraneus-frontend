@@ -36,7 +36,7 @@ export const Navigation = () => {
               <Figure.Image
                 width={30}
                 height={30}
-                src="../../public/metamasklogo.svg"
+                src="metamasklogo.svg"
               />
             </Figure>
             

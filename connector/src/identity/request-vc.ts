@@ -10,7 +10,7 @@ import {
     MethodScope,
 } from "@iota/identity-wasm/web";
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
-import { ensureAddressHasFunds, store_holder_identity, is_first_identity, HolderIdentity } from "./utils";
+import { ensureAddressHasFunds, store_holder_identity, is_first_identity } from "./utils";
 
 const node_url = import.meta.env.VITE_NODE_URL as string;
 
@@ -23,12 +23,16 @@ client
   .init("client_wasm_bg.wasm")
   .then(() => identity.init("identity_wasm_bg.wasm"));
 
+// If user has already created its identity, get from the backend the DID
+// otherwise create one, save it in the db and send the request to the issuer
 export async function send_vc_request() {
-    let holder_identity = is_first_identity();
-    let holder_did = holder_identity?.did;
-    if(holder_identity === undefined)
-        holder_did = (await createIdentity()).did;
-    const response = await fetch('http://localhost:1234/resolveDID', {
+    // let holder_identity = is_first_identity();
+    // let holder_did = holder_identity?.did;
+    // if(holder_identity === undefined)
+    let holder_did = (await createIdentity()).did;
+
+    // request to the issuer
+    const response = await fetch('http://localhost:3213/requestVC', {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -93,8 +97,8 @@ export async function createIdentity(): Promise<{
     const published = await didClient.publishDidOutput(secretManager, aliasOutput);
     console.log("Published DID document:", JSON.stringify(published, null, 2));
 
-    store_holder_identity(walletAddressBech32, mnemonic, keypair, published.id())
-
+    const store_res = await store_holder_identity(walletAddressBech32, mnemonic, keypair, published.id())
+    
     return {
         didClient,
         secretManager,

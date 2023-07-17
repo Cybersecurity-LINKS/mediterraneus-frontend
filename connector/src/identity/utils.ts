@@ -98,12 +98,27 @@ export class HolderIdentity implements holder_identityJSON {
 }
 
 // Insecure implementation since stronghold bindings are not aligned with iota-idetity's bindings.
-// Stronghold should be used to secure the storage of private keys as well as other sensitive holder identity metadata. 
-export function store_holder_identity(addr: string, mnemonic: string, keypair: KeyPair, did: IotaDID) {
+// Stronghold should be used as a  secure storage of private keys as well as other sensitive holder identity metadata. 
+export async function store_holder_identity(addr: string, mnemonic: string, keypair: KeyPair, did: IotaDID) {
     var holder_metadata = new HolderIdentity(addr, mnemonic, keypair, did);
 
-    const holder_metadataJSON = JSON.stringify(holder_metadata)
-    fs.writeFileSync(holder_identity_file, holder_metadataJSON, 'utf-8');
+    const holder_metadataJSON = JSON.stringify({
+        did: holder_metadata.did,
+        mnemonic: holder_metadata.mnemonic,
+        privkey: holder_metadata.keypair.private().toString(),
+        pubkey: holder_metadata.keypair.public().toString(),
+        wallet_address: holder_metadata.wallet_address
+    })
+
+    // request to the issuer
+    const response = await fetch('http://localhost:1234/identity', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: holder_metadataJSON
+    });
+    return response.status;
 }
 
 // check if the holder already has an SSI for this given application.
