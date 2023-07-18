@@ -10,7 +10,7 @@ import {
     MethodScope,
 } from "@iota/identity-wasm/web";
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
-import { ensureAddressHasFunds, store_holder_identity, is_first_identity } from "./utils";
+import { ensureAddressHasFunds, store_holder_identity, is_first_identity, HolderIdentity } from "./utils";
 
 const node_url = import.meta.env.VITE_NODE_URL as string;
 
@@ -26,22 +26,27 @@ client
 // If user has already created its identity, get from the backend the DID
 // otherwise create one, save it in the db and send the request to the issuer
 export async function send_vc_request() {
-    // let holder_identity = is_first_identity();
-    // let holder_did = holder_identity?.did;
-    // if(holder_identity === undefined)
-    let holder_did = (await createIdentity()).did;
-
-    // request to the issuer
-    const response = await fetch('http://localhost:3213/requestVC', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-                did: holder_did
-            })
-    });
-    console.log(response);
+    try {
+        let holder_identity: HolderIdentity | undefined = await is_first_identity();
+        let holder_did = holder_identity?.did;
+        if(holder_identity === undefined)
+            holder_did = (await createIdentity()).did;
+        else 
+            console.log("Identity already created. Proceeding... ");
+        // request to the issuer
+        // const response = await fetch('http://localhost:3213/requestVC', {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     },
+        //     body: JSON.stringify({
+        //             did: holder_did
+        //         })
+        // });
+        console.log("Identity created. Now can send request to the issuer");
+    } catch(error) {
+        throw error;
+    }
 }
 
 export async function createIdentity(): Promise<{
@@ -84,6 +89,7 @@ export async function createIdentity(): Promise<{
     
     // Insert a new Ed25519 verification method in the DID document.
     let keypair = new KeyPair(KeyType.Ed25519);
+    console.log("pub: " + keypair.public() + " priv: " + keypair.private())
     let method = new IotaVerificationMethod(document.id(), keypair.type(), keypair.public(), "#key-1");
     document.insertMethod(method, MethodScope.VerificationMethod());
 
@@ -98,6 +104,9 @@ export async function createIdentity(): Promise<{
     console.log("Published DID document:", JSON.stringify(published, null, 2));
 
     const store_res = await store_holder_identity(walletAddressBech32, mnemonic, keypair, published.id())
+    if(store_res != 201) {
+        throw Error("Identity storing failed");
+    }
     
     return {
         didClient,

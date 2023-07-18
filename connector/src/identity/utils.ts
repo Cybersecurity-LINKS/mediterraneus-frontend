@@ -1,9 +1,7 @@
 import { Client } from "@iota/client-wasm/web";
-import { IotaDID, KeyPair } from "@iota/identity-wasm/web";
-import * as fs from 'fs';
+import { IotaDID, KeyPair, KeyType } from "@iota/identity-wasm/web";
 
 const faucet_url = import.meta.env.VITE_FAUCET_URL as string;
-const holder_identity_file = import.meta.env.VITE_HOLDER_IDENTITY as string;
 
 /** Request funds from the faucet API, if needed, and wait for them to show in the wallet. */
 export async function ensureAddressHasFunds(client: Client, addressBech32: string): Promise<Boolean> {
@@ -123,10 +121,25 @@ export async function store_holder_identity(addr: string, mnemonic: string, keyp
 
 // check if the holder already has an SSI for this given application.
 // Returns true if the identity need to be created, otherwise it will be read from the 
-// fs (insecure implementation)
-export function is_first_identity(): HolderIdentity | undefined {
-    const holder_identityJSON = fs.readFileSync(holder_identity_file, 'utf-8');
-    const holder_identity: HolderIdentity | undefined = JSON.parse(holder_identityJSON);
-
-    return holder_identity;
+// backend (insecure implementation)
+export async function is_first_identity(): Promise<HolderIdentity | undefined> {
+    try {
+        const response = await fetch('http://localhost:1234/identity', {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+    if(response.status != 200)
+        throw Error("Could not get any identity");
+    const json_resp: any[] = await response.json()
+    if(json_resp.length == 0)
+        return undefined
+    return new HolderIdentity(json_resp[0].wallet_address, 
+        json_resp[0].mnemonic, 
+        KeyPair.fromKeys(KeyType.Ed25519, json_resp[0].pubkey, json_resp[0].privkey),
+        json_resp[0].did)
+    }catch(error) {
+        throw error;
+    }
 }
