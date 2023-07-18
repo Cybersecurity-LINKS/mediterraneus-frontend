@@ -16,6 +16,6 @@ export async function insertIdentity(
     });
   }
 
-export async function getIdentity(did_in: string) {
-    return await identity(db).findOne({did: did_in})
+export async function getIdentity() {
+    return await identity(db).find().all()
 }
