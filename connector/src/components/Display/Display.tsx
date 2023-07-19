@@ -2,19 +2,28 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatChainAsNum } from '@/utils'
 import { Figure, Toast, Row, Button} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { send_vc_request } from '@/identity/request-vc'
+import { send_vc_request1 } from '@/identity/request-vc'
 
 export const Display = () => {
 
   const { wallet } = useMetaMask()
 
   const createIdentity_ext = async () => {
-    send_vc_request();
+    try {
+      // send first issuance request
+      const vchash: string = await send_vc_request1();
+      console.log(vchash)
+      if(vchash.length < 66) // 0x + 64 bytes
+        throw Error("Received vchash is invalid.")
+      // send second issuance request
+    } catch (error) {
+        console.log(error)
+        throw error;
+    }
   }
 
   return (
     <>
-      
       <Toast className='mt-3 ms-5'>
         <Toast.Header closeButton={false}>
           <Button onClick={createIdentity_ext}>Create Identity</Button>

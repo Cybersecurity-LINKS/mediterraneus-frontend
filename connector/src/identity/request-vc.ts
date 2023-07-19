@@ -12,10 +12,13 @@ import {
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
 import { ensureAddressHasFunds, store_holder_identity, is_first_identity, HolderIdentity } from "./utils";
 
+import { AccountManager } from "@iota/wallet"
+
 const node_url = import.meta.env.VITE_NODE_URL as string;
 
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
+import { useMetaMask } from "@/hooks/useMetaMask";
 
 // Calling identity.init().then(<callback>) or await identity.init() is required to load the Wasm file from the server if not available, 
 // because of that it will only be slow for the first time.
@@ -23,9 +26,16 @@ client
   .init("client_wasm_bg.wasm")
   .then(() => identity.init("identity_wasm_bg.wasm"));
 
-// If user has already created its identity, get from the backend the DID
-// otherwise create one, save it in the db and send the request to the issuer
-export async function send_vc_request() {
+type ResponseVC1 = {
+    vchash: string;
+}
+/**
+ * If user has already created its identity, get from the backend the DID
+ * otherwise create one, save it in the db and send the request to the issuer.
+ * @returns The first step returns the VC hash that the holder has to sign both with the DID-related private key
+ *          but also with (evm) wallet private key. 
+ */
+export async function send_vc_request1(): Promise<string> {
     try {
         let holder_identity: HolderIdentity | undefined = await is_first_identity();
         let holder_did = holder_identity?.did;
@@ -34,19 +44,42 @@ export async function send_vc_request() {
         else 
             console.log("Identity already created. Proceeding... ");
         // request to the issuer
-        // const response = await fetch('http://localhost:3213/requestVC', {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     body: JSON.stringify({
-        //             did: holder_did
-        //         })
-        // });
-        console.log("Identity created. Now can send request to the issuer");
+        const response = await fetch('http://localhost:3213/requestVC1', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                did: holder_did
+            })
+        });
+        const responseVC1: ResponseVC1 = await response.json() as ResponseVC1;
+        return response.ok ? responseVC1.vchash : "";
     } catch(error) {
         throw error;
     }
+}
+
+/**
+ * Prepare and send the second request for VC issuance. 
+ * First sign the the vchash using the remote provider, secondly, sign the same digest using the SSI private key
+ * @param vchash hash of vc received from request 1.
+ */
+export async function send_vc_request2(vchash: string) {
+    const { provider } = useMetaMask();
+    const signer = await provider?.getSigner();
+
+    // retreive SSI priv key
+    const identity = await fetch("http://localhost:1234/identity", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+
+    const signedVChash_W = await signer?.signMessage(vchash);
+    const signedVChash_SSi = "";
 }
 
 export async function createIdentity(): Promise<{
@@ -55,6 +88,7 @@ export async function createIdentity(): Promise<{
     walletAddressBech32: string;
     did: IotaDID;
 }> {
+    new AccountManager({})
     const client = new Client({
         primaryNode: node_url,
         localPow: true,
