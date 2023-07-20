@@ -12,8 +12,6 @@ import {
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
 import { ensureAddressHasFunds, store_holder_identity, is_first_identity, HolderIdentity } from "./utils";
 
-import { AccountManager } from "@iota/wallet"
-
 const node_url = import.meta.env.VITE_NODE_URL as string;
 
 import * as client from "@iota/client-wasm/web";
@@ -88,7 +86,6 @@ export async function createIdentity(): Promise<{
     walletAddressBech32: string;
     did: IotaDID;
 }> {
-    new AccountManager({})
     const client = new Client({
         primaryNode: node_url,
         localPow: true,
@@ -150,3 +147,58 @@ export async function createIdentity(): Promise<{
     };
 }
 
+// import * as path from 'path'
+// import * as dotenv from 'dotenv'
+// import { AccountManager, AccountManagerOptions, CoinType } from "@iota/wallet"
+
+// dotenv.config({path: path.resolve(__dirname, '.env')});
+
+// export async function createIdentity_wallet() {
+//     try {
+//         const client = new Client({
+//             primaryNode: node_url,
+//             localPow: true,
+//         });
+//         const didClient = new IotaIdentityClient(client);
+
+//         const manager = await createAccountManager();
+//         const account = await manager.createAccount({
+//             alias: 'connector',
+//         })
+//         console.log('Account created:', account);
+//         const address = await account.generateAddress();
+//         console.log('New address:', address.address);
+//         // Request funds for the wallet, if needed - only works on development networks.
+//         // if (await ensureAddressHasFunds(client, address.address) == true ){
+//         //     console.log("Address funded");
+//         // }
+        
+//         // Create a new DID document with a placeholder DID.
+//         // The DID will be derived from the Alias Id of the Alias Output after publishing.
+//         // const document = new IotaDocument(await didClient.getNetworkHrp());
+
+//     } catch (error) {
+//         throw error;
+//     }
+// }
+
+// async function createAccountManager() {
+//     const accountManagerOptions: AccountManagerOptions = {
+//         storagePath: './alice-database',
+//         clientOptions: {
+//             nodes: [node_url || "https://api.testnet.shimmer.network"],
+//             localPow: true,
+//         },
+//         coinType: CoinType.Shimmer,
+//         secretManager: {
+//             stronghold: {
+//                 snapshotPath: `./wallet.stronghold`,
+//                 password: `${sh_password}`,
+//             },
+//         },
+//     };
+
+//     const manager = new AccountManager(accountManagerOptions);
+//     await manager.storeMnemonic(`${env_mnemonic}`);
+//     return manager;
+// }

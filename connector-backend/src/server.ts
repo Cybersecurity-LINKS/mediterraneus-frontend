@@ -10,7 +10,6 @@ export class Server {
         this.app = express();
         this.config();
         this.routerConfig();
-        // this.dbConnect();
     }
 
     private config() {
