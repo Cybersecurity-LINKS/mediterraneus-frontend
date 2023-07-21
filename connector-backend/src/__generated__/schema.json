@@ -10,28 +10,7 @@
         "typeName": "TEXT"
       },
       {
-        "name": "mnemonic",
-        "isNullable": false,
-        "hasDefault": false,
-        "typeId": 25,
-        "typeName": "TEXT"
-      },
-      {
         "name": "privkey",
-        "isNullable": false,
-        "hasDefault": false,
-        "typeId": 25,
-        "typeName": "TEXT"
-      },
-      {
-        "name": "pubkey",
-        "isNullable": false,
-        "hasDefault": false,
-        "typeId": 25,
-        "typeName": "TEXT"
-      },
-      {
-        "name": "wallet_address",
         "isNullable": false,
         "hasDefault": false,
         "typeId": 25,
