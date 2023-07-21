@@ -18,13 +18,14 @@ export class ConnectorWallet {
     constructor() {}
 
     private setupSecretManager = () => {
-        const mnemonic = Bip39.randomMnemonic();
+        // const mnemonic = Bip39.randomMnemonic();
+        // console.log(mnemonic)
         this.secret_manager = {
             // stronghold: {
             //     snapshotPath: `${process.env.STRONGHOLD_PATH}`,
             //     password: `${process.env.STRONGHOLD_PASSWORD}`,
             // },
-            mnemonic: mnemonic,
+            mnemonic: `${process.env.NON_SECURE_MNEMONIC}`,
         }
     }
 
@@ -52,7 +53,7 @@ export class ConnectorWallet {
             this.accountManager = new AccountManager(accountManagerOptions);
             
             // const mnemonic = Bip39.randomMnemonic();
-            // await this.accountManager.storeMnemonic(this.secret_manager);   
+            // await this.accountManager.storeMnemonic(`${process.env.NON_SECURE_MNEMONIC}`);
         } catch (error) {
             console.log(error)
         }

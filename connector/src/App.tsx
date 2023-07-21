@@ -9,6 +9,7 @@ import { MetaMaskError } from './components/MetaMaskError'
 import { MetaMaskContextProvider } from './hooks/useMetaMask'
 import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route } from 'react-router';
+import { Identity } from './components/Identity';
 
 export const App = () => {
 
@@ -42,6 +43,17 @@ export const App = () => {
           />
           <Route path="catalogue" element={
             <Catalogue/>
+          } />
+          <Route path="identity" element={
+            <>
+              <Row className="d-flex justify-content-center">
+                <Col sm={4}><Display /></Col>
+                <Col sm={8}><Identity /></Col>
+              </Row>
+              <Row className="fixed-bottom">
+                  <MetaMaskError />
+              </Row>
+            </>
           } />
         </Routes>
       </Container>

@@ -1,6 +1,7 @@
+import { IotaDID, IotaDocument } from '@iota/identity-wasm/node'
 import { Identity } from '../__generated__'
 import { getIdentity, insertIdentity } from '../models/db-operations'
-import { createIdentity } from '../services/create_identity'
+import { createIdentity, resolveDID } from '../services/identity'
 
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
@@ -26,13 +27,19 @@ export class IdentityController {
     }
 
     public async get(_, res) {
-        getIdentity().then((did_get: Identity[]) => {
-            res.status(200)
-            .send({did: did_get[0].did})
-            .end();
-        }).catch((error) => {
+        try {
+            const did_get = (await getIdentity()).at(0);
+            if(did_get?.did === undefined)
+                throw Error("Could retrieve any DID from the DB.");
+            console.log("Resolving DID: ", did_get.did);
+            const didDoc: IotaDocument = await resolveDID(IotaDID.parse(did_get.did)) 
+            res.status(200).send({
+                did: did_get.did,
+                did_doc: didDoc
+            }).end()
+        } catch (error) {
             console.log(error)
             res.status(400).send(error).end();
-        });
+        }
     }
 }

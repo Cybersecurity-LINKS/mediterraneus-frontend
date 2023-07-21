@@ -36,7 +36,6 @@ import { ensureAddressHasFunds } from "../utils";
     await ensureAddressHasFunds(connectorWallet.client!, connectorWallet.accountAddress?.address!)
     const address = Bech32Helper.addressFromBech32(connectorWallet.accountAddress?.address!, networkHrp);
     const aliasOutput: IAliasOutput = await didClient.newDidOutput(address, document);
-    console.log('alias:', aliasOutput)
 
     // Publish the Alias Output and get the published DID document.
     const published = await didClient.publishDidOutput(connectorWallet.secret_manager!, aliasOutput);
@@ -46,4 +45,10 @@ import { ensureAddressHasFunds } from "../utils";
         did: published.id(),
         keypair: keypair,
     }
+ }
+
+ export async function resolveDID(did: IotaDID): Promise<IotaDocument> {
+    const didClient = new IotaIdentityClient(connectorWallet.client!);    
+    // Resolve the associated Alias Output and extract the DID document from it.
+    return await didClient.resolveDid(did);
  }

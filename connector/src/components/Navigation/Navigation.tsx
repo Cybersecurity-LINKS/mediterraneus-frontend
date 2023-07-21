@@ -1,6 +1,7 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
+import { TbExternalLink } from 'react-icons/tb';
 import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 
 export const Navigation = () => {
@@ -9,13 +10,14 @@ export const Navigation = () => {
 
   return (
     <Navbar bg="light" variant="light">
-    <Container>
-      <Navbar.Brand className="float-left mr-2" as={Link} to="/">MARKETPLACE</Navbar.Brand>
-      <Nav className="me-auto">
-        <Nav.Link as={Link} to="/publish" >Publish</Nav.Link>
-        <Nav.Link as={Link} to="/catalogue" >Catalogue</Nav.Link>
+    <Container fluid>
+      <Navbar.Brand className="float-left ms-5" as={Link} to="/" style={{fontSize: "25px"}}>CONNECTOR</Navbar.Brand>
+      <Nav className="" style={{fontSize: "20px"}}>
+        <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
+        <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
+        <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue<TbExternalLink/></Nav.Link>
       </Nav>
-      <Nav className='float-right mr-2'>
+      <Nav className='float-right me-5'>
       {!hasProvider &&
         <Nav.Link href="https://metamask.io" target="_blank">Install MetaMask</Nav.Link>
       }
