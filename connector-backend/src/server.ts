@@ -18,7 +18,7 @@ export class Server {
         this.app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
         this.app.use(express.json())
         this.app.use((_, res, next) => {
-            res.append('Access-Control-Allow-Origin', ['http://localhost:*']);
+            res.append('Access-Control-Allow-Origin', ['http://localhost']);
             res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
             res.append('Access-Control-Allow-Headers', 'Content-Type');
             next();

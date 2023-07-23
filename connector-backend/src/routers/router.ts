@@ -12,4 +12,8 @@ router.post('/identity', async (req, res) => {
     await identityController.post(req, res)
 });
 
+router.post('/signdata', async (req, res) => {
+    await identityController.postSign(req, res)
+});
+
 export default router;

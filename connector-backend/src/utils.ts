@@ -72,3 +72,21 @@ export async function requestFundsFromFaucet(addressBech32: string) {
         throw new Error(`failed to get funds from faucet: ${errorMessage}`);
     } 
 }
+
+export const privKeytoBytes = (text: string): Uint8Array => {
+    const buffer = text.split(",");
+    const result = new Uint8Array(buffer.length);
+    for (let i = 0; i < buffer.length; ++i) {
+        result[i] = buffer[i] as unknown as number;
+    }
+    return result;
+};
+
+export const stringToBytes = (text: string): Uint8Array => {
+    const buffer = Buffer.from(text, 'utf-8')
+    const result = new Uint8Array(buffer.length);
+    for (let i = 0; i < buffer.length; ++i) {
+        result[i] = buffer[i] as unknown as number;
+    }
+    return result;
+};

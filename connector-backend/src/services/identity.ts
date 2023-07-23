@@ -1,4 +1,5 @@
 import {
+    Ed25519,
     IotaDID,
     IotaDocument,
     IotaIdentityClient,
@@ -51,4 +52,8 @@ import { ensureAddressHasFunds } from "../utils";
     const didClient = new IotaIdentityClient(connectorWallet.client!);    
     // Resolve the associated Alias Output and extract the DID document from it.
     return await didClient.resolveDid(did);
+ }
+
+ export function signData(message: Uint8Array, privkey: Uint8Array): Uint8Array {
+    return Ed25519.sign(message, privkey)
  }
