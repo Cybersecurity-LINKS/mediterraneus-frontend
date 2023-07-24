@@ -21,16 +21,15 @@ export class ConnectorWallet {
         // const mnemonic = Bip39.randomMnemonic();
         // console.log(mnemonic)
         this.secret_manager = {
+            mnemonic: `${process.env.NON_SECURE_MNEMONIC}`,
             // stronghold: {
             //     snapshotPath: `${process.env.STRONGHOLD_PATH}`,
             //     password: `${process.env.STRONGHOLD_PASSWORD}`,
             // },
-            mnemonic: `${process.env.NON_SECURE_MNEMONIC}`,
         }
     }
 
     private setupClientOptions = () => {
-        console.log(__dirname)
         this.clientOptions = {
             primaryNode: `${process.env.NODE_URL}`,
             localPow: true
@@ -49,11 +48,12 @@ export class ConnectorWallet {
                 coinType: CoinType.Shimmer,
                 secretManager: this.secret_manager
             };
-    
             this.accountManager = new AccountManager(accountManagerOptions);
             
             // const mnemonic = Bip39.randomMnemonic();
+            // console.log(mnemonic)
             // await this.accountManager.storeMnemonic(`${process.env.NON_SECURE_MNEMONIC}`);
+            // await this.accountManager.storeMnemonic(mnemonic);
         } catch (error) {
             console.log(error)
         }

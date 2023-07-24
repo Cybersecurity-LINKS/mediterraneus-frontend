@@ -1,5 +1,9 @@
-import { AbiCoder, BigNumberish, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
+import { AbiCoder, BigNumberish, InterfaceAbi, JsonRpcProvider, ethers, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
+import { Credential} from "@iota/identity-wasm/node";
 import contractAddresses from '../../../smart-contracts/addresses/contractAddresses.json'
+
+const IDENTITY_SC_ADDRESS = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
+const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
 
 const enum CONTRACT_ADRRESS{
   "Deployer" = 0,
@@ -143,4 +147,33 @@ export function getSemiPermitDigest(
       [PERMIT_TYPEHASH, approve.owner, approve.spender, approve.value, nonce, deadline]
     )
   )
+}
+
+export const privKeytoBytes = (text: string): Uint8Array => {
+  const buffer = text.split(",");
+  const result = new Uint8Array(buffer.length);
+  for (let i = 0; i < buffer.length; ++i) {
+      result[i] = buffer[i] as unknown as number;
+  }
+  return result;
+};
+
+export const fetchIDentityABI = async () => {
+  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDENTITY_SC_ADDRESS}`);
+  const json = await response.json();
+  return json.result;
+}
+
+export const getIdentitySC = async (provider: JsonRpcProvider) => {
+    let abi: InterfaceAbi = await fetchIDentityABI();
+    return new ethers.Contract(`${IDENTITY_SC_ADDRESS}`, abi, provider)
+}
+
+export const extractNumberFromVCid = (vc: Credential): number => {
+  const id = vc.id();
+  if(id === undefined)
+      return -1;
+  const spliced = id.split("/");
+  const lastString = spliced[spliced.length - 1];
+  return parseInt(lastString);
 }

@@ -51,7 +51,7 @@ export class IdentityController {
             if(identity === undefined)
                 throw Error("Could retrieve any private key from the DB.");
             const ssi_signature = signData(stringToBytes(req.body.vchash), privKeytoBytes(identity.privkey));
-            res.status(201).send({ssi_signature: Buffer.from(ssi_signature).toString('hex')}).end();
+            res.status(201).send({ssi_signature: ssi_signature.toString()}).end();
         } catch (error) {
             console.log(error);
             res.status(400).send(error).end();

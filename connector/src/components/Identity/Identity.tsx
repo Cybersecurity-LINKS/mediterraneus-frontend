@@ -1,5 +1,6 @@
 import { useMetaMask } from "@/hooks/useMetaMask";
-import { Ed25519, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
+import { extractNumberFromVCid, getIdentitySC, privKeytoBytes } from "@/utils";
+import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useEffect, useState } from "react"
 import { Button, Card, Container } from "react-bootstrap";
 
@@ -10,8 +11,7 @@ export const Identity = () => {
 
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
-    const [vcHash, setVcHash] = useState<string>(''); 
-    const [vc, setVc] = useState('');
+    const [vc, setVc] = useState<Credential>();
 
     useEffect(() => {
         const getDIDfromBackend = async () => {
@@ -40,7 +40,6 @@ export const Identity = () => {
           });
           await response.json().then(resp => {
             console.log(resp.did)
-            console.log(resp.did_doc)
             setDid(resp.did);
             setDidDoc(resp.did_doc);
           });
@@ -60,8 +59,9 @@ export const Identity = () => {
                 body: JSON.stringify({did: did!.toString()})   
             });
             const json_resp = await response.json();
-            setVcHash(json_resp.vchash);
-            
+            const vcHash = json_resp.vchash;
+            console.log({vcHash: vcHash})
+
             const responseSign = await fetch("http://localhost:1234/signdata", {
                 method: 'POST',
                 headers: {
@@ -70,16 +70,38 @@ export const Identity = () => {
                 body: JSON.stringify({vchash: vcHash}) 
             });
             const json_sign = await responseSign.json();
-            const ssi_signature: string = json_sign.ssi_signature
-            if(ssi_signature === undefined || ssi_signature.length != 128) { // hex len = 64 * 2
+            const ssi_signature = privKeytoBytes(json_sign.ssi_signature)
+            if(ssi_signature === undefined || ssi_signature.length != 64) { // hex len = 64 * 2
                 console.log("Signature undefined or invalid");
                 throw Error("Signature undefined or invalid");
             }
             const signer = await provider?.getSigner();
             const pseudo_sign = await signer?.signMessage(vcHash)
-            console.log(vcHash)
             console.log(ssi_signature)
             console.log(pseudo_sign)
+
+            const inactiveVC_response = await fetch('http://localhost:3213/requestVC2', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    vcHash: vcHash,
+                    ssi_signature: ssi_signature.toString(),
+                    pseudo_sign: pseudo_sign
+                })
+            }) 
+            const inactiveVC_json = await inactiveVC_response.json();
+            console.log(inactiveVC_json.vc)
+            setVc(Credential.fromJSON(JSON.stringify(inactiveVC_json.vc)));
+            const vc_numId = extractNumberFromVCid(vc!);
+
+            const IDSC_istance = await getIdentitySC(shimmerProvider!);
+            await IDSC_istance.activateVC(vc_numId);
+
+            IDSC_istance.on("VC_Activated", async (vc_id) => {
+                console.log(`VC ${vc_id} activated successfully`);
+            })
         } catch (error) {
             console.log(error);
             throw error;
@@ -111,13 +133,17 @@ export const Identity = () => {
                         </>
                     }
                     {
-                        vc === '' 
+                        vc === undefined 
                         ? // true
                         <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
                             {/* <Button onClick={createIdentity_ext}>Request Verifiable Crential to Issuer</Button> */}
                         </div>
                         :
-                        <div>vc</div>
+                        <div>
+                            <Card style={{width: '55rem', backgroundColor: "ThreeDLightShadow"}} className='ms-4 mb-5'>
+                                <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(vc.toJSON(), null, 2)}</pre>
+                            </Card>
+                        </div>
                     }
                 </Card>
             </Container>

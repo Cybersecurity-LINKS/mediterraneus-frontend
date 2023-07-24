@@ -7,8 +7,6 @@ export const Display = () => {
 
   const { wallet } = useMetaMask()
 
-
-
   return (
     <>
       <Toast className='mt-3 ms-5'>
