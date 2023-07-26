@@ -1,17 +1,19 @@
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { extractNumberFromVCid, getIdentitySC, privKeytoBytes } from "@/utils";
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
+import { ethers } from "ethers";
 import { useEffect, useState } from "react"
 import { Button, Card, Container } from "react-bootstrap";
 
 export const Identity = () => {
 
-    const { shimmerProvider, provider } = useMetaMask();
+    const { provider } = useMetaMask();
 
 
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
+    const [vcLoaded, setVcLoaded] = useState(false);
 
     useEffect(() => {
         const getDIDfromBackend = async () => {
@@ -27,8 +29,9 @@ export const Identity = () => {
                 setDidDoc(json_resp.did_doc);
             }
         };
+        if(vc !== undefined) setVcLoaded(true)
         getDIDfromBackend();
-    }, [did]);
+    }, [did, vc, vcLoaded]);
  
     const createIdentity_ext = async () => {
         try {
@@ -60,7 +63,6 @@ export const Identity = () => {
             });
             const json_resp = await response.json();
             const vcHash = json_resp.vchash;
-            console.log({vcHash: vcHash})
 
             const responseSign = await fetch("http://localhost:1234/signdata", {
                 method: 'POST',
@@ -76,9 +78,7 @@ export const Identity = () => {
                 throw Error("Signature undefined or invalid");
             }
             const signer = await provider?.getSigner();
-            const pseudo_sign = await signer?.signMessage(vcHash)
-            console.log(ssi_signature)
-            console.log(pseudo_sign)
+            const pseudo_sign = await signer?.signMessage(ethers.toBeArray(vcHash))
 
             const inactiveVC_response = await fetch('http://localhost:3213/requestVC2', {
                 method: 'POST',
@@ -92,16 +92,16 @@ export const Identity = () => {
                 })
             }) 
             const inactiveVC_json = await inactiveVC_response.json();
-            console.log(inactiveVC_json.vc)
-            setVc(Credential.fromJSON(JSON.stringify(inactiveVC_json.vc)));
-            const vc_numId = extractNumberFromVCid(vc!);
+            const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
+            setVc(vc_cred);
+            const vc_numId = extractNumberFromVCid(vc_cred);
 
-            const IDSC_istance = await getIdentitySC(shimmerProvider!);
-            await IDSC_istance.activateVC(vc_numId);
-
-            IDSC_istance.on("VC_Activated", async (vc_id) => {
+            const IDSC_istance = await getIdentitySC(provider!);
+            await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
+            await IDSC_istance.on("VC_Activated", async (vc_id) => {
                 console.log(`VC ${vc_id} activated successfully`);
-            })
+            });
+
         } catch (error) {
             console.log(error);
             throw error;
@@ -127,21 +127,21 @@ export const Identity = () => {
                                 <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{did.toString()}</pre>
                                 <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(didDoc, null, 2)}</pre>
                             </Card>
-                            <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
+                            {/* <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
                                 <Button onClick={requestVC}>Request Verifiable Crential to Issuer</Button>
-                            </div>
+                            </div> */}
                         </>
                     }
                     {
-                        vc === undefined 
+                        ((vc as unknown as Credential) === undefined) 
                         ? // true
                         <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
-                            {/* <Button onClick={createIdentity_ext}>Request Verifiable Crential to Issuer</Button> */}
+                            <Button onClick={requestVC}>Request Verifiable Crential to Issuer</Button>
                         </div>
                         :
                         <div>
                             <Card style={{width: '55rem', backgroundColor: "ThreeDLightShadow"}} className='ms-4 mb-5'>
-                                <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(vc.toJSON(), null, 2)}</pre>
+                                <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(vc, null, 2)}</pre>
                             </Card>
                         </div>
                     }

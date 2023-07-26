@@ -29,7 +29,7 @@ export const Navigation = () => {
       {hasProvider && wallet.accounts.length > 0 &&
         <>
         <OverlayTrigger  
-              placement="right"
+              placement="bottom"
               overlay={<Tooltip>Open in Block Explorer</Tooltip>}
             > 
         <Card style={{ width: '12rem' }} border="primary" bg="primary">

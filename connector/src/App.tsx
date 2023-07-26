@@ -11,6 +11,13 @@ import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route } from 'react-router';
 import { Identity } from './components/Identity';
 
+import * as client from "@iota/client-wasm/web";
+import * as identity from "@iota/identity-wasm/web";
+
+client
+  .init("client_wasm_bg.wasm")
+  .then(() => identity.init("identity_wasm_bg.wasm"));
+
 export const App = () => {
 
   return (

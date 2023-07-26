@@ -1,6 +1,7 @@
 import { AbiCoder, BigNumberish, InterfaceAbi, JsonRpcProvider, ethers, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
-import { Credential} from "@iota/identity-wasm/node";
+import { Credential } from "@iota/identity-wasm/web";
 import contractAddresses from '../../../smart-contracts/addresses/contractAddresses.json'
+import { useMetaMask } from '@/hooks/useMetaMask';
 
 const IDENTITY_SC_ADDRESS = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
 const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
@@ -164,13 +165,13 @@ export const fetchIDentityABI = async () => {
   return json.result;
 }
 
-export const getIdentitySC = async (provider: JsonRpcProvider) => {
+export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     let abi: InterfaceAbi = await fetchIDentityABI();
-    return new ethers.Contract(`${IDENTITY_SC_ADDRESS}`, abi, provider)
+    return new ethers.Contract(`${IDENTITY_SC_ADDRESS}`, abi, await provider.getSigner())
 }
 
 export const extractNumberFromVCid = (vc: Credential): number => {
-  const id = vc.id();
+  const id = (vc as Credential).id();
   if(id === undefined)
       return -1;
   const spliced = id.split("/");
