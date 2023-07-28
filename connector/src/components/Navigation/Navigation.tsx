@@ -46,7 +46,7 @@ export const Navigation = () => {
                 className="text_link tooltip-bottom text-white mt-1"
                 target="_blank"
                 href={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>
-                {formatAddress2(wallet.accounts[0])}
+                {formatAddress2(wallet.accounts[0])} 
               </Nav.Link>
           </Row>
         </Card>

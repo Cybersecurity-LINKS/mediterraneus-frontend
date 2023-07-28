@@ -1,6 +1,6 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatChainAsNum } from '@/utils'
-import { Figure, Toast, Row, Button} from 'react-bootstrap'
+import { Figure, Toast, Row} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 
 export const Display = () => {

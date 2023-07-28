@@ -1,5 +1,5 @@
 import { IotaDID, IotaDocument } from '@iota/identity-wasm/node'
-import { getIdentity, insertIdentity } from '../models/db-operations'
+import { getIdentity, insertIdentity, insertVCintoExistingIdentity } from '../models/db-operations'
 import { createIdentity, resolveDID, signData } from '../services/identity'
 import { privKeytoBytes, stringToBytes } from '../utils'
 
@@ -30,12 +30,13 @@ export class IdentityController {
         try {
             const did_get = (await getIdentity()).at(0);
             if(did_get?.did === undefined)
-                throw Error("Could retrieve any DID from the DB.");
+                throw Error("Could not retrieve any DID from the DB.");
             console.log("Resolving DID: ", did_get.did);
             const didDoc: IotaDocument = await resolveDID(IotaDID.parse(did_get.did)) 
             res.status(200).send({
                 did: did_get.did,
-                did_doc: didDoc
+                did_doc: didDoc,
+                vc: did_get.vc
             }).end()
         } catch (error) {
             console.log(error)
@@ -52,6 +53,18 @@ export class IdentityController {
                 throw Error("Could retrieve any private key from the DB.");
             const ssi_signature = signData(stringToBytes(req.body.vchash), privKeytoBytes(identity.privkey));
             res.status(201).send({ssi_signature: ssi_signature.toString()}).end();
+        } catch (error) {
+            console.log(error);
+            res.status(400).send(error).end();
+        }
+    }
+
+    public async postStoreVC(req: TypedRequestBody<{
+        vc
+    }>, res) {
+        try {
+            await insertVCintoExistingIdentity(req.body.vc as JSON);
+            res.status(201).end();
         } catch (error) {
             console.log(error);
             res.status(400).send(error).end();

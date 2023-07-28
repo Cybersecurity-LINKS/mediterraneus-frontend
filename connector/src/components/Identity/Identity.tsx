@@ -1,37 +1,42 @@
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { extractNumberFromVCid, getIdentitySC, privKeytoBytes } from "@/utils";
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
-import { ethers } from "ethers";
+import { ContractTransactionResponse, ethers } from "ethers";
 import { useEffect, useState } from "react"
 import { Button, Card, Container } from "react-bootstrap";
+import { IdentityAccordion } from "./IdentityAccordion";
 
 export const Identity = () => {
-
-    const { provider } = useMetaMask();
-
+    const { provider, wallet } = useMetaMask();
 
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
-    const [vcLoaded, setVcLoaded] = useState(false);
+    const [trigger, setTrigger] = useState(true);
 
     useEffect(() => {
         const getDIDfromBackend = async () => {
+            console.log(wallet.accounts[0])
             const response = await fetch('http://localhost:1234/identity', {
                 method: 'GET',
                 headers: {
                     "Content-type": "application/json"
-                  } 
+                    } 
             });
             if(response.status == 200){
                 const json_resp = await response.json();
                 setDid(json_resp.did);
                 setDidDoc(json_resp.did_doc);
+                if(json_resp.vc != null)
+                    setVc(Credential.fromJSON(json_resp.vc));
             }
         };
-        if(vc !== undefined) setVcLoaded(true)
-        getDIDfromBackend();
-    }, [did, vc, vcLoaded]);
+
+        if(trigger){
+            getDIDfromBackend();
+            setTrigger(false);
+        }
+    }, [trigger, wallet.accounts]);
  
     const createIdentity_ext = async () => {
         try {
@@ -43,8 +48,7 @@ export const Identity = () => {
           });
           await response.json().then(resp => {
             console.log(resp.did)
-            setDid(resp.did);
-            setDidDoc(resp.did_doc);
+            setTrigger(true);
           });
         } catch (error) {
             console.log(error)
@@ -93,15 +97,24 @@ export const Identity = () => {
             }) 
             const inactiveVC_json = await inactiveVC_response.json();
             const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
-            setVc(vc_cred);
             const vc_numId = extractNumberFromVCid(vc_cred);
 
             const IDSC_istance = await getIdentitySC(provider!);
-            await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
-            await IDSC_istance.on("VC_Activated", async (vc_id) => {
-                console.log(`VC ${vc_id} activated successfully`);
+            let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
+            await tx.wait();
+            // store VC in connector's backend.
+            const storeVCresp = await fetch("http://localhost:1234/storeVC", {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    vc: vc_cred?.toJSON(),
+                })
             });
-
+            if(!storeVCresp.ok || storeVCresp.status != 201)
+                throw Error("Cannot store VC");
+            setTrigger(true);
         } catch (error) {
             console.log(error);
             throw error;
@@ -110,9 +123,9 @@ export const Identity = () => {
 
     return (
         <>
-            <Container fluid className="mt-3">
-                <Card style={{width: '60rem'}} className=' mb-5 mt-3'>
-                    <Card.Body className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
+            <Container fluid className="d-flex mt-3 justify-content-center">
+                <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
+                    <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
                         <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
                     </Card.Body>
                     {
@@ -123,27 +136,18 @@ export const Identity = () => {
                         </div>
                         : // false
                         <>
-                            <Card style={{width: '55rem', backgroundColor: "ThreeDLightShadow"}} className='ms-4 mb-5'>
-                                <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{did.toString()}</pre>
-                                <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(didDoc, null, 2)}</pre>
-                            </Card>
-                            {/* <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
-                                <Button onClick={requestVC}>Request Verifiable Crential to Issuer</Button>
-                            </div> */}
+                            <IdentityAccordion title={"Decentralized IDentifier"} content={did.toString() +"\n"+ JSON.stringify(didDoc, null, 2)} />
                         </>
                     }
                     {
-                        ((vc as unknown as Credential) === undefined) 
+                        ((vc as Credential) === undefined) 
                         ? // true
-                        <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
-                            <Button onClick={requestVC}>Request Verifiable Crential to Issuer</Button>
-                        </div>
+                        <>
+                            <IdentityAccordion title={"Verifiable Credential"} content={""} />
+                            <Button className="mb-2 mt-3 ms-auto me-auto" onClick={requestVC}>Request Verifiable Credential</Button>
+                        </>
                         :
-                        <div>
-                            <Card style={{width: '55rem', backgroundColor: "ThreeDLightShadow"}} className='ms-4 mb-5'>
-                                <pre className="ms-2 mb-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>{JSON.stringify(vc, null, 2)}</pre>
-                            </Card>
-                        </div>
+                        <IdentityAccordion title={"Verifiable Credential"} content={JSON.stringify(vc, null, 2)} />
                     }
                 </Card>
             </Container>

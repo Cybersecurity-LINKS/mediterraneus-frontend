@@ -16,4 +16,8 @@ router.post('/signdata', async (req, res) => {
     await identityController.postSign(req, res)
 });
 
+router.post("/storeVC", async (req, res) => {
+    await identityController.postStoreVC(req, res);
+})
+
 export default router;

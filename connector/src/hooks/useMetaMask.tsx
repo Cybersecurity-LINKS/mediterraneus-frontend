@@ -33,7 +33,6 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [shimmerProvider, setShimmerProvider] = useState<JsonRpcProvider>(new ethers.JsonRpcProvider(shimmerJsonRpcUrl));
 
-  
   useEffect(() => {
     const refreshAccounts = (accounts: any) => {
       if (accounts.length > 0) {
@@ -129,7 +128,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
         clearError
       }}
     >
-      {children}
+      {wallet.accounts.length == 0 ? null : children}
     </MetaMaskContext.Provider>
   )
 }

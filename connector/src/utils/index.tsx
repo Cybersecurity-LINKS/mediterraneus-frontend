@@ -3,7 +3,7 @@ import { Credential } from "@iota/identity-wasm/web";
 import contractAddresses from '../../../smart-contracts/addresses/contractAddresses.json'
 import { useMetaMask } from '@/hooks/useMetaMask';
 
-const IDENTITY_SC_ADDRESS = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
+const identity_sc_address = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
 const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
 
 const enum CONTRACT_ADRRESS{
@@ -160,14 +160,14 @@ export const privKeytoBytes = (text: string): Uint8Array => {
 };
 
 export const fetchIDentityABI = async () => {
-  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDENTITY_SC_ADDRESS}`);
+  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${identity_sc_address}`);
   const json = await response.json();
   return json.result;
 }
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     let abi: InterfaceAbi = await fetchIDentityABI();
-    return new ethers.Contract(`${IDENTITY_SC_ADDRESS}`, abi, await provider.getSigner())
+    return new ethers.Contract(`${identity_sc_address}`, abi, await provider.getSigner())
 }
 
 export const extractNumberFromVCid = (vc: Credential): number => {

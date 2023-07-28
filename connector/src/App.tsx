@@ -6,7 +6,7 @@ import { Catalogue } from './components/Catalogue'
 import { Publish} from './components/Publish';
 
 import { MetaMaskError } from './components/MetaMaskError'
-import { MetaMaskContextProvider } from './hooks/useMetaMask'
+import { MetaMaskContextProvider, useMetaMask } from './hooks/useMetaMask'
 import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route } from 'react-router';
 import { Identity } from './components/Identity';
@@ -54,8 +54,9 @@ export const App = () => {
           <Route path="identity" element={
             <>
               <Row className="d-flex justify-content-center">
-                <Col sm={4}><Display /></Col>
-                <Col sm={8}><Identity /></Col>
+                {/* <Col sm={4}><Display /></Col> */}
+                {/* <Col sm={8}><Identity /></Col> */}
+                <Identity />
               </Row>
               <Row className="fixed-bottom">
                   <MetaMaskError />

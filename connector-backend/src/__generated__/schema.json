@@ -15,6 +15,13 @@
         "hasDefault": false,
         "typeId": 25,
         "typeName": "TEXT"
+      },
+      {
+        "name": "vc",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 3802,
+        "typeName": "JSONB"
       }
     ]
   }
