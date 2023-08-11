@@ -1,6 +1,7 @@
 CREATE TABLE identity
 (
-    did text PRIMARY KEY,
+    eth_address text PRIMARY KEY,
+    did text NOT NULL,
     privkey text NOT NULL,
     vc JSONB
 )

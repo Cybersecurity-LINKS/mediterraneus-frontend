@@ -1,7 +1,7 @@
 import { IotaDID, IotaDocument } from '@iota/identity-wasm/node'
 import { getIdentity, insertIdentity, insertVCintoExistingIdentity } from '../models/db-operations'
 import { createIdentity, resolveDID, signData } from '../services/identity'
-import { privKeytoBytes, stringToBytes } from '../utils'
+import { privKeytoBytes, stringToBytes, buf2hex } from '../utils'
 
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
@@ -9,9 +9,12 @@ export interface TypedRequestBody<T> extends Express.Request {
 
 export class IdentityController {
 
-    public async post(_, res) {
+    public async post(req: TypedRequestBody<{
+        eth_address
+    }>, res) {
         createIdentity().then(({did, keypair}) => {
             insertIdentity(
+                req.body.eth_address.toString(),
                 did.toString(), 
                 keypair.private().toString(), 
             ).then( () => {
@@ -26,9 +29,9 @@ export class IdentityController {
         })
     }
 
-    public async get(_, res) {
+    public async get(eth_address: string, res) {
         try {
-            const did_get = (await getIdentity()).at(0);
+            const did_get = (await getIdentity(eth_address));
             if(did_get?.did === undefined)
                 throw Error("Could not retrieve any DID from the DB.");
             console.log("Resolving DID: ", did_get.did);
@@ -45,14 +48,15 @@ export class IdentityController {
     }
 
     public async postSign(req: TypedRequestBody<{
-        vchash
+        vchash,
+        eth_address
     }>, res) {
         try {
-            const identity = (await getIdentity()).at(0);
+            const identity = (await getIdentity(req.body.eth_address));
             if(identity === undefined)
                 throw Error("Could retrieve any private key from the DB.");
-            const ssi_signature = signData(stringToBytes(req.body.vchash), privKeytoBytes(identity.privkey));
-            res.status(201).send({ssi_signature: ssi_signature.toString()}).end();
+            const ssi_signature = buf2hex(signData(stringToBytes(req.body.vchash), privKeytoBytes(identity!.privkey)));
+            res.status(201).send({ssi_signature: `${ssi_signature}`}).end();
         } catch (error) {
             console.log(error);
             res.status(400).send(error).end();
@@ -60,10 +64,11 @@ export class IdentityController {
     }
 
     public async postStoreVC(req: TypedRequestBody<{
-        vc
+        vc,
+        eth_address
     }>, res) {
         try {
-            await insertVCintoExistingIdentity(req.body.vc as JSON);
+            await insertVCintoExistingIdentity(req.body.eth_address, req.body.vc as JSON);
             res.status(201).end();
         } catch (error) {
             console.log(error);

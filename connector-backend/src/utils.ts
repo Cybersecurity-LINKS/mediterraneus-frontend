@@ -90,3 +90,7 @@ export const stringToBytes = (text: string): Uint8Array => {
     }
     return result;
 };
+
+export const buf2hex = (buffer: Uint8Array) => { // buffer is an ArrayBuffer
+    return Buffer.from(buffer).toString('hex')
+}

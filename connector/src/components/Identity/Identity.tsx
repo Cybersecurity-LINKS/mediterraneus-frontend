@@ -15,13 +15,13 @@ export const Identity = () => {
     const [trigger, setTrigger] = useState(true);
 
     useEffect(() => {
-        const getDIDfromBackend = async () => {
-            console.log(wallet.accounts[0])
-            const response = await fetch('http://localhost:1234/identity', {
+        const getIDfromBackend = async () => {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const response = await fetch(`http://localhost:1234/identity/${accounts[0]}`, {
                 method: 'GET',
                 headers: {
                     "Content-type": "application/json"
-                    } 
+                },
             });
             if(response.status == 200){
                 const json_resp = await response.json();
@@ -29,22 +29,29 @@ export const Identity = () => {
                 setDidDoc(json_resp.did_doc);
                 if(json_resp.vc != null)
                     setVc(Credential.fromJSON(json_resp.vc));
+            } else {
+                setDid(undefined);
+                setDidDoc(undefined);
+                setVc(Credential.fromJSON(undefined));
             }
         };
 
         if(trigger){
-            getDIDfromBackend();
+            window.ethereum.on('accountsChanged', getIDfromBackend);
+            getIDfromBackend();
             setTrigger(false);
         }
-    }, [trigger, wallet.accounts]);
+    }, [trigger]);
  
     const createIdentity_ext = async () => {
         try {
+            console.log(wallet.accounts[0]);
           const response = await fetch('http://localhost:1234/identity', {
             method: 'POST',
             headers: {
               "Content-type": "application/json"
-            } 
+            },
+            body: JSON.stringify({eth_address: wallet.accounts[0]}) 
           });
           await response.json().then(resp => {
             console.log(resp.did)
@@ -58,7 +65,7 @@ export const Identity = () => {
 
     const requestVC = async () => {
         try {
-            const response = await fetch('http://localhost:3213/requestVC1', {
+            const response = await fetch('http://localhost:3213/api/identity', {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
@@ -66,38 +73,39 @@ export const Identity = () => {
                 body: JSON.stringify({did: did!.toString()})   
             });
             const json_resp = await response.json();
-            const vcHash = json_resp.vchash;
+            const vcHash = `${json_resp.vchash}`;
 
             const responseSign = await fetch("http://localhost:1234/signdata", {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
                 },
-                body: JSON.stringify({vchash: vcHash}) 
+                body: JSON.stringify({eth_address: wallet.accounts[0], vchash: vcHash}) 
             });
             const json_sign = await responseSign.json();
-            const ssi_signature = privKeytoBytes(json_sign.ssi_signature)
-            if(ssi_signature === undefined || ssi_signature.length != 64) { // hex len = 64 * 2
-                console.log("Signature undefined or invalid");
-                throw Error("Signature undefined or invalid");
-            }
+            // const ssi_signature = privKeytoBytes(json_sign.ssi_signature)
+            // if(ssi_signature === undefined || ssi_signature.length != 64) { // hex len = 64 * 2
+            //     console.log("Signature undefined or invalid");
+            //     throw Error("Signature undefined or invalid");
+            // }
             const signer = await provider?.getSigner();
-            const pseudo_sign = await signer?.signMessage(ethers.toBeArray(vcHash))
-
-            const inactiveVC_response = await fetch('http://localhost:3213/requestVC2', {
+            const pseudo_sign = await signer?.signMessage(ethers.toBeArray(`${vcHash}`))
+        
+            const inactiveVC_response = await fetch('http://localhost:3213/api/identity/2', {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
                 },
                 body: JSON.stringify({
-                    vcHash: vcHash,
-                    ssi_signature: ssi_signature.toString(),
+                    vc_hash: vcHash,
+                    ssi_signature: json_sign.ssi_signature.toString(),
                     pseudo_sign: pseudo_sign
                 })
             }) 
             const inactiveVC_json = await inactiveVC_response.json();
             const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
             const vc_numId = extractNumberFromVCid(vc_cred);
+            console.log(ethers.toBigInt(vc_numId))
 
             const IDSC_istance = await getIdentitySC(provider!);
             let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
@@ -109,6 +117,7 @@ export const Identity = () => {
                     "Content-type": "application/json"
                 },
                 body: JSON.stringify({
+                    eth_address: wallet.accounts[0],
                     vc: vc_cred?.toJSON(),
                 })
             });

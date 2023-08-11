@@ -81,7 +81,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
     getProvider();
 
     return () => {
-      window.ethereum?.removeListener('accountsChanged', refreshAccounts)
+      // window.ethereum?.removeListener('accountsChanged', refreshAccounts)
       window.ethereum?.removeListener('chainChanged', refreshChain)
     }
   }, [])
@@ -128,7 +128,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
         clearError
       }}
     >
-      {wallet.accounts.length == 0 ? null : children}
+      {children}
     </MetaMaskContext.Provider>
   )
 }

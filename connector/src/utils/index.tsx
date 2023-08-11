@@ -1,7 +1,6 @@
-import { AbiCoder, BigNumberish, InterfaceAbi, JsonRpcProvider, ethers, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
+import { AbiCoder, BigNumberish, InterfaceAbi, ethers, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
 import { Credential } from "@iota/identity-wasm/web";
 import contractAddresses from '../../../smart-contracts/addresses/contractAddresses.json'
-import { useMetaMask } from '@/hooks/useMetaMask';
 
 const identity_sc_address = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
 const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;

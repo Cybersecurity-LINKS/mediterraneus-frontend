@@ -14,15 +14,15 @@ import { ensureAddressHasFunds, store_holder_identity, is_first_identity, Holder
 
 const node_url = import.meta.env.VITE_NODE_URL as string;
 
-import * as client from "@iota/client-wasm/web";
-import * as identity from "@iota/identity-wasm/web";
+// import * as client from "@iota/client-wasm/web";
+// import * as identity from "@iota/identity-wasm/web";
 import { useMetaMask } from "@/hooks/useMetaMask";
 
 // Calling identity.init().then(<callback>) or await identity.init() is required to load the Wasm file from the server if not available, 
 // because of that it will only be slow for the first time.
-client
-  .init("client_wasm_bg.wasm")
-  .then(() => identity.init("identity_wasm_bg.wasm"));
+// client
+//   .init("client_wasm_bg.wasm")
+//   .then(() => identity.init("identity_wasm_bg.wasm"));
 
 type ResponseVC1 = {
     vchash: string;

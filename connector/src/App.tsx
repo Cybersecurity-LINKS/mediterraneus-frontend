@@ -6,7 +6,7 @@ import { Catalogue } from './components/Catalogue'
 import { Publish} from './components/Publish';
 
 import { MetaMaskError } from './components/MetaMaskError'
-import { MetaMaskContextProvider, useMetaMask } from './hooks/useMetaMask'
+import { MetaMaskContextProvider } from './hooks/useMetaMask'
 import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route } from 'react-router';
 import { Identity } from './components/Identity';
@@ -19,7 +19,6 @@ client
   .then(() => identity.init("identity_wasm_bg.wasm"));
 
 export const App = () => {
-
   return (
     <MetaMaskContextProvider>
         <Navigation />
