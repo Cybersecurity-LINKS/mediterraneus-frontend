@@ -8,6 +8,7 @@ This results in having also the **iota-client** dependency, that is automaticall
 In order to use the identity framework we have to install the dependency using npm
 
 ```sh
+cd connector
 npm i @iota/identity-wasm@0.7.0-alpha.5
 ```
 To use this in a web application we have enable the library. The loads the WASM file with an HTTP GET request, so the .wasm file must be copied to the root of the dist folder.
@@ -102,3 +103,6 @@ npm run dev
 npm start
 ```
 
+## TODO
+
+Smart Contracts should be moved in a separate repository. Additional information on how to deploy new smart contracts are in the dedicated folder in this repo.
