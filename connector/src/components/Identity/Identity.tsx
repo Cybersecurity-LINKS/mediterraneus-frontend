@@ -32,7 +32,7 @@ export const Identity = () => {
             } else {
                 setDid(undefined);
                 setDidDoc(undefined);
-                setVc(Credential.fromJSON(undefined));
+                setVc(undefined);
             }
         };
 
