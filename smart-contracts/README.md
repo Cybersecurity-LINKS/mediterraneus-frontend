@@ -1,5 +1,4 @@
-# SC_DataMarketplace_samples
-Simple SCs for implementing a decentralized marketplace. Training repo 
+# Smart Contracts for the Mediterraneus Protocol 
 
 ## Requirements
 1. Solidity compiler
