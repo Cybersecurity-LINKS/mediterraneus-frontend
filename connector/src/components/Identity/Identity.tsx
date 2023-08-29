@@ -3,7 +3,7 @@ import { extractNumberFromVCid, getIdentitySC, privKeytoBytes } from "@/utils";
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { ContractTransactionResponse, ethers } from "ethers";
 import { useEffect, useState } from "react"
-import { Button, Card, Container } from "react-bootstrap";
+import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 
 export const Identity = () => {
@@ -12,7 +12,9 @@ export const Identity = () => {
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
+
     const [trigger, setTrigger] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const getIDfromBackend = async () => {
@@ -34,6 +36,7 @@ export const Identity = () => {
                 setDidDoc(undefined);
                 setVc(undefined);
             }
+            setLoading(false);
         };
 
         if(trigger){
@@ -132,35 +135,47 @@ export const Identity = () => {
 
     return (
         <>
-            <Container fluid className="d-flex mt-3 justify-content-center">
-                <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
-                    <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
-                        <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
-                    </Card.Body>
-                    {
-                        did === undefined 
-                        ? // true
-                        <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
-                            <Button style={{width: "150px"}} onClick={createIdentity_ext}>Create Identity</Button>
-                        </div>
-                        : // false
-                        <>
-                            <IdentityAccordion title={"Decentralized IDentifier"} content={did.toString() +"\n"+ JSON.stringify(didDoc, null, 2)} />
-                        </>
-                    }
-                    {
-                        ((vc as Credential) === undefined) 
-                        ? // true
-                        <>
-                            <IdentityAccordion title={"Verifiable Credential"} content={""} />
-                            <Button className="mb-2 mt-3 ms-auto me-auto" onClick={requestVC}>Request Verifiable Credential</Button>
-                        </>
-                        :
-                        <IdentityAccordion title={"Verifiable Credential"} content={JSON.stringify(vc, null, 2)} />
-                    }
-                </Card>
-            </Container>
+            {
+                loading ? 
+                <Container className="d-flex justify-content-center"><Spinner animation="grow" variant="warning" style={{
+                    width: '5rem', 
+                    height: '5rem', 
+                    position: 'absolute', 
+                    justifyContent: 'center',
+                    flex: 1,
+                    alignItems: 'center',
+                    marginTop: 270,
+                }}/></Container>
+                :
+                <Container fluid className="d-flex mt-3 justify-content-center">
+                    <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
+                        <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
+                            <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
+                        </Card.Body>
+                        {
+                            did === undefined 
+                            ? // true
+                            <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
+                                <Button style={{width: "150px"}} onClick={createIdentity_ext}>Create Identity</Button>
+                            </div>
+                            : // false
+                            <>
+                                <IdentityAccordion title={"Decentralized IDentifier"} content={did.toString() +"\n"+ JSON.stringify(didDoc, null, 2)} />
+                            </>
+                        }
+                        {
+                            ((vc as Credential) === undefined) 
+                            ? // true
+                            <>
+                                <IdentityAccordion title={"Verifiable Credential"} content={""} />
+                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={requestVC}>Request Verifiable Credential</Button>
+                            </>
+                            :
+                            <IdentityAccordion title={"Verifiable Credential"} content={JSON.stringify(vc, null, 2)} />
+                        }
+                    </Card>
+                </Container>
+            }
         </>
-    ) 
-    
+    )
 }

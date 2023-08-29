@@ -13,6 +13,7 @@ import { Identity } from './components/Identity';
 
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
+import { UploadAsset } from './components/UploadAsset';
 
 client
   .init("client_wasm_bg.wasm")
@@ -60,6 +61,13 @@ export const App = () => {
               <Row className="fixed-bottom">
                   <MetaMaskError />
               </Row>
+            </>
+          } />
+          <Route path="uploadasset" element={
+            <>
+            <Row className="d-flex justify-content-center">
+                <UploadAsset />
+            </Row>
             </>
           } />
         </Routes>

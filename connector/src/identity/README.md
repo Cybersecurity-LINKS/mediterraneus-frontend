@@ -2,6 +2,8 @@
 The identity bindings include all the modules needed for creating and managing a self sovereign identity. 
 This results in having also the **iota-client** dependency, that is automatically included in the bindings itself. 
 
+FOLDER TO DELETE !!!!!!!!!!!!
+
 ## Install the bindings
 In order to use the identity framework we have to install the dependency using npm
 

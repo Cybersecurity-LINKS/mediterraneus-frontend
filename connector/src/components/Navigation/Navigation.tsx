@@ -13,8 +13,9 @@ export const Navigation = () => {
     <Container fluid>
       <Navbar.Brand className="float-left ms-5" as={Link} to="/" style={{fontSize: "25px"}}>CONNECTOR</Navbar.Brand>
       <Nav className="" style={{fontSize: "20px"}}>
-        <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
         <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
+        <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload Asset</Nav.Link>
+        <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
         <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue<TbExternalLink/></Nav.Link>
       </Nav>
       <Nav className='float-right me-5'>

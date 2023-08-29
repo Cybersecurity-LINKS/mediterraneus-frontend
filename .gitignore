@@ -7,3 +7,4 @@ go.work.sum
 dist/
 postgresdata/
 connector-database/
+uploads/

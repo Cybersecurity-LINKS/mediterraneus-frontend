@@ -12,21 +12,26 @@ export class IdentityController {
     public async post(req: TypedRequestBody<{
         eth_address
     }>, res) {
-        createIdentity().then(({did, keypair}) => {
-            insertIdentity(
-                req.body.eth_address.toString(),
-                did.toString(), 
-                keypair.private().toString(), 
-            ).then( () => {
-                res.status(201).send({did: did}).end();
+        if(req.body.eth_address !== undefined) {
+            createIdentity().then(({did, keypair}) => {
+                insertIdentity(
+                    req.body.eth_address.toString(),
+                    did.toString(), 
+                    keypair.private().toString(), 
+                ).then( () => {
+                    res.status(201).send({did: did}).end();
+                }).catch((error) => {
+                    console.log(error)
+                    res.status(400).send(error).end();
+                })  
             }).catch((error) => {
                 console.log(error)
-                res.status(400).send(error).end();
-            })  
-        }).catch((error) => {
-            console.log(error)
-            res.status(401).send(error).end();
-        })
+                res.status(401).send(error).end();
+            })
+        } else {
+            res.status(400).send({error: "Eth address undefined"}).end();
+        }
+
     }
 
     public async get(eth_address: string, res) {

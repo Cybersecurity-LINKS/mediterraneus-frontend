@@ -91,7 +91,7 @@ npm install
 # generate the schema to enable non-native ORM in typescript
 # User and password are defined in the docker compose, while the table name is defined in the initialization script
 # located in connector-backend/src/migrations/dbinit.sql
-npx @databases/pg-schema-cli --database postgres://user:pswd@localhost:5432/table-name --directory src/__generated__
+npx @databases/pg-schema-cli --database postgres://user:pswd@localhost:5432/identity --directory src/__generated__
 ```
 
 At this stage, everything should be ready, and the application can be executed:

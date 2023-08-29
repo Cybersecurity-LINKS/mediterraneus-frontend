@@ -14,7 +14,7 @@ export class Server {
 
     private config() {
         this.app.use(morgan("dev"));
-        this.app.use(bodyParser.urlencoded({ extended: false }));
+        this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
         this.app.use(express.json())
         this.app.use((_, res, next) => {
