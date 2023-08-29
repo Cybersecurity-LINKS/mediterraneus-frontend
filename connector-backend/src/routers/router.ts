@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import { IdentityController } from '../controllers/controller';
 import multer from 'multer';
+// import { heliaNode } from '../app';
+// import { unixfs } from '@helia/unixfs'
+import { readFileSync } from 'fs';
 
 const storage = multer.diskStorage({
     destination: '../uploads/',
     filename: function (req, file, cb) {
         console.log(file.originalname)
-        cb(null, file.fieldname + '-' + Date.now() + file.originalname.match(/\..*$/)[0])
+        cb(null, file.fieldname + '-' + Date.now() + file.originalname.match(/\..*$/)![0])
     }
 });
 const upload = multer({storage}).array("files");
@@ -31,7 +34,7 @@ router.post("/storeVC", async (req, res) => {
 });
 
 router.post("/uploadOnLAD", async (req, res) => {
-    upload(req, res, function (err) {
+    upload(req, res, async function (err) {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
@@ -47,12 +50,28 @@ router.post("/uploadOnLAD", async (req, res) => {
         }
 
         // Everything went fine.
-        // show file `req.files`
-        // show body `req.body`
+        console.log(req.body)
+        console.log(req.files)
+
+        // load offering file's content of IPFS and get CID back
+        // const fs = unixfs(heliaNode);
+
+        // for(const file in req?.files) {
+        //     const content = readFileSync(req.files[file].path, 'utf-8');
+        //     console.log(content)
+        //     const encoder = new TextEncoder()
+            // const cid = await fs.addFile({
+            //     path: req.files[file].path,
+            //     content: encoder.encode(content)
+            // })
+            // console.log("cid: ", cid);
+        // }
+        // compute the trust metadata
+
+        // update LAD
+
         res.status(200).send({ message: "Successfully uploaded files" }).end();
     })
-    // console.log(req.body);
-    // res.json({ message: "Successfully uploaded files" });
 });
 
 export default router;
