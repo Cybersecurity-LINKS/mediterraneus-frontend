@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import { IdentityController } from '../controllers/controller';
 import multer from 'multer';
-// import { heliaNode } from '../app';
-// import { unixfs } from '@helia/unixfs'
 import { readFileSync } from 'fs';
 
 const storage = multer.diskStorage({
