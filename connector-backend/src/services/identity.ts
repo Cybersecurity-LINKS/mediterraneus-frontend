@@ -7,10 +7,10 @@ import {
     KeyPair,
     KeyType,
     MethodScope,
-} from "@iota/identity-wasm/node";
+} from "@iota/identity-wasm/node/index.js";
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
-import { connectorWallet } from "../app";
-import { ensureAddressHasFunds } from "../utils";
+import { connectorWallet } from "../app.js";
+import { ensureAddressHasFunds } from "../utils.js";
 
  export async function createIdentity(): Promise<{
     did: IotaDID,

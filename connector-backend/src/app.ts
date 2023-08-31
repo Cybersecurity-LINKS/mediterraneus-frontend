@@ -1,5 +1,5 @@
-import { Server } from './server';
-import { ConnectorWallet } from './wallet';
+import { Server } from './server.js';
+import { ConnectorWallet } from './wallet.js';
 
 const port = parseInt(process.env.PORT || '1234');
 export const connectorWallet = new ConnectorWallet();

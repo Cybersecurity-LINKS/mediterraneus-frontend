@@ -1,9 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import router from './routers/router';
+import router from './routers/router.js';
 import morgan from 'morgan';
 
-export class Server {
+class Server {
     private app;
 
     constructor() {
@@ -37,3 +37,5 @@ export class Server {
         });
     }
 }
+
+export { Server };

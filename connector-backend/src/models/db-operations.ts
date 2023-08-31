@@ -1,4 +1,4 @@
-import db, {identity} from '../dbconfig/dbconnector';
+import db, {identity} from '../dbconfig/dbconnector.js';
 
 export async function insertIdentity(
     eth_address: string,

@@ -1,7 +1,13 @@
 import createConnectionPool, {sql} from '@databases/pg';
 import tables from '@databases/pg-typed';
 import DatabaseSchema from '../__generated__';
-import schemajson from '../__generated__/schema.json'
+import schemajson from '../__generated__/schema.json' assert {type: "json"};
+
+// import { createRequire } from 'node:module'
+
+// // Import the package.json file to get the version number by using the createRequire function
+// const require = createRequire(import.meta.url)
+// const { schemajson } = require('../__generated__/schema.json')
 
 export {sql};
 

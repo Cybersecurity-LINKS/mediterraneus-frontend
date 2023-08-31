@@ -1,7 +1,7 @@
-import { IotaDID, IotaDocument } from '@iota/identity-wasm/node'
-import { getIdentity, insertIdentity, insertVCintoExistingIdentity } from '../models/db-operations'
-import { createIdentity, resolveDID, signData } from '../services/identity'
-import { privKeytoBytes, stringToBytes, buf2hex } from '../utils'
+import { IotaDID, IotaDocument } from '@iota/identity-wasm/node/index.js'
+import { getIdentity, insertIdentity, insertVCintoExistingIdentity } from '../models/db-operations.js'
+import { createIdentity, resolveDID, signData } from '../services/identity.js'
+import { privKeytoBytes, stringToBytes, buf2hex } from '../utils.js'
 
 export interface TypedRequestBody<T> extends Express.Request {
     body: T

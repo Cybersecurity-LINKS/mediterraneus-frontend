@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-      "lib": ["es2019", "DOM"],
+      "lib": ["ES2022", "DOM"],
       "declaration": true,
       "declarationMap": true,
-      "target": "es2019",
-      "module": "commonjs",
+      "target": "ES2022",
+      "module": "ESNext",
       "sourceMap": true,
-      "strict": true,
+      "strict": false,
       "moduleResolution": "node",
       "resolveJsonModule": true,
       "noImplicitAny": false,
