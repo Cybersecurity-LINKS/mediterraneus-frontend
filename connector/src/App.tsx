@@ -68,6 +68,9 @@ export const App = () => {
             <Row className="d-flex justify-content-center">
                 <UploadAsset />
             </Row>
+            <Row className="fixed-bottom">
+                  <MetaMaskError />
+            </Row>
             </>
           } />
         </Routes>

@@ -1,4 +1,5 @@
-import db, {identity} from '../dbconfig/dbconnector.js';
+import { LocalAssetDb } from '../__generated__/index.js';
+import db, { identity, local_asset_db} from '../dbconfig/dbconnector.js';
 
 export async function insertIdentity(
     eth_address: string,
@@ -27,4 +28,8 @@ export async function insertVCintoExistingIdentity(eth_address: string, vc: JSON
         console.log(error);
         throw error;
     }
+}
+
+export async function insertLADentry(lad_entry: LocalAssetDb) {
+    await local_asset_db(db).insert(lad_entry)
 }

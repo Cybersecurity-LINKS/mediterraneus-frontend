@@ -20,7 +20,7 @@ const db = createConnectionPool({
 export default db;
 
 // You can list whatever tables you actually have here:
-const {identity} = tables<DatabaseSchema>({
+const { identity, local_asset_db } = tables<DatabaseSchema>({
   databaseSchema: schemajson,
 });
-export {identity};
+export { identity, local_asset_db };
