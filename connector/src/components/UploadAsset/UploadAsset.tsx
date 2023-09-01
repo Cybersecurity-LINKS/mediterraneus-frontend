@@ -22,7 +22,9 @@ export const UploadAsset = () => {
         try{
             event.preventDefault();
             if(offeringFile != null && assetFile != null && (offeringFile?.files!.length > 1 || offeringFile?.files!.length <= 0) && (assetFile?.files!.length > 1 || assetFile?.files!.length <= 0)) {
-                throw "Asset and Offeirng files must be chosen in order to proceed"
+                const err = new Error("Asset and Offeirng files must be chosen in order to proceed")
+                setError(err.message)
+                throw err;
             } else {
                 if(wallet.accounts[0] === undefined) {
                     const err = new Error("Please connect your wallet!")

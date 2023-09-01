@@ -33,3 +33,11 @@ export async function insertVCintoExistingIdentity(eth_address: string, vc: JSON
 export async function insertLADentry(lad_entry: LocalAssetDb) {
     await local_asset_db(db).insert(lad_entry)
 }
+
+export async function _getAssetAliases() {
+    return await local_asset_db(db).find().all();
+}
+
+export async function _getLADentry_byAlias(alias: string) {
+    return await local_asset_db(db).findOne({nft_name: alias});
+}

@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import { Client } from "@iota/client-wasm/node";
+import { IotaDocument, MethodScope } from '@iota/identity-wasm/node';
 dotenv.config()
 
 /** Request funds from the faucet API, if needed, and wait for them to show in the wallet. */
@@ -93,4 +94,8 @@ export const stringToBytes = (text: string): Uint8Array => {
 
 export const buf2hex = (buffer: Uint8Array) => { // buffer is an ArrayBuffer
     return Buffer.from(buffer).toString('hex')
+}
+
+export const extractPubKeyFromDoc = (doc: IotaDocument) => {
+    return  doc.methods(MethodScope.VerificationMethod())[0].data().tryDecode()
 }

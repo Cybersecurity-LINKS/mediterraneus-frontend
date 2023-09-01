@@ -1,7 +1,7 @@
-import { IotaDID, IotaDocument } from '@iota/identity-wasm/node/index.js'
-import { getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
+import { IotaDID, IotaDocument, IotaVerificationMethod, MethodData, MethodScope } from '@iota/identity-wasm/node/index.js'
+import { _getAssetAliases, _getLADentry_byAlias, getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
-import { privKeytoBytes, stringToBytes, buf2hex } from '../utils.js'
+import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
 import { keccak256 } from 'ethers';
@@ -134,6 +134,31 @@ export class IdentityController {
             // error.code == 23505 => duplicate key value violates unique constraint "local_asset_db_pkey"
             res.status(500).send({error: error.message, error_code: error.code}).end();
 
+        }
+    }
+
+    public async getAssetAliases(req, res) {
+        try {
+            let lad_entries = await _getAssetAliases();
+            const aliases: string[] = lad_entries.map(entry => {
+                return entry.nft_name
+            })
+            res.status(200).send({aliases: aliases}).end()    
+        } catch (error) {
+            res.status(500).send({error: "Could not retreive any data from the DB"}).end();
+        }
+    }
+
+    public async getLADentry_byAlias(alias, res) {
+        try {
+            const lad_entry = await _getLADentry_byAlias(alias);
+            const gc_doc = await resolveDID(IotaDID.parse(process.env.GLOBAL_CATALOGUE_DID))
+            let pub_key = extractPubKeyFromDoc(gc_doc);
+            if(lad_entry === null)
+                throw "";
+            res.status(200).send({lad_entry: lad_entry}).end();
+        } catch (error) {
+            res.status(500).send({error: "Could not retreive any data from the DB"}).end();
         }
     }
 }

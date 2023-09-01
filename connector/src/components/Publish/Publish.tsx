@@ -1,51 +1,82 @@
 import { MouseEvent, useEffect, useState } from 'react';
-import { Card, Button, Form, InputGroup, Col, Row } from 'react-bootstrap';
+import { Card, Button, Form, InputGroup, Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
 import { MaxUint256, ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
+import { TbInfoCircle, TbInfoSmall } from 'react-icons/tb';
 
 export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
+    const [NFTnames, setNFTnames] = useState([]);
     const [NFTsymbol, setNFTsymbol] = useState("");
-    const [OfferingCID, setOfferingCID] = useState("");
+    const [EncCID, setEncCID] = useState("");
 
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
     const [DTmaxSupply, setDTmaxSupply] = useState<BigInt>(BigInt(0));
-    const [AssetProviderURL, setAssetProviderURL] = useState("");
+    const [DownloadURL, setDownloadURL] = useState("");
 
-    const [inputFile, setInputFile] = useState<HTMLInputElement | null>(null);
+    const [Assethash, setAssetHash] = useState("");
+    const [OfferingHash, setOfferingHash] = useState("");
+    const [TrustSign, setTrustSign] = useState("");
 
-    const [errors, setErrors] = useState({});
+    const [error, setError] = useState("");
     const [published, setPublished] = useState(false);
 
     const { wallet, provider } = useMetaMask()
 
     useEffect(() => {
-        setInputFile(document.getElementById("uploadOffering") as HTMLInputElement);
+        const getAssetAliases = async () => {
+            try {
+                const response = await fetch("http://localhost:1234/assetAliases", {
+                    method: "GET"
+                });
+                const body = await response.json();
+                if(response.status == 200) {
+                    console.log(body.aliases)
+                    setNFTnames(body.aliases)
+                } else {
+                    const err = new Error(body["error"]);
+                    setError(err.message)
+                    throw err;
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        getAssetAliases();
     }, []);
 
-    const handleUpload = async () => {
-        const formData = new FormData()
-        try{
-            if(inputFile != null && (inputFile?.files!.length > 1 || inputFile?.files!.length == 0)) {
-                throw "Cannot upload 0 files or more than 1 file"
+    const handleNFTnameChoice = async (chosen_alias: string) => {
+        if(chosen_alias == "Choose an NFT Name") {
+            setEncCID("");
+            setAssetHash("");
+            setOfferingHash("");
+            setTrustSign("");
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:1234/ladInfo/${chosen_alias}`)
+            const body = await response.json();
+
+            if(response.status == 200) {
+                const lad_entry = body.lad_entry;
+                setEncCID(lad_entry.cid);
+                setAssetHash(lad_entry.hash_asset);
+                setOfferingHash(lad_entry.hash_offering);
+                setTrustSign(lad_entry.sign);
             } else {
-                let file = inputFile!.files?.[0] as Blob
-                formData.append("file", file);
-                console.log(file)
-                const response = await fetch("http://192.168.94.194:3333/uploadOfferingMsg",
-                    {
-                        body: formData,
-                        method: "POST"
-                    }
-                );
-                const result = await response.json()
-                console.log("Success, got:", result["CID"])
-                setOfferingCID(result["CID"])
+                setEncCID("");
+                setAssetHash("");
+                setOfferingHash("");
+                setTrustSign("");
+                const err = new Error(body["error"]);
+                setError(err.message)
+                throw err;
             }
-        }catch (err) {
-            throw err
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -65,7 +96,7 @@ export const Publish = () => {
             await contractIstance.deployERC721Contract(
                 NFTname,
                 NFTsymbol,
-                OfferingCID,
+                EncCID,
                 wallet.accounts[0]
             );
 
@@ -148,46 +179,46 @@ export const Publish = () => {
         <>
         <Card style={{width: '60rem'}} className='d-flex mb-5 mt-3'>
             <Card.Body>
-                <Card.Title>Publish new Data/Service NFT</Card.Title>
+                <Card.Title>Publish a new tokenized Data/Service</Card.Title>
             </Card.Body>
             <Form className="mt-3 mb-3 ps-5 pe-5">
+
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
-                <Col sm={2}>
-                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>NFT Name</Form.Label>
+                <Col sm={4} >
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>
+                        NFT Name/Asset Alias
+                        <OverlayTrigger  
+                            placement="top"
+                            overlay={<Tooltip>Unique Alias representing the Asset and takes the "role" of the NFT Name</Tooltip>}
+                            >  
+                        <Figure><TbInfoCircle /></Figure>
+                        </OverlayTrigger>
+                    </Form.Label>
                 </Col>
-                <Col sm={10}>
-                    <Form.Control size="lg" type="input" placeholder="Enter the NFT Name" onChange={(event) => { setNFTname(event.target.value) }}/>
+                <Col sm={8}>
+                    <Form.Select size="lg" defaultValue="Choose an NFT Name" onChange={(event) => { handleNFTnameChoice(event.target.value) }}>
+                        <option>Choose an NFT Name</option>
+                        {NFTnames.map(nftname => <option key={nftname} value={nftname}>{nftname}</option>)}
+                    </Form.Select>
                 </Col>
             </Form.Group>
 
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTsymbol">
-                <Col sm={2}> 
+                <Col sm={4}> 
                     <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>NFT Symbol</Form.Label> 
                 </Col>
-                <Col sm={10}>
-                    <Form.Control size="lg" type="input" placeholder="Enter the NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
-                </Col>
-            </Form.Group>
-
-            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadOffering">
-                <Col sm={4}>
-                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Upload Offering Message</Form.Label>
-                </Col>
                 <Col sm={8}>
-                    <div className='d-flex justify-content-center '>
-                        <Form.Control type="file" size="lg" accept='.json'/>
-                        <Button className="ms-5" variant='primary' onClick={() => handleUpload()}>Upload</Button>
-                    </div>
+                    <Form.Control size="lg" type="input" placeholder="Choose an NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
                 </Col>
             </Form.Group>
 
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
-                <Col sm={3}>
-                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Offering CID</Form.Label>
+                <Col sm={4}>
+                    <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Encrypted Offering's CID</Form.Label>
                 </Col>
-                <Col sm={9}>
-                    <Form.Control disabled={true} size="lg" type="text" placeholder="Upload Offering Message to get CID back" 
-                        value={OfferingCID.length == 0 ? "Upload Offering Message to get CID back" : OfferingCID} />
+                <Col sm={8}>
+                    <Form.Control disabled={true} size="lg" type="text" placeholder="Asymmetrically Encrypted CID" 
+                        value={EncCID.length == 0 ? "" : EncCID} style={{fontSize: "18px", fontFamily: 'italic'}}/>
                 </Col>
             </Form.Group>
 
@@ -222,12 +253,46 @@ export const Publish = () => {
 
                 <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
                     <Col sm={3}>
-                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Asset Provider URL</Form.Label>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Download URL</Form.Label>
                     </Col>
                     <Col sm={9}>
-                        <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setAssetProviderURL(event.target.value) }} />
+                        <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
                     </Col>
                 </Form.Group>
+            </Card.Body>
+
+            <Card.Title>Trust Metadata</Card.Title>
+            <Card.Body>
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetHash">
+                    <Col sm={2}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Asset Hash</Form.Label>
+                    </Col>
+                    <Col sm={10}>
+                        <Form.Control size="lg" type="input" placeholder="Hash of the Asset" disabled 
+                        value={Assethash.length == 0 ? "" : Assethash} style={{fontSize: "20px", fontFamily: 'italic'}} />
+                    </Col>
+                </Form.Group>
+
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="offeringHash">
+                    <Col sm={2}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Offering Hash</Form.Label>
+                    </Col>
+                    <Col sm={10}>
+                        <Form.Control size="lg" type="input" placeholder="Hash of the Offering" disabled
+                        value={OfferingHash.length == 0 ? "" : OfferingHash} style={{fontSize: "20px", fontFamily: 'italic'}} />
+                    </Col>
+                </Form.Group>
+
+                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="trustSign">
+                    <Col sm={3}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Trust Signature</Form.Label>
+                    </Col>
+                    <Col sm={12}>
+                        <Form.Control size="lg" type="input" placeholder="Trust Signature" disabled
+                        value={TrustSign.length == 0 ? "" : TrustSign} style={{fontSize: "20px", fontFamily: 'italic'}} />
+                    </Col>
+                </Form.Group>
+
             </Card.Body>
 
             <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { handleSubmit(event) }}>
@@ -235,6 +300,15 @@ export const Publish = () => {
             </Button>
             </Form>
         </Card>
+        <Row className="fixed-bottom">
+        {
+            error 
+                &&
+            <Alert className="me-5 ms-3" key='danger' variant='danger' onClick={() => { setError('') }}>
+                <strong>Error:</strong> { error }
+            </Alert>
+        }
+        </Row>
         </>
     );
 }
