@@ -1,4 +1,4 @@
-import { Ed25519, IotaDID, IotaDocument, X25519 } from '@iota/identity-wasm/node/index.js'
+import { IotaDID, IotaDocument, X25519 } from '@iota/identity-wasm/node/index.js'
 import { _getAssetAliases, _getLADentry_byAlias, getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc } from '../utils.js'

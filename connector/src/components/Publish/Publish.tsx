@@ -1,9 +1,9 @@
 import { MouseEvent, useEffect, useState } from 'react';
-import { Card, Button, Form, InputGroup, Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
+import { Card, Button, Form, Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
 import { MaxUint256, ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
-import { TbInfoCircle, TbInfoSmall } from 'react-icons/tb';
+import { TbInfoCircle } from 'react-icons/tb';
 
 export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
