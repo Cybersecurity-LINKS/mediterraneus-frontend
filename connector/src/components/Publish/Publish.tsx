@@ -57,7 +57,13 @@ export const Publish = () => {
             return;
         }
         try {
-            const response = await fetch(`http://localhost:1234/ladInfo/${chosen_alias}`)
+            const response = await fetch(`http://localhost:1234/ladInfo/${wallet.accounts[0]}/${chosen_alias}`, {
+                method: "GET",
+                // body: JSON.stringify({
+                //     eth_address: wallet.accounts[0],
+                //     asset_alias: NFTname
+                // })
+            })
             const body = await response.json();
 
             if(response.status == 200) {

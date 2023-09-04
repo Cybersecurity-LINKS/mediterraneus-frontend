@@ -1,10 +1,12 @@
-import { IotaDID, IotaDocument, IotaVerificationMethod, MethodData, MethodScope } from '@iota/identity-wasm/node/index.js'
+import { Ed25519, IotaDID, IotaDocument, X25519 } from '@iota/identity-wasm/node/index.js'
 import { _getAssetAliases, _getLADentry_byAlias, getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
 import { keccak256 } from 'ethers';
+import pkg from 'crypto-js';
+const { AES, enc } = pkg;
 
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
@@ -149,16 +151,48 @@ export class IdentityController {
         }
     }
 
-    public async getLADentry_byAlias(alias, res) {
+    public async getLADentry_byAlias(asset_alias, eth_address, res) {
         try {
-            const lad_entry = await _getLADentry_byAlias(alias);
-            const gc_doc = await resolveDID(IotaDID.parse(process.env.GLOBAL_CATALOGUE_DID))
-            let pub_key = extractPubKeyFromDoc(gc_doc);
+            console.log(`${asset_alias} ${eth_address}`)
+            const lad_entry = await _getLADentry_byAlias(asset_alias);
             if(lad_entry === null)
                 throw "";
+            const identity = await getIdentity(eth_address);
+            // For now the GC_DID is the Issuer's identity. For now used to simulate the GC to try if this works.
+            const gc_doc = await resolveDID(IotaDID.parse(process.env.GLOBAL_CATALOGUE_DID))
+
+            // the CID must be encrypted before returning it to the "front" connector.
+            // asymmetric crypto can be used to determine a common shared secret between two parties:
+            // the connector uses its private key and GC's public key to compute a shared key
+            const gc_pub_key = extractPubKeyFromDoc(gc_doc);
+            const priv_key_x25119 = X25519.Ed25519toX25519Private(privKeytoBytes(identity.privkey));
+            const gc_pub_key_x25119 = X25519.Ed25519toX25519Public(gc_pub_key);
+            const shared_key = X25519.keyExchange(priv_key_x25119, gc_pub_key_x25119);
+
+            // console.log(`shared key: ${buf2hex(shared_key)}`);
+            const ciphertext = AES.encrypt(lad_entry.cid, buf2hex(shared_key)).toString();
+            // console.log(`ciphertext: ${ciphertext}`)
+            lad_entry.cid = ciphertext;  
+
+            // const decrypted = AES.decrypt(ciphertext, buf2hex(shared_key));
+            // console.log(`decrypted: ${decrypted.toString(enc.Utf8)}`);
             res.status(200).send({lad_entry: lad_entry}).end();
         } catch (error) {
+            console.log(error);
             res.status(500).send({error: "Could not retreive any data from the DB"}).end();
         }
+    }
+
+    public async simulateGCdecrypt(eth_address, res) {
+        // hex string of the private key of the Issuer. The issuer keys are for now used to simulate the GC to try if this works.
+        const gc_priv_key_x25119 = X25519.Ed25519toX25519Private(Uint8Array.from(Buffer.from('47c62af8fc25c32ef0d9cb493fc3d10f7709085770e9fdf016a1c0f4a79a2fa1', 'hex')))
+
+        const identity = await getIdentity(eth_address);
+        const doc = await resolveDID(IotaDID.parse(identity.did))
+        const pub_key_x25119 = X25519.Ed25519toX25519Public(extractPubKeyFromDoc(doc));
+
+        const shared_key = X25519.keyExchange(gc_priv_key_x25119, pub_key_x25119);
+        console.log(buf2hex(shared_key));
+        res.status(200).send({key: buf2hex(shared_key)}).end();
     }
 }

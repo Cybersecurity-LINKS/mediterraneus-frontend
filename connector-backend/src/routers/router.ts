@@ -54,8 +54,12 @@ router.get("/assetAliases", async (req, res) => {
     await identityController.getAssetAliases(req, res);
 })
 
-router.get("/ladInfo/:asset_alias", async (req, res) => {
-    await identityController.getLADentry_byAlias(req.params.asset_alias, res);
+router.get("/ladInfo/:eth_address/:asset_alias", async (req, res) => {
+    await identityController.getLADentry_byAlias(req.params.asset_alias, req.params.eth_address, res);
+})
+
+router.get("/simulate/:eth_address", async (req, res) => {
+    await identityController.simulateGCdecrypt(req.params.eth_address, res);
 })
 
 export default router;

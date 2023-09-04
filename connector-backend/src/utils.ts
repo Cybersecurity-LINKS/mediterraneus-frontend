@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { Client } from "@iota/client-wasm/node";
-import { IotaDocument, MethodScope } from '@iota/identity-wasm/node';
+import { IotaDocument, MethodScope } from '@iota/identity-wasm/node/index.js';
 dotenv.config()
 
 /** Request funds from the faucet API, if needed, and wait for them to show in the wallet. */
