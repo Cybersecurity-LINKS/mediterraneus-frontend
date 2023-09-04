@@ -8,6 +8,8 @@ import { keccak256 } from 'ethers';
 import pkg from 'crypto-js';
 const { AES, enc } = pkg;
 
+import crypto from 'crypto'
+
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
 }
@@ -163,35 +165,51 @@ export class IdentityController {
 
             // the CID must be encrypted before returning it to the "front" connector.
             // asymmetric crypto can be used to determine a common shared secret between two parties:
-            // the connector uses its private key and GC's public key to compute a shared key
+            // the connector uses its private key and GC's public key to compute a shared secret.
+
+            // The shared secret, known only to those who know a relevant secret key (yours or theirs). It is not cryptographically random. Do not use it directly as a key.
             const gc_pub_key = extractPubKeyFromDoc(gc_doc);
             const priv_key_x25119 = X25519.Ed25519toX25519Private(privKeytoBytes(identity.privkey));
             const gc_pub_key_x25119 = X25519.Ed25519toX25519Public(gc_pub_key);
             const shared_key = X25519.keyExchange(priv_key_x25119, gc_pub_key_x25119);
 
-            // console.log(`shared key: ${buf2hex(shared_key)}`);
-            const ciphertext = AES.encrypt(lad_entry.cid, buf2hex(shared_key)).toString();
-            // console.log(`ciphertext: ${ciphertext}`)
-            lad_entry.cid = ciphertext;  
-
-            // const decrypted = AES.decrypt(ciphertext, buf2hex(shared_key));
-            // console.log(`decrypted: ${decrypted.toString(enc.Utf8)}`);
-            res.status(200).send({lad_entry: lad_entry}).end();
+            let ciphertext;
+            crypto.hkdf('sha512', shared_key, '', '', 64, (err, derivedKey) => {
+                if (err) throw err;
+                console.log(Buffer.from(derivedKey).toString('hex'));  // '24156e2...5391653'
+            
+                ciphertext = AES.encrypt(lad_entry.cid, Buffer.from(derivedKey).toString('hex')).toString();
+                lad_entry.cid = ciphertext;  
+                
+                res.status(200).send({lad_entry: lad_entry}).end();
+            });
         } catch (error) {
             console.log(error);
             res.status(500).send({error: "Could not retreive any data from the DB"}).end();
         }
     }
 
-    public async simulateGCdecrypt(eth_address, res) {
+    public async simulateGCdecrypt(req: TypedRequestBody<{
+        ciphertext,
+        eth_address
+    }>, res) {
         // hex string of the private key of the Issuer. The issuer keys are for now used to simulate the GC to try if this works.
         const gc_priv_key_x25119 = X25519.Ed25519toX25519Private(Uint8Array.from(Buffer.from('47c62af8fc25c32ef0d9cb493fc3d10f7709085770e9fdf016a1c0f4a79a2fa1', 'hex')))
 
-        const identity = await getIdentity(eth_address);
+        const identity = await getIdentity(req.body.eth_address);
         const doc = await resolveDID(IotaDID.parse(identity.did))
         const pub_key_x25119 = X25519.Ed25519toX25519Public(extractPubKeyFromDoc(doc));
-
+        
         const shared_key = X25519.keyExchange(gc_priv_key_x25119, pub_key_x25119);
+        
+        crypto.hkdf('sha512', shared_key, '', '', 64, (err, derivedKey) => {
+            if (err) throw err;
+            console.log(Buffer.from(derivedKey).toString('hex'));  // '24156e2...5391653'
+
+            const decrypted = AES.decrypt(req.body.ciphertext, Buffer.from(derivedKey).toString('hex'));
+            console.log(`decrypted: ${decrypted.toString(enc.Utf8)}`);
+        });
+        
         console.log(buf2hex(shared_key));
         res.status(200).send({key: buf2hex(shared_key)}).end();
     }

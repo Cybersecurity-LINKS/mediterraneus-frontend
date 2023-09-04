@@ -58,8 +58,8 @@ router.get("/ladInfo/:eth_address/:asset_alias", async (req, res) => {
     await identityController.getLADentry_byAlias(req.params.asset_alias, req.params.eth_address, res);
 })
 
-router.get("/simulate/:eth_address", async (req, res) => {
-    await identityController.simulateGCdecrypt(req.params.eth_address, res);
+router.post("/simulate", async (req, res) => {
+    await identityController.simulateGCdecrypt(req, res);
 })
 
 export default router;
