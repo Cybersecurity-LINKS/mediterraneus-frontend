@@ -17,9 +17,17 @@ contract ERC721Base is
 
     address private _factory;
     address[] private deployedERC20Tokens;
+    string private _asset_download_URL;
+    struct TrustMetadata {
+        string asset_hash;
+        string offering_hash;
+        string trust_sign;
+    }
+
+    TrustMetadata private _trustMetadata;
 
     event NFTminted(
-        address indexed owner,
+        address owner,
         string name, 
         string symbol,
         address factory
@@ -42,10 +50,14 @@ contract ERC721Base is
 
     function initialize(
         address owner,
-        string calldata name_, 
-        string calldata symbol_,
         address factory,
-        string memory _tokenURI
+        string memory name_, 
+        string memory symbol_,
+        string memory _tokenURI,
+        string memory asset_download_URL,
+        string memory asset_hash,
+        string memory offering_hash,
+        string memory trust_sign
     ) external initializer returns(bool) {
         require(owner != address(0), "Invalid NFT owner: zero address not valid!");
 
@@ -54,6 +66,12 @@ contract ERC721Base is
         _factory = factory;
         _safeMint(owner, 1);
         _setTokenURI(1, _tokenURI);
+        _asset_download_URL = asset_download_URL;
+        _trustMetadata = TrustMetadata(
+            asset_hash,
+            offering_hash,
+            trust_sign
+        );
         emit NFTminted(owner, name_, symbol_, _factory);
         return true;
     }

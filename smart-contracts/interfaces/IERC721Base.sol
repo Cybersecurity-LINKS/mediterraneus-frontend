@@ -6,7 +6,7 @@ pragma solidity ^0.8.18;
  */
 interface IERC721Base {
     event NFTminted(
-        address indexed owner,
+        address owner,
         string name, 
         string symbol,
         address factory
@@ -14,10 +14,14 @@ interface IERC721Base {
 
     function initialize(
         address owner,
-        string calldata name_, 
-        string calldata symbol_,
         address factory,
-        string memory _tokenURI
+        string memory name_, 
+        string memory symbol_,
+        string memory _tokenURI,
+        string memory asset_download_URL,
+        string memory asset_hash,
+        string memory offering_hash,
+        string memory trust_sign
     ) external returns(bool);
 
     function getNFTowner() external view returns (address owner);

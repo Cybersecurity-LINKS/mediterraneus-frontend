@@ -1,6 +1,6 @@
 import { MouseEvent, useEffect, useState } from 'react';
 import { Card, Button, Form, Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
-import { MaxUint256, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { getContractABI, getContractAddress, getPermitDigest } from '@/utils';
 import { useMetaMask } from '@/hooks/useMetaMask';
 import { TbInfoCircle } from 'react-icons/tb';
@@ -23,7 +23,7 @@ export const Publish = () => {
     const [error, setError] = useState("");
     const [published, setPublished] = useState(false);
 
-    const { wallet, provider } = useMetaMask()
+    const { wallet, provider, shimmerProvider } = useMetaMask()
 
     useEffect(() => {
         const getAssetAliases = async () => {
@@ -50,6 +50,7 @@ export const Publish = () => {
 
     const handleNFTnameChoice = async (chosen_alias: string) => {
         if(chosen_alias == "Choose an NFT Name") {
+            setNFTname("");
             setEncCID("");
             setAssetHash("");
             setOfferingHash("");
@@ -59,20 +60,18 @@ export const Publish = () => {
         try {
             const response = await fetch(`http://localhost:1234/ladInfo/${wallet.accounts[0]}/${chosen_alias}`, {
                 method: "GET",
-                // body: JSON.stringify({
-                //     eth_address: wallet.accounts[0],
-                //     asset_alias: NFTname
-                // })
             })
             const body = await response.json();
 
             if(response.status == 200) {
                 const lad_entry = body.lad_entry;
+                setNFTname(chosen_alias);
                 setEncCID(lad_entry.cid);
                 setAssetHash(lad_entry.hash_asset);
                 setOfferingHash(lad_entry.hash_offering);
                 setTrustSign(lad_entry.sign);
             } else {
+                setNFTname("");
                 setEncCID("");
                 setAssetHash("");
                 setOfferingHash("");
@@ -89,7 +88,7 @@ export const Publish = () => {
     const handleSubmit = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         try{
             event.preventDefault();
-            const signer = await provider!.getSigner();
+            const signer = await provider!.getSigner(wallet.accounts[0]);
 
             const contractABI = await getContractABI("ERC721Factory");
             const exchangeABI = await getContractABI("FixedRateExchange");
@@ -98,17 +97,20 @@ export const Publish = () => {
 
             const contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
             const exchangeInstance = new ethers.Contract(exchangeAddress!, exchangeABI, signer);
-
-            await contractIstance.deployERC721Contract(
+            
+            const tx = await contractIstance.deployERC721Contract(
                 NFTname,
                 NFTsymbol,
                 EncCID,
-                wallet.accounts[0]
+                DownloadURL,
+                Assethash,
+                OfferingHash,
+                TrustSign,
             );
 
-            await contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, sender, event) => {
+            contractIstance.once("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2) => {
                 console.log("New ERC721 NFT contract deployed successfully!");
-                console.log(newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, sender, event);
+                console.log(newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2);
                 /**
                 * Given the new NFT contract address create also the required DT.
                 */
@@ -120,7 +122,7 @@ export const Publish = () => {
                     DTsymbol,
                     ethers.parseEther(DTmaxSupply.toString())
                 );
-                await erc721ContractIstance.on("TokenCreated", async (name_, symbol_, owner_, NFTcontractAddress_, newERC20address_, maxSupply_, initialSupply_, event) => {
+                await erc721ContractIstance.once("TokenCreated", async (name_, symbol_, owner_, NFTcontractAddress_, newERC20address_, maxSupply_, initialSupply_, event) => {
                     console.log(name_, symbol_, owner_, NFTcontractAddress_, newERC20address_, maxSupply_, initialSupply_, event);
                     /**
                      * Given the new DT contract address wait for minting.
@@ -140,7 +142,7 @@ export const Publish = () => {
                     await erc20ContractIstance.mint(ownerAddress, ethers.parseEther("10")); // mint 10 DTs
                     await erc20ContractIstance.createFixedRate(exchangeAddress, BigInt(1e16), 0);
                     
-                    erc20ContractIstance.on("FixedRateCreated", async (exchangeID, _owner, fixedRateAddress_, event) => {
+                    erc20ContractIstance.once("FixedRateCreated", async (exchangeID, _owner, fixedRateAddress_, event) => {
                         console.log(exchangeID, _owner, fixedRateAddress_, event);
                         // const approve = {
                         //     owner: ownerAddress,
@@ -164,7 +166,7 @@ export const Publish = () => {
                         // )
 
                         await erc20ContractIstance.approve(exchangeAddress, ethers.parseEther("1"))
-                        erc20ContractIstance.on("Approval", async (owner, spender, amount, event) => {
+                        erc20ContractIstance.once("Approval", async (owner, spender, amount, event) => {
                             console.log(owner, spender, amount, event);
                             const allowance = await erc20ContractIstance.allowance(owner, spender);
                             console.log(`allowance: ${allowance}`);
@@ -176,6 +178,9 @@ export const Publish = () => {
                     })
                 });
             });
+
+            const rc = await tx.wait();
+            console.log(rc)
         } catch (err) {
             console.log(err);
         }
@@ -218,6 +223,15 @@ export const Publish = () => {
                 </Col>
             </Form.Group>
 
+            <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
+                    <Col sm={4}>
+                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Download URL</Form.Label>
+                    </Col>
+                    <Col sm={8}>
+                        <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
+                    </Col>
+                </Form.Group>
+
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
                 <Col sm={4}>
                     <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Encrypted Offering's CID</Form.Label>
@@ -254,15 +268,6 @@ export const Publish = () => {
                     </Col>
                     <Col sm={9}>
                         <Form.Control size="lg" type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
-                    </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
-                    <Col sm={3}>
-                        <Form.Label style={{fontSize: "20px", fontFamily: 'italic'}}>Download URL</Form.Label>
-                    </Col>
-                    <Col sm={9}>
-                        <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
                     </Col>
                 </Form.Group>
             </Card.Body>

@@ -30,7 +30,8 @@ export const Catalogue = () => {
             const contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
             
             const DTcontractABI = await getContractABI("ERC20Base");
-            const DTcontractAddress =  await contractIstance.getDTaddresses();
+            const [...DTcontractAddress] =  await contractIstance.getDTaddresses();
+            console.log(DTcontractAddress)
             const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, shimmerProvider);
             
             let NFTinfo: IDataOffering = {
@@ -53,7 +54,7 @@ export const Catalogue = () => {
                 let contractIstance = new ethers.Contract(contractAddress!, contractABI, shimmerProvider);
     
                 let [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();
-    
+                console.log(NFTaddresses)
                 let NFTobjs: IDataOffering[] = [];
                 for(let i = 0; i < NFTaddresses.length; i++ ) {
                     let l_dataoffering = await getNFTinfo(NFTaddresses[i]);
@@ -86,7 +87,7 @@ export const Catalogue = () => {
                 :
                 dataOfferings.length == 0 ? 
                 <Container className="mt-3">
-                    <Row><Col md={{ span: 6, offset: 3 }}><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Col></Row>
+                    <Row><Alert variant="primary" className="text-center"> <strong>Nothing published yet!</strong></Alert></Row>
                 </Container>
                     :
                 <Container className="mt-3">

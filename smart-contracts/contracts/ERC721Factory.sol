@@ -34,12 +34,11 @@ contract ERC721Factory is Ownable, Deployer, IERC721Factory {
 
     event NFTCreated(
         address newTokenAddress,
-        address indexed templateAddress,
+        address templateAddress,
         string tokenName,
-        address indexed admin,
+        address admin,
         string symbol,
-        string tokenURI,
-        address indexed creator
+        string tokenURI
     );
 
     // contract owner = minter
@@ -63,35 +62,42 @@ contract ERC721Factory is Ownable, Deployer, IERC721Factory {
     function deployERC721Contract(
         string memory name,
         string memory symbol,
-        string memory tokenURI,
-        address owner
-    ) public returns(address erc721Instance){
+        string memory tokenURI, // enc CID
+        string memory asset_download_URL,
+        string memory asset_hash,
+        string memory offering_hash,
+        string memory trust_sign
+    ) public {
         require(base721ContractInfo.baseAddress != address(0), "DeployER721Contract: invalid base address");
         require(base721ContractInfo.isActive, "DeployERC721Contract: Base contract not active");
-        require(owner != address(0), "address(0) cannot be an owner");
+        require(msg.sender != address(0), "address(0) cannot be an owner");
 
-        erc721Instance = deploy(base721ContractInfo.baseAddress);
+        address erc721Instance = deploy(base721ContractInfo.baseAddress);
         require(erc721Instance != address(0), "deployERC721Contract: Failed to deploy new ERC721 contract");
         
         erc721addresses.push(erc721Instance);
         createdERC721List[erc721Instance] = erc721Instance;
-        eRC721_to_owner[erc721Instance] = owner;
+        eRC721_to_owner[erc721Instance] = msg.sender;
         currentNFTCount += 1;
         
         IERC721Base ierc721Instance = IERC721Base(erc721Instance);
         require(ierc721Instance.initialize(
-            owner,
+            msg.sender,
+            address(this),
             name,
             symbol,
-            address(this),
-            tokenURI
-        ), "Factory: Could not initialize New NFT contract");
-        emit NFTCreated(erc721Instance, base721ContractInfo.baseAddress, name, owner, symbol, tokenURI, msg.sender);
+            tokenURI,
+            asset_download_URL,
+            asset_hash,
+            offering_hash,
+            trust_sign
+        ) == true, "Factory: Could not initialize New NFT contract");
+        emit NFTCreated(erc721Instance, base721ContractInfo.baseAddress, name, msg.sender, symbol, tokenURI);
     }
 
     function deployERC20Contract(
-        string memory name_,
-        string memory symbol_,
+        string calldata name_,
+        string calldata symbol_,
         address owner_, // minter = DT owner = NFT owner
         // address erc721address_, // should be the calling NFT contract = msg.sender
         uint256 maxSupply_
@@ -116,7 +122,6 @@ contract ERC721Factory is Ownable, Deployer, IERC721Factory {
             maxSupply_
         ), "DT initialization failed!");
         emit ERC20ContractDeployed(erc20Instance, owner_, name_, symbol_);
-        return erc20Instance;
     }
 
     function addERC721Basetemplate(address _baseAddress) internal onlyOwner {

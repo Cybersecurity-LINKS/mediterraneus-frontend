@@ -1,8 +1,7 @@
 import { AbiCoder, BigNumberish, InterfaceAbi, ethers, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
 import { Credential } from "@iota/identity-wasm/web";
-import contractAddresses from '../../public/contractAddresses.json'
+import contractAddresses from '../addresses/contractAddresses.json'
 
-// const contractAddresses = await import.meta.glob('../../../smart-contracts/addresses/contractAddresses.json') 
 const identity_sc_address = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
 const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
 
@@ -35,7 +34,7 @@ export const formatAddress2 = (addr: string) => {
 export const getContractABI = async (contractName: string) => {
   try {
     // dynamic import
-    const contractArtifact = await import(`../../public/artifacts/contracts/${contractName}.sol/${contractName}.json`);
+    const contractArtifact = await import(`../artifacts/contracts/${contractName}.sol/${contractName}.json`);
     const abi = contractArtifact.abi
 
     return abi

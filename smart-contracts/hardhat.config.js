@@ -40,7 +40,7 @@ module.exports = {
     customChains: [
       {
         network: 'shimmerevm-testnet',
-        chainId: 1071,
+        chainId: 1072,
         urls: {
           apiURL: 'https://explorer.evm.testnet.shimmer.network/api',
           browserURL: 'https://explorer.evm.testnet.shimmer.network/'

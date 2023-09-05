@@ -36,7 +36,7 @@ PRIVATE_KEY_2='<priv_key2>'
 ## Run the scripts
 1. Deploy the contracts
 ```sh
-$ npx hardhat run --network <your-network> scripts/deploy.js
+$ npx hardhat run --network shimmerevm-testnet scripts/deploy.js
 ```
 2. Run the various scripts to play with the contracts
 ```sh
