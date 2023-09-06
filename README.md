@@ -102,7 +102,3 @@ npm run dev
 # No logging features (like nodemon)
 npm start
 ```
-
-## TODO
-
-Smart Contracts should be moved in a separate repository. Additional information on how to deploy new smart contracts are in the dedicated folder in this repo.
