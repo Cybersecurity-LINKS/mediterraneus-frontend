@@ -178,10 +178,8 @@ export const Publish = () => {
                 OfferingHash,
                 TrustSign,
             );
-            // const tx = await contractIstance.prova();
 
             const rc = await tx.wait(3);
-            console.log(rc)
         } catch (err) {
             console.log(err);
         }
