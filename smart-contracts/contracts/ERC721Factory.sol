@@ -126,14 +126,14 @@ contract ERC721Factory is Ownable, Deployer, IERC721Factory {
 
     function addERC721Basetemplate(address _baseAddress) internal onlyOwner {
         require(_baseAddress != address(0), "Address(0) NOT allowed for base NFTcontract");
-        require(_isContract(_baseAddress), "Provided address is NOT a contract");
+        // require(_isContract(_baseAddress), "Provided address is NOT a contract");
         base721ContractInfo = ContractBase(_baseAddress, true);
         emit Base721Added(base721ContractInfo.baseAddress, base721ContractInfo.isActive);
     }
 
     function addERC20Basetemplate(address _baseAddress) internal onlyOwner {
         require(_baseAddress != address(0), "Address(0) NOT allowed for base NFTcontract");
-        require(_isContract(_baseAddress), "Provided address is NOT a contract");
+        // require(_isContract(_baseAddress), "Provided address is NOT a contract");
         base20ContractInfo = ContractBase(_baseAddress, true);
         emit Base721Added(base20ContractInfo.baseAddress, base20ContractInfo.isActive);
     }

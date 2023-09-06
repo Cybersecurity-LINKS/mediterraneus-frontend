@@ -98,17 +98,7 @@ export const Publish = () => {
             const contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
             const exchangeInstance = new ethers.Contract(exchangeAddress!, exchangeABI, signer);
             
-            const tx = await contractIstance.deployERC721Contract(
-                NFTname,
-                NFTsymbol,
-                EncCID,
-                DownloadURL,
-                Assethash,
-                OfferingHash,
-                TrustSign,
-            );
-
-            contractIstance.once("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2) => {
+            contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2) => {
                 console.log("New ERC721 NFT contract deployed successfully!");
                 console.log(newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2);
                 /**
@@ -179,7 +169,18 @@ export const Publish = () => {
                 });
             });
 
-            const rc = await tx.wait();
+            const tx = await contractIstance.deployERC721Contract(
+                NFTname,
+                NFTsymbol,
+                EncCID,
+                DownloadURL,
+                Assethash,
+                OfferingHash,
+                TrustSign,
+            );
+            // const tx = await contractIstance.prova();
+
+            const rc = await tx.wait(3);
             console.log(rc)
         } catch (err) {
             console.log(err);

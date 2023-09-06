@@ -21,18 +21,17 @@ export const Catalogue = () => {
     const [loading, setLoading] = useState(true);
     const columnsPerRow = 4;
 
-    const { shimmerProvider } = useMetaMask();
+    const { provider } = useMetaMask();
 
     useEffect(() => {
 
         const getNFTinfo = async (contractAddress: string): Promise<IDataOffering> => {
             const contractABI = await getContractABI("ERC721Base");
-            const contractIstance = new ethers.Contract(contractAddress, contractABI, shimmerProvider);
+            const contractIstance = new ethers.Contract(contractAddress, contractABI, provider);
             
             const DTcontractABI = await getContractABI("ERC20Base");
             const [...DTcontractAddress] =  await contractIstance.getDTaddresses();
-            console.log(DTcontractAddress)
-            const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, shimmerProvider);
+            const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, provider);
             
             let NFTinfo: IDataOffering = {
                 NFTaddress: contractAddress,
@@ -51,10 +50,9 @@ export const Catalogue = () => {
             try {
                 const contractABI = await getContractABI("ERC721Factory");
                 const contractAddress = getContractAddress("ERC721Factory");
-                let contractIstance = new ethers.Contract(contractAddress!, contractABI, shimmerProvider);
+                let contractIstance = new ethers.Contract(contractAddress!, contractABI, provider);
     
                 let [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();
-                console.log(NFTaddresses)
                 let NFTobjs: IDataOffering[] = [];
                 for(let i = 0; i < NFTaddresses.length; i++ ) {
                     let l_dataoffering = await getNFTinfo(NFTaddresses[i]);

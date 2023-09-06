@@ -18,6 +18,18 @@ module.exports = {
       gasPrice: 8000000000,
       accounts: [process.env.PRIVATE_KEY],
     },
+    'sepolia': {
+      url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      gas: 2100000, 
+      gasPrice: 10000000000,
+      accounts: [process.env.SEPOLIA_PKEY]
+    },
+    'polygon_mumbai': {
+      url: "https://rpc-mumbai.maticvigil.com",
+      gas: 2100000, 
+      gasPrice: 8000000000,
+      accounts: [process.env.SEPOLIA_PKEY]
+    }
     // 'shimmerevm-testnet2': {
     //   url: 'https://json-rpc.evm.testnet.shimmer.network',
     //   chainId: 1071,
@@ -35,7 +47,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      'shimmerevm-testnet': 'ABCDE12345ABCDE12345ABCDE123456789'
+      'shimmerevm-testnet': 'ABCDE12345ABCDE12345ABCDE123456789',
+      'polygon_mumbai': 'CJDGS5QWIIHRZPD127CXST931ZNJM3RQY9'
     },
     customChains: [
       {
