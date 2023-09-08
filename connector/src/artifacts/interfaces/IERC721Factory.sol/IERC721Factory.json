@@ -40,6 +40,11 @@
           "type": "address"
         },
         {
+          "internalType": "address",
+          "name": "erc721address_",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
           "name": "maxSupply_",
           "type": "uint256"

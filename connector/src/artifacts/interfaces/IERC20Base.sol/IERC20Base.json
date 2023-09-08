@@ -7,6 +7,53 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "allInOne_approve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "caller",
           "type": "address"
         }
@@ -20,6 +67,35 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "fixedRateAddress_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "fixedrate_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "giveMintPerm_toExchange",
+          "type": "uint256"
+        }
+      ],
+      "name": "createFixedRate",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exchangeID",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -47,6 +123,11 @@
         {
           "internalType": "address",
           "name": "router_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "factory_",
           "type": "address"
         },
         {

@@ -35,6 +35,72 @@
       "type": "event"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "erc20token",
+          "type": "address"
+        }
+      ],
+      "name": "addNewErc20token",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "erc721address_",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxSupply_",
+          "type": "uint256"
+        }
+      ],
+      "name": "createDataToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "erc20token",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "getNFTowner",
       "outputs": [
