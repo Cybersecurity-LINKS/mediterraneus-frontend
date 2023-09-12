@@ -166,6 +166,8 @@ export const fetchIDentityABI = async () => {
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     let abi: InterfaceAbi = await fetchIDentityABI();
+    if(abi == null)
+      abi = await getContractABI("IDentity")
     return new ethers.Contract(`${identity_sc_address}`, abi, await provider.getSigner())
 }
 

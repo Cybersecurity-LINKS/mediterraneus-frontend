@@ -14,6 +14,7 @@ import { Identity } from './components/Identity';
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
 import { UploadAsset } from './components/UploadAsset';
+import { IdentityContextProvider } from './hooks/useIdentity';
 
 client
   .init("client_wasm_bg.wasm")
@@ -22,6 +23,7 @@ client
 export const App = () => {
   return (
     <MetaMaskContextProvider>
+    <IdentityContextProvider>
         <Navigation />
         <Container fluid>
         <Routes>
@@ -75,7 +77,7 @@ export const App = () => {
           } />
         </Routes>
       </Container>
-        
+    </IdentityContextProvider>
     </MetaMaskContextProvider>
   )
 }
