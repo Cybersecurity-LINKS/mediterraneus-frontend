@@ -11,7 +11,8 @@ const enum CONTRACT_ADRRESS{
   "ERC20Base" = 2,
   "RouterFactory" = 3,
   "FixedRateExchange" = 4,
-  "ERC721Factory" = 5,
+  "IDentity" = 5,
+  "ERC721Factory" = 6,
 
 }
 
