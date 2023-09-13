@@ -15,6 +15,7 @@ import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
 import { UploadAsset } from './components/UploadAsset';
 import { IdentityContextProvider } from './hooks/useIdentity';
+import { IdentityToast } from './components/Identity/DisplayToast';
 
 client
   .init("client_wasm_bg.wasm")
@@ -31,6 +32,7 @@ export const App = () => {
             <Row>
               <ToastContainer>
                     <Display />
+                    <IdentityToast />
               </ToastContainer>
             </Row>
           }/>
@@ -39,6 +41,7 @@ export const App = () => {
                 <Row className="d-flex justify-content-center">
                   <Col sm={4}>
                     <Display />
+                    <IdentityToast />
                   </Col>
                   <Col sm={8}>
                     <Publish />

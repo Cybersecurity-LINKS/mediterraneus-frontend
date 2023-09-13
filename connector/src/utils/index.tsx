@@ -10,8 +10,9 @@ const enum CONTRACT_ADRRESS{
   "ERC721Base" = 1,
   "ERC20Base" = 2,
   "RouterFactory" = 3,
-  "ERC721Factory" = 4,
-  "FixedRateExchange" = 5
+  "FixedRateExchange" = 4,
+  "ERC721Factory" = 5,
+
 }
 
 export const formatBalance = (rawBalance: string) => {
@@ -29,6 +30,9 @@ export const formatAddress = (addr: string) => {
 }
 export const formatAddress2 = (addr: string) => {
   return `${addr.substring(0, 5)}...${addr.substring(38, 42)}`
+}
+export const formatDid = (did: string | undefined) => {
+  return `${did?.substring(0, 25)}...${did?.substring(30, 42)}`
 }
 
 export const getContractABI = async (contractName: string) => {

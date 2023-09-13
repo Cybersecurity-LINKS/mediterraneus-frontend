@@ -5,13 +5,17 @@ import { ContractTransactionResponse, ethers } from "ethers";
 import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useState } from "react";
 
 export const Identity = () => {
     const { provider, wallet } = useMetaMask();
     const { did, didDoc, vc, setTriggerTrue, loading } = useIdentity();
+
+    const [cretingIdentity, setCreatingIdentity] = useState(false);
  
     const createIdentity_ext = async () => {
         try {
+            setCreatingIdentity(true);
             console.log(wallet.accounts[0]);
             const response = await fetch('http://localhost:1234/identity', {
             method: 'POST',
@@ -23,15 +27,18 @@ export const Identity = () => {
           await response.json().then(resp => {
             console.log(resp.did)
             setTriggerTrue();
+            setCreatingIdentity(false);
           });
         } catch (error) {
             console.log(error)
+            setCreatingIdentity(false);
             throw error;
         }
     }
 
     const requestVC = async () => {
         try {
+            setCreatingIdentity(true);
             const response = await fetch('http://localhost:3213/api/identity', {
                 method: 'POST',
                 headers: {
@@ -93,8 +100,10 @@ export const Identity = () => {
             if(!storeVCresp.ok || storeVCresp.status != 201)
                 throw Error("Cannot store VC");
             setTriggerTrue();
+            setCreatingIdentity(false);
         } catch (error) {
             console.log(error);
+            setCreatingIdentity(false);
             throw error;
         }
     }
@@ -113,6 +122,15 @@ export const Identity = () => {
                     marginTop: 270,
                 }}/></Container>
                 :
+                cretingIdentity ? <Container className="d-flex justify-content-center"><Spinner animation="border" variant="success" style={{
+                    width: '5rem', 
+                    height: '5rem', 
+                    position: 'absolute', 
+                    justifyContent: 'center',
+                    flex: 1,
+                    alignItems: 'center',
+                    marginTop: 270,
+                }}/></Container> : 
                 <Container fluid className="d-flex mt-3 justify-content-center">
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>

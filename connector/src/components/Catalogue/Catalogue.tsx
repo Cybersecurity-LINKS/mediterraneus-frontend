@@ -67,7 +67,7 @@ export const Catalogue = () => {
             
         getDataOfferings();
         
-    }, [dataOfferings.length]);
+    }, [dataOfferings.length, provider]);
 
     return(
         <>
