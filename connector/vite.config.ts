@@ -28,4 +28,7 @@ export default defineConfig({
     // necessary for segment analytics lib to work
     global: {},
   },
+  server: {
+    port: 5174
+  }
 })

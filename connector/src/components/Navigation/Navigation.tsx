@@ -16,7 +16,7 @@ export const Navigation = () => {
         <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
         <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload Asset</Nav.Link>
         <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
-        <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Global Catalogue<TbExternalLink/></Nav.Link>
+        <Nav.Link as={Link} to="http://localhost:5173/catalogue" target='_blank' className='me-2 ms-2'>Global Catalogue<TbExternalLink/></Nav.Link>
       </Nav>
       <Nav className='float-right me-5'>
       {!hasProvider &&
