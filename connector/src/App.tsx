@@ -2,7 +2,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { Navigation } from './components/Navigation'
 import { Display } from './components/Display'
-import { Catalogue } from './components/Catalogue'
 import { Publish} from './components/Publish';
 
 import { MetaMaskError } from './components/MetaMaskError'
@@ -53,9 +52,6 @@ export const App = () => {
             </>
             }
           />
-          <Route path="catalogue" element={
-            <Catalogue/>
-          } />
           <Route path="identity" element={
             <>
               <Row className="d-flex justify-content-center">
