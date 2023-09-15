@@ -13,8 +13,20 @@ const enum CONTRACT_ADRRESS{
   "FixedRateExchange" = 4,
   "IDentity" = 5,
   "ERC721Factory" = 6,
-
 }
+
+export const NETWORKS: { [k: string]: string } = {
+  1: "Ethereum Main Network",
+  1072: "Shimmer Testnet Network",
+  31337: "Hardhat Network",
+};
+
+export const NETWORK_SYMBOL: { [k: string]: string } = {
+  1: "ETH",
+  1072: "SMR",
+  31337: "CAZZO",
+};
+
 
 export const formatBalance = (rawBalance: string) => {
   const balance = (parseInt(rawBalance) / 1000000000000000000).toFixed(4)
