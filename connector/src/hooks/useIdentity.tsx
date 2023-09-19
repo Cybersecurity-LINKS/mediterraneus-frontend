@@ -1,5 +1,6 @@
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
+import { useConnector } from "@/hooks/useConnector";
 
 interface IdentityData {
     did: IotaDID | undefined
@@ -14,6 +15,7 @@ interface IdentityData {
 const IdentityContext = createContext<IdentityData>({} as IdentityData);
 
 export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
+    const { connectorUrl } = useConnector();
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
@@ -24,7 +26,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     useEffect(() => {
         const getIDfromBackend = async () => {
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const response = await fetch(`http://localhost:1234/identity/${accounts[0]}`, {
+            const response = await fetch(`${connectorUrl}/identity/${accounts[0]}`, {
                 method: 'GET',
                 headers: {
                     "Content-type": "application/json"
@@ -46,10 +48,17 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
         if(trigger){
             window.ethereum.on('accountsChanged', getIDfromBackend);
-            getIDfromBackend();
+            if(connectorUrl !== "") {
+                getIDfromBackend();   
+            } else {
+                setDid(undefined);
+                setDidDoc(undefined);
+                setVc(undefined);
+                setLoading(false);
+            }
             setTrigger(false);
         }
-    }, [trigger]);
+    }, [trigger, connectorUrl]);
 
     const setTriggerTrue = () => {
         setTrigger(true);

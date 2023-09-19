@@ -4,7 +4,7 @@ import { createIdentity, resolveDID, signData } from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
-import { keccak256 } from 'ethers';
+import { id, keccak256 } from 'ethers';
 import pkg from 'crypto-js';
 const { AES, enc } = pkg;
 
@@ -52,6 +52,23 @@ export class IdentityController {
                 did: did_get.did,
                 did_doc: didDoc,
                 vc: did_get.vc
+            }).end()
+        } catch (error) {
+            console.log(error)
+            res.status(400).send(error).end();
+        }
+    }
+
+    public async IDentityMaterial(eth_address: string, res) {
+        try {
+            const identity = (await getIdentity(eth_address));
+            if(identity?.did === undefined)
+                throw Error("Could not retrieve any DID from the DB.");
+            const didDoc: IotaDocument = await resolveDID(IotaDID.parse(identity.did)) 
+            res.status(200).send({
+                    vc: identity.vc,
+                    did_doc: didDoc,
+                    key: identity.privkey
             }).end()
         } catch (error) {
             console.log(error)

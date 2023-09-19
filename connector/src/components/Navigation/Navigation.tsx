@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { TbExternalLink } from 'react-icons/tb';
 import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 
-export const Navigation = () => {
+export const Navigation = (props: any) => {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
 
@@ -12,17 +12,19 @@ export const Navigation = () => {
     <Navbar bg="light" variant="light">
     <Container fluid>
       <Navbar.Brand className="float-left ms-5" as={Link} to="/" style={{fontSize: "25px"}}>CONNECTOR</Navbar.Brand>
+      {props.loggedIn ? 
       <Nav className="" style={{fontSize: "20px"}}>
         <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
         <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload Asset</Nav.Link>
         <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
-        <Nav.Link as={Link} to="http://localhost:5173/catalogue" target='_blank' className='me-2 ms-2'>Global Catalogue<TbExternalLink/></Nav.Link>
-      </Nav>
+        <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Global Catalogue<TbExternalLink/></Nav.Link>
+      </Nav> :  "" }
+      
       <Nav className='float-right me-5'>
       {!hasProvider &&
         <Nav.Link href="https://metamask.io" target="_blank">Install MetaMask</Nav.Link>
       }
-      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 &&
+      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && props.loggedIn &&
         <Button variant="primary"disabled={isConnecting}  onClick={connectMetaMask}>
           Connect MetaMask
         </Button>

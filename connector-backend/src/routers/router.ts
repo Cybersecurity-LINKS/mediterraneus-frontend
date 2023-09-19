@@ -16,7 +16,11 @@ const identityController = new IdentityController();
 
 router.get('/identity/:eth_address', async (req, res) => {
     await identityController.get(req.params.eth_address, res)
-} );
+});
+
+router.get('/identitymaterial/:eth_address', async (req, res) => {
+    await identityController.IDentityMaterial(req.params.eth_address, res)
+})
 
 router.post('/identity', async (req, res) => {
     await identityController.post(req, res)

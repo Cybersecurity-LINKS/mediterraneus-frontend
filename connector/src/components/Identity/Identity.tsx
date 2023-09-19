@@ -2,22 +2,27 @@ import { useMetaMask } from "@/hooks/useMetaMask";
 import { extractNumberFromVCid, getIdentitySC } from "@/utils";
 import { Credential } from "@iota/identity-wasm/web"
 import { ContractTransactionResponse, ethers } from "ethers";
-import { Button, Card, Container, Spinner } from "react-bootstrap";
+import { Button, Card, Container, Form, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useState } from "react";
+import { useLocation } from "react-router";
+import { useConnector } from "@/hooks/useConnector";
 
 export const Identity = () => {
+    const { state } = useLocation();
     const { provider, wallet } = useMetaMask();
     const { did, didDoc, vc, setTriggerTrue, loading } = useIdentity();
+    const { connectorUrl, setConnector } = useConnector();
 
     const [cretingIdentity, setCreatingIdentity] = useState(false);
  
-    const createIdentity_ext = async () => {
+    const createIdentity_ext = async (event: any) => {
         try {
+            event.preventDefault();
             setCreatingIdentity(true);
             console.log(wallet.accounts[0]);
-            const response = await fetch('http://localhost:1234/identity', {
+            const response = await fetch(`${connectorUrl}/identity`, {
             method: 'POST',
             headers: {
               "Content-type": "application/json"
@@ -50,7 +55,7 @@ export const Identity = () => {
             console.log(json_resp);
             const vcHash = `${json_resp.vchash}`;
 
-            const responseSign = await fetch("http://localhost:1234/signdata", {
+            const responseSign = await fetch(`${connectorUrl}/signdata`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
@@ -87,7 +92,7 @@ export const Identity = () => {
             let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
             await tx.wait();
             // store VC in connector's backend.
-            const storeVCresp = await fetch("http://localhost:1234/storeVC", {
+            const storeVCresp = await fetch(`${connectorUrl}/storeVC`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
@@ -105,6 +110,31 @@ export const Identity = () => {
             console.log(error);
             setCreatingIdentity(false);
             throw error;
+        }
+    }
+
+    const downloadIdentity = async () => {
+        const response = await fetch(`${connectorUrl}/identitymaterial/${wallet.accounts[0]}`, {
+            method: 'GET',
+            headers: {
+                "Content-type": "application/json"
+            },
+        });
+        if(response.status == 200){
+            const identityMat = await response.json();
+            console.log(identityMat)
+            const file = new Blob([JSON.stringify(identityMat)], {type: "text/json;charset=utf-8"})
+
+            // anchor link
+            const element = document.createElement("a");
+            element.href = URL.createObjectURL(file);
+            element.download = "IdentityMat-" + Date.now() + ".json";
+
+            // simulate link click
+            document.body.appendChild(element); // Required for this to work in FireFox
+            element.click();
+        } else {
+            // set error message
         }
     }
 
@@ -135,13 +165,31 @@ export const Identity = () => {
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
                             <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
+                            {
+                                !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
+                                    <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
+                                        Download your IDentity
+                                    </Button>
+                                )
+                            }
                         </Card.Body>
+                        {
+                            (state.fromLogin ?
+                                <Form.Group controlId="connService" className="mb-3 d-flex justify-content-center">
+                                <h4 style={{fontSize: "25px", fontFamily: "serif"}}>Connector Service URL*</h4>
+                                <div className='d-flex justify-content-center ms-3'>
+                                    <Form.Control type="input" placeholder="http://127.0.0.1" value={connectorUrl} onChange={(event) => {setConnector(event.target.value)}}/>
+                                </div>
+                                </Form.Group>
+                            : "")
+                        }
                         {
                             did === undefined 
                             ? // true
-                            <div className='d-flex justify-content-center mb-2 mt-3 ms-auto me-auto '>
-                                <Button style={{width: "150px"}} onClick={createIdentity_ext}>Create Identity</Button>
-                            </div>
+                            <>                            
+                                <IdentityAccordion title={"Decentralized IDentifier"} content={"No Decentralized IDentifier available. Please request one."} />  
+                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={createIdentity_ext}>Request DID</Button>
+                            </>
                             : // false
                             <>
                                 <IdentityAccordion title={"Decentralized IDentifier"} content={did.toString() +"\n"+ JSON.stringify(didDoc, null, 2)} />

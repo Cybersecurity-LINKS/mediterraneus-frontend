@@ -1,0 +1,35 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Background color of the page */
+  }
+  
+  .login-box {
+    background-color: #ffffff; /* Background color of the form */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 500px; /* Adjust the width as needed */
+    position: relative;
+    top: 0;
+    transition: top 0.3s ease-in-out;
+  }
+  
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 20px 10px;
+    border-color: transparent transparent #ffffff transparent;
+  }
+  
+  /* Adjust the top value to control the floating distance */
+  .float-up .login-box {
+    top: -20px;
+  }
