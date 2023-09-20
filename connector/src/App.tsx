@@ -7,7 +7,7 @@ import { Publish} from './components/Publish';
 import { MetaMaskError } from './components/MetaMaskError'
 import { MetaMaskContextProvider } from './hooks/useMetaMask'
 import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
-import { Routes, Route, Navigate, useLocation } from 'react-router';
+import { Routes, Route, Navigate } from 'react-router';
 import { Identity } from './components/Identity';
 
 import * as client from "@iota/client-wasm/web";
@@ -26,7 +26,6 @@ client
   .then(() => identity.init("identity_wasm_bg.wasm"));
 
 export const App = () => {
-  const { state } = useLocation();
   const [loggedIn, setLoggedIn] = useState(false);
   
   return (
@@ -48,7 +47,7 @@ export const App = () => {
             <Navigate to="/login"/>
           }/>
           <Route path="/login" element={
-              loggedIn ? <Navigate to="" /> : <Login />
+              loggedIn ? <Navigate to="" /> : <Login setLoggedIn={setLoggedIn}/>
           }/>
           <Route path="/register" element={
               <Identity />

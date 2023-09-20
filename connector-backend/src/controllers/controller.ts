@@ -1,7 +1,7 @@
-import { IotaDID, IotaDocument, X25519 } from '@iota/identity-wasm/node/index.js'
+import { IotaDID, IotaDocument, Presentation, X25519, Credential, ProofOptions } from '@iota/identity-wasm/node/index.js'
 import { _getAssetAliases, _getLADentry_byAlias, getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
-import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc } from '../utils.js'
+import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, getIotaDIDfromString } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
 import { id, keccak256 } from 'ethers';
@@ -9,6 +9,7 @@ import pkg from 'crypto-js';
 const { AES, enc } = pkg;
 
 import crypto from 'crypto'
+import Identity from '../__generated__/identity.js';
 
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
@@ -52,23 +53,6 @@ export class IdentityController {
                 did: did_get.did,
                 did_doc: didDoc,
                 vc: did_get.vc
-            }).end()
-        } catch (error) {
-            console.log(error)
-            res.status(400).send(error).end();
-        }
-    }
-
-    public async IDentityMaterial(eth_address: string, res) {
-        try {
-            const identity = (await getIdentity(eth_address));
-            if(identity?.did === undefined)
-                throw Error("Could not retrieve any DID from the DB.");
-            const didDoc: IotaDocument = await resolveDID(IotaDID.parse(identity.did)) 
-            res.status(200).send({
-                    vc: identity.vc,
-                    did_doc: didDoc,
-                    key: identity.privkey
             }).end()
         } catch (error) {
             console.log(error)
@@ -229,5 +213,34 @@ export class IdentityController {
         
         console.log(buf2hex(shared_key));
         res.status(200).send({key: buf2hex(shared_key)}).end();
+    }
+
+    public async generateVP(req: TypedRequestBody<{
+        eth_address,
+        challenge
+    }>, res) {
+        try {
+            const identity: Identity = await getIdentity(req.body.eth_address);
+            const did_doc = await resolveDID(getIotaDIDfromString(identity.did))
+
+            const unsignedVp = new Presentation({
+                holder: did_doc.id(),
+                verifiableCredential: Credential.fromJSON(identity.vc)
+            });
+            console.log(req.body.challenge["challenge"])
+            const signedVp = await did_doc.signPresentation(
+                unsignedVp,
+                privKeytoBytes(identity.privkey),
+                "#key-1",
+                new ProofOptions({
+                    challenge: req.body.challenge["challenge"].toString()
+                }));
+            const signedVp_json = signedVp.toJSON();
+
+            res.status(200).send({signed_vp: signedVp_json}).end();
+        } catch (error) {
+            console.log(error);
+            res.status(500).send({error: `Could not generate the VP: ${error}`}).end();
+        }
     }
 }

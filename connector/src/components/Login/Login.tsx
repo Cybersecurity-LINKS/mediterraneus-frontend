@@ -1,78 +1,58 @@
 import { useMetaMask } from "@/hooks/useMetaMask";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap"
 import './Login.css'
-import { Credential, Duration, IotaDocument, Presentation, ProofOptions, Timestamp } from "@iota/identity-wasm/web";
-import { extractNumberFromVCid, getIdentitySC, privKeytoBytes } from "@/utils";
+import { getIdentitySC } from "@/utils";
 import { useNavigate } from "react-router";
 import { useConnector } from "@/hooks/useConnector";
+import authAPI from '@/api/authAPI';
 
-export const Login = () => {    
+
+export const Login = (props: any) => {    
     const navigate = useNavigate();
 
     const { wallet, isConnecting, connectMetaMask, provider } = useMetaMask();
-    const [errorMessage, setErrorMessage] = useState('');
-    const [loginFile, setLoginFile] = useState<HTMLInputElement | null>(null);
     const { connectorUrl, setConnector } = useConnector();
 
-
-    useEffect(() => {
-        setLoginFile(document.getElementById("uploadIdMat") as HTMLInputElement);
-    }, []);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const clearError = () => setErrorMessage('')
 
     const handleLogin = async () => {
         try {
-            // get vc from file
-            const login_file = loginFile!.files?.[0];
-            const content = await login_file?.text();
-            const idmat_json = JSON.parse(content!)
-            const vc = Credential.fromJSON(idmat_json["vc"]);
-            const holder_diddoc = IotaDocument.fromJSON(idmat_json["did_doc"])
-            const key = privKeytoBytes(idmat_json["key"]);
-            console.log(vc.credentialSubject().at(0)?.id) // holder did
-
-            // verify if vc_id is on IDSC and active
-            const vc_id = extractNumberFromVCid(vc);
-            const IDSC_istance = await getIdentitySC(provider!);
-            if(!(await IDSC_istance.isVCActive(vc_id))) {
-                throw "VC is not Active!";
-            }
-
-            // req challenge from back
-            // TODO
-            const challenge = ""
-
-            // create VP
-            const unsignedVp = new Presentation({
-                holder: vc.credentialSubject().at(0)?.id,
-                verifiableCredential: vc,
-            });
-            
-            // Sign the verifiable presentation using the holder's verification method
-            // and include the requested challenge and expiry timestamp.
-            const signedVp = await holder_diddoc.signPresentation(
-                unsignedVp,
-                key,
-                "#key-1",
-                new ProofOptions({
-                    challenge: challenge,
-                    expires: Timestamp.nowUTC().checkedAdd(Duration.minutes(10)),
-                }),
-            );
-
-            // send VP to backend   
-            
+            // login to backend, receive challenge
+            let challenge = await authAPI.getChallenge(wallet.accounts[0]);
+            // ask connector (identity key wallet) to create a vp
+            let signed_vp = await authAPI.createVP(connectorUrl, challenge, wallet.accounts[0]);
+            // send vp to verifier (catalogue)
+            if((await authAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
+                props.setLoggedIn(true);
+            }  
         } catch (error) {
             console.log(error)
         }
     }
 
     const handleRegister = async () => {
-        navigate("/register", {
-            state: {fromLogin: true}
-        })
+        try {
+            const IDSC_istance = await getIdentitySC(provider!);
+            const is_active = await IDSC_istance.isVCActive_Addr(wallet.accounts[0]);
+            if(is_active === true) {
+                setErrorMessage("Already registered. Please continue with Login")
+            } else {
+                navigate("/register", {
+                    state: {fromLogin: true}
+                })
+            }    
+        } catch (error: any) {
+            // if exception is thrown by the idsc call it means that the given
+            // eth address does not have a vc. So it still lies in the case where
+            // the navigate has to be called.
+            navigate("/register", {
+                state: {fromLogin: true}
+            })
+        }
+        
     }
 
     return(
@@ -99,20 +79,11 @@ export const Login = () => {
                         }
                     </Form.Group>
 
-                    {/* Load Verifiable Presentation Section */}
-                    <Form.Group controlId="uploadIdMat" className="mt-5">
-                        <h4>Load your Identity</h4>
-                        <hr className="mb-3" />
-                        <div className='d-flex justify-content-center '>
-                            <Form.Control type="file" size="lg" accept='.json'/>
-                        </div>
-                    </Form.Group>
-
                     <Form.Group controlId="connService" className="mt-5">
                         <h4>Specify your Connector Service</h4>
                         <hr className="mb-3" />
                         <div className='d-flex justify-content-center '>
-                            <Form.Control type="input" size="lg" onChange={(event) => {setConnector(event.target.value)}}/>
+                            <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value)}}/>
                         </div>
                     </Form.Group>
 

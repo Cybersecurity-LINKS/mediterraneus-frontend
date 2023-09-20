@@ -6,12 +6,13 @@ import { Button, Card, Container, Form, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useConnector } from "@/hooks/useConnector";
 
 export const Identity = () => {
     const { state } = useLocation();
-    const { provider, wallet } = useMetaMask();
+    const navigate = useNavigate();
+    const { provider, wallet, isConnecting, connectMetaMask } = useMetaMask();
     const { did, didDoc, vc, setTriggerTrue, loading } = useIdentity();
     const { connectorUrl, setConnector } = useConnector();
 
@@ -138,6 +139,10 @@ export const Identity = () => {
         }
     }
 
+    const gotoLogin = async () => {
+        navigate("/login");
+    }
+
     return (
         <>
             {
@@ -166,19 +171,38 @@ export const Identity = () => {
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
                             <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
                             {
-                                !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
+                                (state !== null) && !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                     <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
                                         Download your IDentity
                                     </Button>
                                 )
                             }
+                            {
+                                (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
+                                    <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={gotoLogin} value="download">
+                                        Go to Login
+                                    </Button>
+                                )
+                            }
                         </Card.Body>
+                        <Form.Group controlId="username" className="mb-3 d-flex justify-content-center">
+                            {/* Check if MetaMask is available and no accounts are connected */}
+                            {(state !== null) && state.fromLogin && window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
+                                <>
+                                <h4 className="me-2">Connect your wallet</h4>
+                                <Button variant="outline-primary" disabled={isConnecting} onClick={connectMetaMask}>Connect MetaMask</Button>
+                                </>) 
+                            || (state !== null) && state.fromLogin && (
+                                    <><h4 className="me-2" style={{fontSize: "25px", fontFamily: "serif"}}>Connect your wallet</h4>
+                                    <Form.Text style={{fontSize: '18px', color: 'blue'}}>{wallet.accounts[0]}</Form.Text></>
+                            )}
+                        </Form.Group>
                         {
-                            (state.fromLogin ?
+                            ((state !== null) && state.fromLogin ?
                                 <Form.Group controlId="connService" className="mb-3 d-flex justify-content-center">
                                 <h4 style={{fontSize: "25px", fontFamily: "serif"}}>Connector Service URL*</h4>
                                 <div className='d-flex justify-content-center ms-3'>
-                                    <Form.Control type="input" placeholder="http://127.0.0.1" value={connectorUrl} onChange={(event) => {setConnector(event.target.value)}}/>
+                                    <Form.Control type="input" placeholder="http://127.0.0.1" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue()}}/>
                                 </div>
                                 </Form.Group>
                             : "")

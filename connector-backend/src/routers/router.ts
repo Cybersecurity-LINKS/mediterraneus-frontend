@@ -18,10 +18,6 @@ router.get('/identity/:eth_address', async (req, res) => {
     await identityController.get(req.params.eth_address, res)
 });
 
-router.get('/identitymaterial/:eth_address', async (req, res) => {
-    await identityController.IDentityMaterial(req.params.eth_address, res)
-})
-
 router.post('/identity', async (req, res) => {
     await identityController.post(req, res)
 });
@@ -64,6 +60,10 @@ router.get("/ladInfo/:eth_address/:asset_alias", async (req, res) => {
 
 router.post("/simulate", async (req, res) => {
     await identityController.simulateGCdecrypt(req, res);
+})
+
+router.post("/generate_vp", async (req, res) => {
+    await identityController.generateVP(req, res);
 })
 
 export default router;
