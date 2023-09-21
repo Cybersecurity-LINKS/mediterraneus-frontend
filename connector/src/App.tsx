@@ -15,10 +15,9 @@ import * as identity from "@iota/identity-wasm/web";
 import { UploadAsset } from './components/UploadAsset';
 import { IdentityContextProvider } from './hooks/useIdentity';
 import { IdentityToast } from './components/Identity/DisplayToast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Login } from './components/Login';
 import { Catalogue } from './components/Catalogue';
-import { ConnectorContextProvider } from '@/hooks/useConnector';
 
 
 client
@@ -28,14 +27,23 @@ client
 export const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   
+  useEffect(() => {
+    const loggedIn_ = sessionStorage.getItem("loggedIn");
+    if (loggedIn_ === "true") {
+      setLoggedIn(true);
+    } else {
+      setLoggedIn(false);
+    }
+
+  }, []);
+
   return (
     <MetaMaskContextProvider>
-    <ConnectorContextProvider>
     <IdentityContextProvider>
         <Navigation loggedIn={loggedIn}/>
         <Container fluid>
         <Routes>
-        <Route path="" element={
+        <Route path="/" element={
             loggedIn ?
             <Row>
               <ToastContainer>
@@ -47,7 +55,7 @@ export const App = () => {
             <Navigate to="/login"/>
           }/>
           <Route path="/login" element={
-              loggedIn ? <Navigate to="" /> : <Login setLoggedIn={setLoggedIn}/>
+              loggedIn ? <Navigate to="/" /> : <Login setLoggedIn={setLoggedIn} />
           }/>
           <Route path="/register" element={
               <Identity />
@@ -107,7 +115,6 @@ export const App = () => {
         </Routes>
       </Container>
     </IdentityContextProvider>
-    </ConnectorContextProvider>
     </MetaMaskContextProvider>
   )
 }

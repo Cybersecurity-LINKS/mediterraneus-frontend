@@ -4,15 +4,15 @@ import { Alert, Button, Container, Form } from "react-bootstrap"
 import './Login.css'
 import { getIdentitySC } from "@/utils";
 import { useNavigate } from "react-router";
-import { useConnector } from "@/hooks/useConnector";
 import authAPI from '@/api/authAPI';
+import { useIdentity } from "@/hooks/useIdentity";
 
 
 export const Login = (props: any) => {    
     const navigate = useNavigate();
 
     const { wallet, isConnecting, connectMetaMask, provider } = useMetaMask();
-    const { connectorUrl, setConnector } = useConnector();
+    const { setTriggerTrue, connectorUrl, setConnector } = useIdentity()
 
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -27,8 +27,12 @@ export const Login = (props: any) => {
             // send vp to verifier (catalogue)
             if((await authAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
                 props.setLoggedIn(true);
-            }  
+                sessionStorage.setItem("loggedIn", "true");
+            } else {
+                setErrorMessage('Login failed!');
+            } 
         } catch (error) {
+            setErrorMessage('Login failed!');
             console.log(error)
         }
     }
@@ -83,7 +87,7 @@ export const Login = (props: any) => {
                         <h4>Specify your Connector Service</h4>
                         <hr className="mb-3" />
                         <div className='d-flex justify-content-center '>
-                            <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value)}}/>
+                            <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue();}}/>
                         </div>
                     </Form.Group>
 

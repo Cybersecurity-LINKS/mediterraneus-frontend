@@ -227,7 +227,6 @@ export class IdentityController {
                 holder: did_doc.id(),
                 verifiableCredential: Credential.fromJSON(identity.vc)
             });
-            console.log(req.body.challenge["challenge"])
             const signedVp = await did_doc.signPresentation(
                 unsignedVp,
                 privKeytoBytes(identity.privkey),

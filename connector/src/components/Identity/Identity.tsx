@@ -5,19 +5,18 @@ import { ContractTransactionResponse, ethers } from "ethers";
 import { Button, Card, Container, Form, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { useConnector } from "@/hooks/useConnector";
 
 export const Identity = () => {
     const { state } = useLocation();
     const navigate = useNavigate();
+
     const { provider, wallet, isConnecting, connectMetaMask } = useMetaMask();
-    const { did, didDoc, vc, setTriggerTrue, loading } = useIdentity();
-    const { connectorUrl, setConnector } = useConnector();
+    const { did, didDoc, vc, setTriggerTrue, loading, connectorUrl, setConnector } = useIdentity();
 
     const [cretingIdentity, setCreatingIdentity] = useState(false);
- 
+
     const createIdentity_ext = async (event: any) => {
         try {
             event.preventDefault();

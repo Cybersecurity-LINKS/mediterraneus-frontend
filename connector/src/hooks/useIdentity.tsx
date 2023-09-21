@@ -1,6 +1,5 @@
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
-import { useConnector } from "@/hooks/useConnector";
 
 interface IdentityData {
     did: IotaDID | undefined
@@ -8,6 +7,8 @@ interface IdentityData {
     vc: Credential | undefined
     trigger: boolean
     loading: boolean
+    connectorUrl: string
+    setConnector: (connectorUrl: string) => void
     setTriggerTrue: () => void
     setTriggerFalse: () => void
 }
@@ -15,13 +16,24 @@ interface IdentityData {
 const IdentityContext = createContext<IdentityData>({} as IdentityData);
 
 export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
-    const { connectorUrl } = useConnector();
+    const [connectorUrl, setConnectorUrl] = useState("");
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
+    const [loadingStorage, setloadingStorage] = useState(true);
+
+    useEffect(() => {
+        const url = sessionStorage.getItem("connectorUrl");
+        if (url != null && url != undefined) {
+            setConnectorUrl(url);
+            setTrigger(true);
+            setloadingStorage(false);
+        }
+    
+    }, []);   
 
     useEffect(() => {
         const getIDfromBackend = async () => {
@@ -46,8 +58,9 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             setLoading(false);
         };
 
-        if(trigger){
+        if(trigger && !loadingStorage){
             window.ethereum.on('accountsChanged', getIDfromBackend);
+            console.log("loading ", connectorUrl)
             if(connectorUrl !== "") {
                 getIDfromBackend();   
             } else {
@@ -58,7 +71,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             }
             setTrigger(false);
         }
-    }, [trigger, connectorUrl]);
+    }, [trigger, connectorUrl, loadingStorage]);
 
     const setTriggerTrue = () => {
         setTrigger(true);
@@ -66,6 +79,11 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
     const setTriggerFalse = () => {
         setTrigger(false);
+    }
+
+    const setConnector = (baseUrl: string) => {
+        sessionStorage.setItem("connectorUrl", baseUrl);
+        setConnectorUrl(baseUrl);
     }
 
     return (
@@ -76,6 +94,8 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             vc,
             trigger,
             loading,
+            connectorUrl,
+            setConnector,
             setTriggerTrue,
             setTriggerFalse
         }}
