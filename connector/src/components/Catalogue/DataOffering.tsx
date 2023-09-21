@@ -1,4 +1,4 @@
-import { Card, OverlayTrigger, Tooltip, TooltipProps, Button } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
 import { IDataOffering } from "./Catalogue";
 import { RefAttributes, MouseEvent, useState, useEffect } from "react";
 import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress, getIdentitySC } from "@/utils";
@@ -19,6 +19,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const [price, setPrice] = useState(0);
     const [native, setNative] = useState("");
     const [loading, setLoading] = useState(true);
+    const [loadingOffering, setLoadingOffering] = useState(true); 
 
     const renderTooltip = (props: JSX.IntrinsicAttributes & TooltipProps & RefAttributes<HTMLDivElement>) => (
         <Tooltip id="button-tooltip" {...props}>
@@ -38,6 +39,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         if(!loading) {
             getOfferingFromIPFS();
             getDT_Price();
+            setLoadingOffering(false);
         }
     }, [props.NFTdataobj.owner, loading])
 
@@ -157,15 +159,25 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         <Card.Link href={baseExplorerURL+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2">{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
                     </OverlayTrigger>
                 </Card.Text>
-                
                 <Card.Title>Asset's Offering</Card.Title>
-                <Card style={{backgroundColor: "ThreeDLightShadow"}} className='mb-3 ms-auto me-auto'>
-                    {
-                        <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>
-                            {offering}
-                        </pre>
-                    }
+                {
+                    loadingOffering ? <Spinner animation="border" variant="success" style={{
+                        width: '3rem', 
+                        height: '3rem', 
+                        marginLeft: '13rem',
+                        position: 'relative',
+                        justifyContent: 'center',
+                        flex: 1,
+                    }}/> :
+                    <Card style={{backgroundColor: "ThreeDLightShadow"}} className='mb-3 ms-auto me-auto'>
+                        {
+                            <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>
+                                {offering}
+                            </pre>
+                        }
                     </Card>
+                }
+                
                 <Card.Title className="mb-3">Price for Asset Access: 1 {`${props.NFTdataobj.DTsymbol}`}</Card.Title>
                 <Card.Title className="mb-3">Exchange Rate: 1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Card.Title>
                 <Button type="submit" onClick={(event) => { handleSubmit(event)}}>Buy Data/Service Access</Button>
