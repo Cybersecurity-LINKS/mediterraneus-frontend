@@ -40,7 +40,7 @@ export const App = () => {
   return (
     <MetaMaskContextProvider>
     <IdentityContextProvider>
-        <Navigation loggedIn={loggedIn}/>
+        <Navigation loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>
         <Container fluid>
         <Routes>
         <Route path="/" element={

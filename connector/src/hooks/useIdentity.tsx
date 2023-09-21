@@ -11,6 +11,7 @@ interface IdentityData {
     setConnector: (connectorUrl: string) => void
     setTriggerTrue: () => void
     setTriggerFalse: () => void
+    clearSessionStorage: () => void
 }
 
 const IdentityContext = createContext<IdentityData>({} as IdentityData);
@@ -86,6 +87,11 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
         setConnectorUrl(baseUrl);
     }
 
+    const clearSessionStorage = () => {
+        sessionStorage.setItem("connectorUrl", "");
+        setConnectorUrl("");
+    }
+
     return (
     <IdentityContext.Provider
         value={{
@@ -97,7 +103,8 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             connectorUrl,
             setConnector,
             setTriggerTrue,
-            setTriggerFalse
+            setTriggerFalse,
+            clearSessionStorage
         }}
     >
         {children}

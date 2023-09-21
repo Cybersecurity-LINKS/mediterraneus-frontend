@@ -2,10 +2,18 @@ import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
 import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
+import { useIdentity } from '@/hooks/useIdentity';
 
 export const Navigation = (props: any) => {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
+  const { clearSessionStorage } = useIdentity();
+
+  const handleLogout = () => {
+    clearSessionStorage();
+    sessionStorage.setItem("loggedIn", "false");
+    props.setLoggedIn(false)
+  }
 
   return (
     <Navbar bg="light" variant="light">
@@ -54,6 +62,15 @@ export const Navigation = (props: any) => {
         </Card>
         </OverlayTrigger>
         </>
+      }
+      {
+        props.loggedIn && 
+          <Button 
+          className='ms-5' 
+          variant='outline-danger' 
+          style={{fontSize: '20px'}} 
+          onClick={handleLogout}
+        >Logout</Button>
       }
       </Nav>
     </Container>
