@@ -61,6 +61,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, provider);
         // get owner of DT
         const ownerAddress = await DTcontractIstance.getDTowner();
+        const ownerBalance = await DTcontractIstance.balanceOf(ownerAddress)
 
         // get Exchange address and contract instance
         const exchangeABI = await getContractABI("FixedRateExchange");
@@ -76,7 +77,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const res: BigInt = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
         const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
-        console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
+        console.log(`owner: ${ownerBalance} exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 

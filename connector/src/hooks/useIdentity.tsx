@@ -90,6 +90,9 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const clearSessionStorage = () => {
         sessionStorage.setItem("connectorUrl", "");
         setConnectorUrl("");
+        setDid(undefined);
+        setDidDoc(undefined);
+        setVc(undefined);
     }
 
     return (
