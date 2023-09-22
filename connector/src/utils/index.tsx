@@ -33,6 +33,22 @@ export const NETWORK_IMAGE: { [k: string]: string } = {
   31337: "../hardhat-seeklogo.com.svg",
 };
 
+export const NETWORK_BGCOLOR: { [k: string]: string } = {
+  1: "ETH",
+  1072: "green",
+  31337: "white",
+};
+
+export const NETWORK_WIDTH: { [k: string]: number } = {
+  1072: 25,
+  31337: 80,
+};
+
+export const NETWORK_HEIGHT: { [k: string]: number } = {
+  1072: 30,
+  31337: 60,
+};
+
 export const formatBalance = (rawBalance: string) => {
   const balance = (parseInt(rawBalance) / 1000000000000000000).toFixed(4)
   return balance

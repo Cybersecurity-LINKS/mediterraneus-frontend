@@ -11,12 +11,11 @@ export const IdentityToast = () => {
     <>
       <Toast className='mt-3 ms-5'>
         <Toast.Header closeButton={false}>
-          <Figure className='mt-2 ms-2 rounded me-2 bg-success '>
+          <Figure className='rounded mt-3'>
             <Figure.Image
-              width={25}
-              height={30}
-              src="../shimmerlogo.svg"
-              className="ms-3 me-3 mt-3 mb-3"
+              width={80}
+              height={50}
+              src="../fingerprint-seeklogo.com-3.svg"
             />
           </Figure>
           <strong className="mb-auto me-auto mt-auto text-black" style={{ fontSize: 18 }}>Connector's Identity</strong>
