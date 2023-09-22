@@ -1,5 +1,5 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
-import { NETWORKS, NETWORK_SYMBOL, formatChainAsNum } from '@/utils'
+import { NETWORKS, NETWORK_IMAGE, NETWORK_SYMBOL, formatChainAsNum } from '@/utils'
 import { Figure, Toast, Row} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 
@@ -11,11 +11,11 @@ export const Display = () => {
     <>
       <Toast className='mt-3 ms-5'>
         <Toast.Header closeButton={false}>
-          <Figure className='mt-2 ms-2 rounded me-2 bg-success '>
+          <Figure className='mt-2 ms-2 rounded me-2 bg-success'>
             <Figure.Image
               width={25}
               height={30}
-              src="../shimmerlogo.svg"
+              src={NETWORK_IMAGE[Number(wallet.chainId)]}
               className="ms-3 me-3 mt-3 mb-3"
             />
           </Figure>

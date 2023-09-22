@@ -11,9 +11,6 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = "https://explorer.evm.testnet.shimmer.network/address/";
     const { provider, wallet } = useMetaMask();
 
-    // The GC identity must be created. For now static until the GC is developed as a standalone app.
-   const priv_key = "";
-
     const [ownerDID, setOwnerDID] = useState<IotaDID>();
     const [offering, setOffering] = useState("");
     const [price, setPrice] = useState(0);
@@ -80,7 +77,6 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
         console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
-
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 
@@ -180,7 +176,12 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 
                 <Card.Title className="mb-3">Price for Asset Access: 1 {`${props.NFTdataobj.DTsymbol}`}</Card.Title>
                 <Card.Title className="mb-3">Exchange Rate: 1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Card.Title>
-                <Button type="submit" onClick={(event) => { handleSubmit(event)}}>Buy Data/Service Access</Button>
+                {
+                    ((wallet.accounts[0] as string).toString().toLowerCase() !== props.NFTdataobj.owner.toLowerCase()) &&
+                    <Button type="submit" onClick={(event) => { handleSubmit(event)}}>
+                        Buy Data/Service Access
+                    </Button>
+                }
             </Card.Body>
         </Card>
   );

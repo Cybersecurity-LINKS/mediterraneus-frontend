@@ -27,6 +27,11 @@ export const NETWORK_SYMBOL: { [k: string]: string } = {
   31337: "CAZZO",
 };
 
+export const NETWORK_IMAGE: { [k: string]: string } = {
+  1: "ETH",
+  1072: "../shimmerlogo.svg",
+  31337: "../hardhat-seeklogo.com.svg",
+};
 
 export const formatBalance = (rawBalance: string) => {
   const balance = (parseInt(rawBalance) / 1000000000000000000).toFixed(4)
@@ -45,7 +50,7 @@ export const formatAddress2 = (addr: string) => {
   return `${addr.substring(0, 5)}...${addr.substring(38, 42)}`
 }
 export const formatDid = (did: string | undefined) => {
-  return `${did?.substring(0, 25)}...${did?.substring(30, 42)}`
+  return `${did?.substring(0, 25)}...${did?.substring(70, did.length)}`
 }
 
 export const getContractABI = async (contractName: string) => {
