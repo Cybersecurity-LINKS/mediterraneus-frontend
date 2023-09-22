@@ -3,11 +3,22 @@ import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
 import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 import { useIdentity } from '@/hooks/useIdentity';
+import { useEffect } from 'react';
 
 export const Navigation = (props: any) => {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
   const { clearSessionStorage } = useIdentity();
+
+  useEffect(() => {
+    const logOut_accountchanged = () => {
+      clearSessionStorage();
+      sessionStorage.setItem("loggedIn", "false");
+      props.setLoggedIn(false);
+    } 
+
+    window.ethereum.on('accountsChanged', logOut_accountchanged)
+  })
 
   const handleLogout = () => {
     clearSessionStorage();

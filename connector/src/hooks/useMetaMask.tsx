@@ -23,7 +23,7 @@ const initialState = { accounts: [], balance: '', chainId: '' }
 
 const MetaMaskContext = createContext<MetaMaskData>({} as MetaMaskData)
 
-export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
+export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: any) => {
   const [hasProvider, setHasProvider] = useState<boolean | null>(null)
   const [wallet, setWallet] = useState(initialState)
 

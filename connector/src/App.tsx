@@ -34,7 +34,6 @@ export const App = () => {
     } else {
       setLoggedIn(false);
     }
-
   }, []);
 
   return (
