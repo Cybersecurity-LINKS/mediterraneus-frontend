@@ -207,7 +207,6 @@ export const fetchIDentityABI = async () => {
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     const IDentity_address = getContractAddress("IDentity");
-    console.log(IDentity_address)
     let abi: InterfaceAbi = await fetchIDentityABI();
     if(abi == null)
       abi = await getContractABI("IDentity")
