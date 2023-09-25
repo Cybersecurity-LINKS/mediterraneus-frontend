@@ -23,7 +23,7 @@
   "dependencies": {
     "@databases/pg-schema-cli": "^4.3.1",
     "@databases/pg-typed": "^4.4.1",
-    "@iota/identity-wasm": "^0.7.0-alpha.5",
+    "@iota/identity-wasm": "0.7.0-alpha.5",
     "@iota/wallet": "2.0.3-rc.35",
     "@types/morgan": "^1.9.4",
     "body-parser": "^1.20.2",
