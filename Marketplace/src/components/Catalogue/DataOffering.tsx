@@ -17,6 +17,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const [native, setNative] = useState("");
     const [loading, setLoading] = useState(true);
     const [loadingOffering, setLoadingOffering] = useState(true); 
+    const [downloadable, setDownloadable] = useState(false); 
 
     const renderTooltip = (props: JSX.IntrinsicAttributes & TooltipProps & RefAttributes<HTMLDivElement>) => (
         <Tooltip id="button-tooltip" {...props}>
@@ -31,11 +32,22 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             setOwnerDID(IotaDID.parse(did));
             setLoading(false);
         }
+        const isDownloadable = async () => {
+            const signerAddress = (await provider?.getSigner())!.address;
+            const DTcontractABI = await getContractABI("ERC20Base");
+            const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, await provider?.getSigner());
+    
+            const currentUserBalance = await DTcontractIstance.balanceOf(signerAddress);
+            if(currentUserBalance >= ethers.parseEther("1") && ((wallet.accounts[0] as string).toLowerCase() !== props.NFTdataobj.owner.toLowerCase())) {
+                setDownloadable(true);
+            }
+        }
 
         getVCownerDID(props.NFTdataobj.owner);
         if(!loading) {
             getOfferingFromIPFS();
             getDT_Price();
+            isDownloadable();
             setLoadingOffering(false);
         }
     }, [props.NFTdataobj.owner, loading])
@@ -110,12 +122,16 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             exchangeContractIstance.on("SuccessfulSwap", async (exchangeId, caller, exchangeOwner, dtamount, smrsent, event) => {
                 console.log(exchangeId, caller, exchangeOwner, dtamount, smrsent, event);
                 const newBalance = await DTcontractIstance.balanceOf(signerAddress);
+                setDownloadable(true);
                 console.log(newBalance);
-            })  
-
+            })
         }catch(err) {
             console.log(err);
         }
+    }
+
+    const downloadAsset = async () => {
+
     }
 
     return (
@@ -178,6 +194,11 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 <Card.Title className="mb-3">Price for Asset Access: 1 {`${props.NFTdataobj.DTsymbol}`}</Card.Title>
                 <Card.Title className="mb-3">Exchange Rate: 1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Card.Title>
                 {
+                    downloadable ? 
+                    <Button type="submit">
+                        Download Asset
+                    </Button> 
+                    :
                     ((wallet.accounts[0] as string).toString().toLowerCase() !== props.NFTdataobj.owner.toLowerCase()) &&
                     <Button type="submit" onClick={(event) => { handleSubmit(event)}}>
                         Buy Data/Service Access
