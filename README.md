@@ -1,4 +1,4 @@
-# Connector Implementation for the Mediterraneus Protocol
+# Marketplace Implementation for the Mediterraneus Protocol
 
 ## IOTA Identity Framework 
 The identity bindings include all the modules needed for creating and managing a self sovereign identity. 
@@ -8,7 +8,7 @@ This results in having also the **iota-client** dependency, that is automaticall
 In order to use the identity framework we have to install the dependency using npm
 
 ```sh
-cd connector
+cd Marketplace
 npm i @iota/identity-wasm@0.7.0-alpha.5
 ```
 To use this in a web application we have enable the library. The loads the WASM file with an HTTP GET request, so the .wasm file must be copied to the root of the dist folder.
@@ -55,13 +55,13 @@ client
   .then(() => identity.init("identity_wasm_bg.wasm"));
 ```
 
-## Connector frontend
+## Marketplace frontend
 To run the frontend application follow these steps:
 
 1. Install the dependencies
 
 ```sh
-cd connector
+cd Marketplace
 
 npm install
 ```
