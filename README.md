@@ -55,6 +55,26 @@ client
   .then(() => identity.init("identity_wasm_bg.wasm"));
 ```
 
+## Connector frontend
+To run the frontend application follow these steps:
+
+1. Install the dependencies
+
+```sh
+cd connector
+
+npm install
+```
+
+2. Copy the `.env.example` file in a `.env` file
+
+3. Copy the `addresses` and the `artifact` folder from the Smart Contracts repo (these folders are obtained after deploying the SCs)
+
+4. Execute the application
+```sh
+npm run dev
+```
+
 ## Connector backend
 Temporary solution for storing identity related information of the connector (aka Data Provier). Information include:
 
@@ -87,18 +107,43 @@ cd connector-backend
 
 # install the necessary dependencies
 npm install
-
-# generate the schema to enable non-native ORM in typescript
-# User and password are defined in the docker compose, while the table name is defined in the initialization script
-# located in connector-backend/src/migrations/dbinit.sql
-npx @databases/pg-schema-cli --database postgres://user:pswd@localhost:5432/identity --directory src/__generated__
 ```
 
-At this stage, everything should be ready, and the application can be executed:
+At this stage, everything should be ready and the DB initialization must be over, and the application can be started:
 ```sh
 # For more "debug"
 npm run dev
 
 # No logging features (like nodemon)
 npm start
+```
+
+### Reset Backend Database
+
+If you want to change the Database initializations script (add/remove some tables) you have to:
+
+1. Stop the running DB container
+```sh
+$ cd connector-backend
+$ docker compose down
+```
+
+2. Remove the `postgredata` folder
+
+3. Modify the `migrations/dbinit.sql` file as you wish
+
+4. Start up the container 
+```sh
+$ docker compose up -d
+```
+
+5. Once the DB initialization is finished update the ORM mapping for TS to work
+```sh
+# generate the schema to enable non-native ORM in typescript
+# User and password are defined in the docker compose, while the table name is defined in the initialization script
+# located in connector-backend/src/migrations/dbinit.sql
+# do this command only if:
+# 1. When the Postgres-DB is initialized
+# 2. When the dbinit.sql is modified
+npx @databases/pg-schema-cli --database postgres://<user>:<pswd>@localhost:5432/identity --directory src/__generated__
 ```
