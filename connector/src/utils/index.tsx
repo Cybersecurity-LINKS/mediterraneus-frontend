@@ -2,7 +2,6 @@ import { AbiCoder, BigNumberish, InterfaceAbi, ethers, keccak256, solidityPacked
 import { Credential } from "@iota/identity-wasm/web";
 import contractAddresses from '../addresses/contractAddresses.json'
 
-const identity_sc_address = import.meta.env.VITE_IDENTITY_SC_ADDRESS as string;
 const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
 
 const enum CONTRACT_ADRRESS{
@@ -103,6 +102,9 @@ export const getContractAddress = (contractName: string) => {
       case "FixedRateExchange":
         ret = contractAddresses.addresses[CONTRACT_ADRRESS.FixedRateExchange].FixedRateExchange?.toString()
         break;
+      case "IDentity":
+          ret = contractAddresses.addresses[CONTRACT_ADRRESS.IDentity].IDentity?.toString()
+          break;
       default:
         ret = "";
     }
@@ -197,16 +199,19 @@ export const privKeytoBytes = (text: string): Uint8Array => {
 };
 
 export const fetchIDentityABI = async () => {
-  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${identity_sc_address}`);
+  const IDentity_address = getContractAddress("IDentity");
+  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
   const json = await response.json();
   return json.result;
 }
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
+    const IDentity_address = getContractAddress("IDentity");
+    console.log(IDentity_address)
     let abi: InterfaceAbi = await fetchIDentityABI();
     if(abi == null)
       abi = await getContractABI("IDentity")
-    return new ethers.Contract(`${identity_sc_address}`, abi, await provider.getSigner())
+    return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())
 }
 
 export const extractNumberFromVCid = (vc: Credential): number => {
