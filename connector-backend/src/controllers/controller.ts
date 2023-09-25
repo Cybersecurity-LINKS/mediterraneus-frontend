@@ -161,8 +161,12 @@ export class IdentityController {
             if(lad_entry === null)
                 throw "";
             const identity = await getIdentity(eth_address);
-            // For now the GC_DID is the Issuer's identity. For now used to simulate the GC to try if this works.
-            const gc_doc = await resolveDID(IotaDID.parse(process.env.GLOBAL_CATALOGUE_DID))
+
+            const gc_resp = await fetch(`${process.env.GC_ENDPOINT}/catalogueDID`, {
+                method: "GET"
+            })
+            const gc_did = (await gc_resp.json())["did"]
+            const gc_doc = await resolveDID(IotaDID.parse(gc_did))
 
             // the CID must be encrypted before returning it to the "front" connector.
             // asymmetric crypto can be used to determine a common shared secret between two parties:
