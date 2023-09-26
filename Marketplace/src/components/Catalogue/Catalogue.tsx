@@ -6,14 +6,15 @@ import { useMetaMask } from "@/hooks/useMetaMask";
 import { ethers } from "ethers";
 
 export interface IDataOffering {
-    owner: string,
-    NFTaddress: string,
-    NFTname: string,
-    NFTsymbol: string,
-    NFTmetadataURI: string,
-    DTname: string,
+    owner: string
+    NFTaddress: string
+    NFTname: string
+    NFTsymbol: string
+    NFTmetadataURI: string
+    DTname: string
     DTsymbol: string
     DTcontractAddress: string
+    AssetDownloadURL: string
 }
 
 export const Catalogue = () => {
@@ -42,7 +43,8 @@ export const Catalogue = () => {
                 NFTmetadataURI: await contractIstance.tokenURI(1),
                 DTname: await DTcontractIstance.name(),
                 DTsymbol: await DTcontractIstance.symbol(),
-                DTcontractAddress: DTcontractAddress[0]
+                DTcontractAddress: DTcontractAddress[0],
+                AssetDownloadURL: await contractIstance.getAssetDownloadURL()
             };
             return NFTinfo;
         }

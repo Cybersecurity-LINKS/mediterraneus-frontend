@@ -26,7 +26,7 @@ export const Publish = () => {
     const [publishing, setPublishing] = useState(false);
 
     const { wallet, provider } = useMetaMask()
-    const { vc } = useIdentity();
+    const { vc, connectorUrl } = useIdentity();
 
     useEffect(() => {
         const getAssetAliases = async () => {
@@ -196,6 +196,17 @@ export const Publish = () => {
                 vc_id: extractNumberFromVCid(vc!)
             });
             await tx.wait(1);
+            contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2) => {
+                const resp = await fetch(`${connectorUrl}/update_nft_address`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        nft_name: name,
+                        nft_sc_address: newERC721Contract,
+                    })
+                });
+                if(resp.status != 200)
+                    throw "Cannot update LAD"
+            })
             setPublishing(false);
         } catch (err) {
             console.log(err);
