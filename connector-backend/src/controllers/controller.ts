@@ -1,10 +1,11 @@
 import { IotaDID, IotaDocument, Presentation, X25519, Credential, ProofOptions } from '@iota/identity-wasm/node/index.js'
-import { _getAssetAliases, _getLADentry_byAlias, getIdentity, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
+import { _getAssetAliases, _getLADentry_byAlias, _updateLADentry, getDownloadReq, getIdentity, insertDownloadReq, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, getIotaDIDfromString } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
-import { id, keccak256 } from 'ethers';
+import { ethers, keccak256} from 'ethers';
+import { v4 as uuidv4 } from 'uuid';
 import pkg from 'crypto-js';
 const { AES, enc } = pkg;
 
@@ -123,6 +124,7 @@ export class IdentityController {
             */
             await insertLADentry({
                 nft_name: additional.asset_alias,
+                nft_sc_address: "",
                 asset_path: req.files[0].path,
                 cid: cid.toString(),
                 hash_asset: asset_hash,
@@ -139,6 +141,19 @@ export class IdentityController {
             // error.code == 23505 => duplicate key value violates unique constraint "local_asset_db_pkey"
             res.status(500).send({error: error.message, error_code: error.code}).end();
 
+        }
+    }
+
+    public async addNFT_addressOnLAD(req: TypedRequestBody<{
+        nft_name,
+        nft_sc_address
+    }>, res) {
+        try {
+            await _updateLADentry(req.body.nft_name, req.body.nft_sc_address);
+            res.status(200).end()
+        } catch (error) {
+            console.log(error);
+            res.status(400).send({error: error}).end()
         }
     }
 
@@ -245,5 +260,40 @@ export class IdentityController {
             console.log(error);
             res.status(500).send({error: `Could not generate the VP: ${error}`}).end();
         }
+    }
+
+    public async downloadRequest(req: TypedRequestBody<{
+        nft_name
+    }>, res) {
+        try {
+            // check I actually own the asset
+            const lad_entry = await _getLADentry_byAlias(req.body.nft_name);
+            if(lad_entry === null || lad_entry === undefined)
+                throw "Asset does not exist on this connector"
+
+            const nonce = uuidv4();
+            await insertDownloadReq(keccak256(nonce), req.body.nft_name);   
+            res.status(201).send({nonce: nonce}).end();
+        } catch (error) {
+            console.log(error);
+            res.status(400).send({error: error}).end();
+        }
+    }
+
+    public async downalodReq_sign(req: TypedRequestBody<{
+        h_nonce,
+        eth_signature
+    }>, res) {
+        try {
+            const download_request = await getDownloadReq(req.body.h_nonce);
+            const lad_entry = await _getLADentry_byAlias(download_request.nft_name);
+
+            const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
+            // TODO: missing abi parse of erc721 and call 'verify Proof of Purchase'
+        } catch (error) {
+            console.log(error);
+            res.status(400).send({error: error}).end();
+        }
+        
     }
 }

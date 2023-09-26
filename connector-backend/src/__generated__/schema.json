@@ -1,5 +1,24 @@
 [
   {
+    "name": "download_request",
+    "columns": [
+      {
+        "name": "h_nonce",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 25,
+        "typeName": "TEXT"
+      },
+      {
+        "name": "nft_name",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 25,
+        "typeName": "TEXT"
+      }
+    ]
+  },
+  {
     "name": "identity",
     "columns": [
       {
@@ -66,6 +85,13 @@
       {
         "name": "nft_name",
         "isNullable": false,
+        "hasDefault": false,
+        "typeId": 25,
+        "typeName": "TEXT"
+      },
+      {
+        "name": "nft_sc_address",
+        "isNullable": true,
         "hasDefault": false,
         "typeId": 25,
         "typeName": "TEXT"

@@ -50,6 +50,10 @@ router.post("/uploadOnLAD", async (req, res) => {
     })
 });
 
+router.post("/update_nft_address", async (req, res) => {
+    await identityController.addNFT_addressOnLAD(req, res);
+})
+
 router.get("/assetAliases", async (req, res) => {
     await identityController.getAssetAliases(req, res);
 })
@@ -64,6 +68,10 @@ router.post("/simulate", async (req, res) => {
 
 router.post("/generate_vp", async (req, res) => {
     await identityController.generateVP(req, res);
+});
+
+router.post("/downalod_asset", async (req, res) => {
+    await identityController.downloadRequest(req, res);
 })
 
 export default router;

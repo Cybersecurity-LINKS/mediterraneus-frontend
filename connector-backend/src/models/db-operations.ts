@@ -1,5 +1,5 @@
 import { LocalAssetDb } from '../__generated__/index.js';
-import db, { identity, local_asset_db} from '../dbconfig/dbconnector.js';
+import db, { download_request, identity, local_asset_db} from '../dbconfig/dbconnector.js';
 
 export async function insertIdentity(
     eth_address: string,
@@ -40,4 +40,20 @@ export async function _getAssetAliases() {
 
 export async function _getLADentry_byAlias(alias: string) {
     return await local_asset_db(db).findOne({nft_name: alias});
+}
+
+export async function _updateLADentry(nft_name: string, nft_sc_address: string) {
+    await local_asset_db(db).update({nft_name: nft_name}, {nft_sc_address: nft_sc_address});
+}
+
+export async function insertDownloadReq(h_nonce: string, nft_name: string) {
+    await download_request(db).insert({h_nonce: h_nonce, nft_name: nft_name}); 
+}
+
+export async function getDownloadReq(h_nonce: string) {
+    return await download_request(db).findOne({h_nonce: h_nonce});
+}
+
+export async function removeDownloadReq(h_nonce: string) {
+    await download_request(db).delete({h_nonce: h_nonce}); 
 }
