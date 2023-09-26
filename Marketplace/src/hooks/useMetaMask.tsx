@@ -5,12 +5,9 @@ import { formatBalance } from '@/utils'
 import { BrowserProvider, JsonRpcProvider, ethers } from 'ethers'
 
 
-const shimmerJsonRpcUrl = import.meta.env.VITE_SHIMMER_JSON_RPC_URL as string;
-
 interface MetaMaskData {
   wallet: typeof initialState
   provider: BrowserProvider | null
-  shimmerProvider: JsonRpcProvider
   hasProvider: boolean | null
   error: boolean
   errorMessage: string
@@ -31,7 +28,6 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
   const [errorMessage, setErrorMessage] = useState('')
 
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
-  const [shimmerProvider, setShimmerProvider] = useState<JsonRpcProvider>(new ethers.JsonRpcProvider(shimmerJsonRpcUrl));
 
   useEffect(() => {
     const refreshAccounts = (accounts: any) => {
@@ -72,11 +68,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
       // await provider.send("eth_requestAccounts", []);
     }
 
-    const initializeProviderShimmer = async() => {
-      setShimmerProvider(new JsonRpcProvider(shimmerJsonRpcUrl.toString()));
-    }
     
-    initializeProviderShimmer();
     initializeProvider();
     getProvider();
 
@@ -119,7 +111,6 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
       value={{
         wallet,
         provider,
-        shimmerProvider,
         hasProvider,
         error: !!errorMessage,
         errorMessage,
