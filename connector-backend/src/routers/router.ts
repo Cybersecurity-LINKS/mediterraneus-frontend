@@ -70,8 +70,12 @@ router.post("/generate_vp", async (req, res) => {
     await identityController.generateVP(req, res);
 });
 
-router.post("/downalod_asset", async (req, res) => {
+router.post("/downalod_asset_req", async (req, res) => {
     await identityController.downloadRequest(req, res);
+})
+
+router.post("/downalod_asset_sign", async (req, res) => {
+    await identityController.downalodReq_sign(req, res);
 })
 
 export default router;

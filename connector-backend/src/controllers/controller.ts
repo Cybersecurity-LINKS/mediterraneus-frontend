@@ -12,6 +12,8 @@ const { AES, enc } = pkg;
 import crypto from 'crypto'
 import Identity from '../__generated__/identity.js';
 
+import abi from '../abi/erc721-abi.json' assert {type: "json"};
+
 export interface TypedRequestBody<T> extends Express.Request {
     body: T
 }
@@ -149,6 +151,7 @@ export class IdentityController {
         nft_sc_address
     }>, res) {
         try {
+            console.log(`Upload ${req.body.nft_name} ${req.body.nft_sc_address}`)
             await _updateLADentry(req.body.nft_name, req.body.nft_sc_address);
             res.status(200).end()
         } catch (error) {
@@ -287,11 +290,24 @@ export class IdentityController {
         try {
             const download_request = await getDownloadReq(req.body.h_nonce);
             const lad_entry = await _getLADentry_byAlias(download_request.nft_name);
-
-            const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
+            
             // TODO: missing abi parse of erc721 and call 'verify Proof of Purchase'
+            const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
+            const contractIstance = new ethers.Contract(lad_entry.nft_sc_address, abi.abi, provider);
+
+            const PoP = await contractIstance.verifyPoP(req.body.eth_signature, req.body.h_nonce);
+            if(PoP)
+                res.status(200).send({asset: "ASSET DOWNLOAD OK"}).end()
+            else
+                res.status(200).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end()
         } catch (error) {
             console.log(error);
+            // 0x524F04724632eED237cbA3c37272e018b3A7967e
+            const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
+            const contractIstance = new ethers.Contract("0x524F04724632eED237cbA3c37272e018b3A7967e", abi.abi, provider);
+
+            const owner = await contractIstance.getNFTowner();
+            console.log("res: ", owner)
             res.status(400).send({error: error}).end();
         }
         

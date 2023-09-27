@@ -130,8 +130,32 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         }
     }
 
-    const downloadAsset = async () => {
+    const downloadAsset = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+        event.preventDefault();
+        try {
+            const resp_nonce = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_req`, {
+                method: 'POST',
+                body: JSON.stringify({nft_name: props.NFTdataobj.NFTname})
+            });
+            const json_nonce_resp = await resp_nonce.json();
+            const h_nonce = keccak256(json_nonce_resp["nonce"]);
 
+            const signer = await provider?.getSigner();
+            const eth_signature = await signer?.signMessage(ethers.toBeArray(`${h_nonce}`));
+
+            const asset_req = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_sign`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    h_nonce: h_nonce,
+                    eth_signature: eth_signature
+                })
+            })
+
+            const asset_resp = await asset_req.json();
+            console.log(asset_resp);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     return (
@@ -195,7 +219,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 <Card.Title className="mb-3">Exchange Rate: 1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Card.Title>
                 {
                     downloadable ? 
-                    <Button type="submit">
+                    <Button type="submit" onClick={(event) => { downloadAsset(event)}}>
                         Download Asset
                     </Button> 
                     :

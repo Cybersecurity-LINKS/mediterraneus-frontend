@@ -195,18 +195,26 @@ export const Publish = () => {
                 maxSupply_: ethers.parseEther(DTmaxSupply.toString()),
                 vc_id: extractNumberFromVCid(vc!)
             });
-            await tx.wait(1);
-            contractIstance.on("NFTCreated", async (newERC721Contract, ERC721baseAddress, name, owner, symbol, tokenURI, event2) => {
-                const resp = await fetch(`${connectorUrl}/update_nft_address`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        nft_name: name,
-                        nft_sc_address: newERC721Contract,
-                    })
-                });
-                if(resp.status != 200)
-                    throw "Cannot update LAD"
-            })
+            const rc = await tx.wait(1);
+            console.log(rc.logs);
+            for(let i = 0; i < rc.logs.length; i++) {
+                let event = rc.logs[i];
+                if(event.eventName == 'NFTCreated' && event.eventSignature == "NFTCreated(address,address,string,address,string,string)"){
+                console.log(`event ${event.eventName}: address ${event.args[0]}`);
+                    const resp = await fetch(`${connectorUrl}/update_nft_address`, {
+                        method: 'POST',
+                        headers: {
+                            "Content-type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            nft_name: NFTname,
+                            nft_sc_address: event.args[0],
+                        })
+                    });
+                    if(resp.status != 200)
+                        throw "Cannot update LAD"
+                }
+            }
             setPublishing(false);
         } catch (err) {
             console.log(err);
