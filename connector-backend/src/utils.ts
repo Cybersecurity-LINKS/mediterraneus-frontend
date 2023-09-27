@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import { Client } from "@iota/client-wasm/node";
 import { IotaDID, IotaDIDUrl, IotaDocument, MethodScope } from '@iota/identity-wasm/node/index.js';
+import * as fs from 'fs';
 dotenv.config()
 
 /** Request funds from the faucet API, if needed, and wait for them to show in the wallet. */
@@ -102,4 +103,9 @@ export const extractPubKeyFromDoc = (doc: IotaDocument) => {
 
 export function getIotaDIDfromString(did_string: string): IotaDID {
     return IotaDIDUrl.parse(did_string).did();
+}
+
+export function readAsset(asset_path: string) {
+    const asset = fs.readFileSync(asset_path, 'utf-8');
+    return JSON.parse(asset);
 }

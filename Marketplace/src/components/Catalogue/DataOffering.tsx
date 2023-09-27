@@ -6,6 +6,7 @@ import { useMetaMask } from "@/hooks/useMetaMask";
 import { AbiCoder, ethers, keccak256 } from "ethers";
 import CardHeader from "react-bootstrap/esm/CardHeader";
 import { IotaDID } from "@iota/identity-wasm/web";
+import { Buffer } from 'buffer';
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = "https://explorer.evm.testnet.shimmer.network/address/";
@@ -135,24 +136,42 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         try {
             const resp_nonce = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_req`, {
                 method: 'POST',
+                headers: {
+                    "Content-type": "application/json"
+                },
                 body: JSON.stringify({nft_name: props.NFTdataobj.NFTname})
             });
             const json_nonce_resp = await resp_nonce.json();
-            const h_nonce = keccak256(json_nonce_resp["nonce"]);
+            const h_nonce = keccak256(Buffer.from(json_nonce_resp["nonce"]));
 
             const signer = await provider?.getSigner();
             const eth_signature = await signer?.signMessage(ethers.toBeArray(`${h_nonce}`));
 
             const asset_req = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_sign`, {
                 method: 'POST',
+                headers: {
+                    "Content-type": "application/json"
+                },
                 body: JSON.stringify({
                     h_nonce: h_nonce,
                     eth_signature: eth_signature
                 })
             })
-
             const asset_resp = await asset_req.json();
-            console.log(asset_resp);
+            if(asset_req.status === 200) {
+                const asset_json = asset_resp["asset"];
+                console.log(asset_json)
+                const file = new Blob([JSON.stringify(asset_json)], {type: "text/json;charset=utf-8"})
+
+                // anchor link
+                const element = document.createElement("a");
+                element.href = URL.createObjectURL(file);
+                element.download = `Asset-${props.NFTdataobj.NFTname}-` + Date.now() + ".json";
+
+                // simulate link click
+                document.body.appendChild(element); // Required for this to work in FireFox
+                element.click();
+            }
         } catch (err) {
             console.log(err);
         }

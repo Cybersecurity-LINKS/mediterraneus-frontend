@@ -1,14 +1,13 @@
 import { IotaDID, IotaDocument, Presentation, X25519, Credential, ProofOptions } from '@iota/identity-wasm/node/index.js'
 import { _getAssetAliases, _getLADentry_byAlias, _updateLADentry, getDownloadReq, getIdentity, insertDownloadReq, insertIdentity, insertLADentry, insertVCintoExistingIdentity } from '../models/db-operations.js'
 import { createIdentity, resolveDID, signData } from '../services/identity.js'
-import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, getIotaDIDfromString } from '../utils.js'
+import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, getIotaDIDfromString, readAsset } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
 import { ethers, keccak256} from 'ethers';
 import { v4 as uuidv4 } from 'uuid';
 import pkg from 'crypto-js';
 const { AES, enc } = pkg;
-
 import crypto from 'crypto'
 import Identity from '../__generated__/identity.js';
 
@@ -275,7 +274,7 @@ export class IdentityController {
                 throw "Asset does not exist on this connector"
 
             const nonce = uuidv4();
-            await insertDownloadReq(keccak256(nonce), req.body.nft_name);   
+            await insertDownloadReq(keccak256(Buffer.from(nonce)), req.body.nft_name);   
             res.status(201).send({nonce: nonce}).end();
         } catch (error) {
             console.log(error);
@@ -296,18 +295,15 @@ export class IdentityController {
             const contractIstance = new ethers.Contract(lad_entry.nft_sc_address, abi.abi, provider);
 
             const PoP = await contractIstance.verifyPoP(req.body.eth_signature, req.body.h_nonce);
-            if(PoP)
-                res.status(200).send({asset: "ASSET DOWNLOAD OK"}).end()
+            if(PoP){
+                const asset_json = readAsset(`${lad_entry.asset_path}`);
+                console.log(asset_json);
+                res.status(200).send({asset: asset_json}).end()
+            }
             else
-                res.status(200).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end()
+                res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end()
         } catch (error) {
             console.log(error);
-            // 0x524F04724632eED237cbA3c37272e018b3A7967e
-            const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
-            const contractIstance = new ethers.Contract("0x524F04724632eED237cbA3c37272e018b3A7967e", abi.abi, provider);
-
-            const owner = await contractIstance.getNFTowner();
-            console.log("res: ", owner)
             res.status(400).send({error: error}).end();
         }
         
