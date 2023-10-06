@@ -18,11 +18,11 @@ export const IdentityAccordion = (props: PropsWithChildren<IdentityContent>) => 
                     <Card style={{width: '60rem', backgroundColor: "ThreeDLightShadow"}} className='mb-5 ms-auto me-auto'>
                     {
                         props.content.length === 0 ? 
-                        <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white", textAlign: "center"}}>
+                        <pre className="ms-2 mt-2" style={{color: "white", textAlign: "center"}}>
                             No Verifiable Credential available. Please request one.
                         </pre>
                         :
-                        <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>
+                        <pre className="ms-2 mt-2" style={{color: "white"}}>
                             {props.content}
                         </pre>
                     }

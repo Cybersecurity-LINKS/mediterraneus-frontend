@@ -66,47 +66,47 @@ export const Login = (props: any) => {
                     <Form className="login-form p-4 rounded">
                         <h1 className="text-center" style={{color: 'blue'}}>Login</h1>
 
-                    {/* Connect Wallet Section */}
-                    <Form.Group className="mt-5" controlId="username">
-                        <h4>Connect your wallet</h4>
-                        <hr className="mb-3" />
-                        {/* Check if MetaMask is available and no accounts are connected */}
-                        {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
-                        <Button
-                            variant="outline-primary"
-                            disabled={isConnecting}
-                            onClick={connectMetaMask}
-                        >
-                            Connect MetaMask
-                        </Button>
-                        ) || <Form.Text style={{fontSize: '18px', color: 'blue'}}>{wallet.accounts[0]}</Form.Text>
-                        }
-                    </Form.Group>
+                        {/* Connect Wallet Section */}
+                        <Form.Group className="mt-5" controlId="username">
+                            <h4>Connect your wallet</h4>
+                            <hr className="mb-3" />
+                            {/* Check if MetaMask is available and no accounts are connected */}
+                            {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
+                            <Button
+                                variant="outline-primary"
+                                disabled={isConnecting}
+                                onClick={connectMetaMask}
+                            >
+                                Connect MetaMask
+                            </Button>
+                            ) || <Form.Text style={{fontSize: '18px', color: 'blue'}}>{wallet.accounts[0]}</Form.Text>
+                            }
+                        </Form.Group>
 
-                    <Form.Group controlId="connService" className="mt-5">
-                        <h4>Specify your Connector Service</h4>
-                        <hr className="mb-3" />
-                        <div className='d-flex justify-content-center '>
-                            <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue();}}/>
-                        </div>
-                    </Form.Group>
+                        <Form.Group controlId="connService" className="mt-5">
+                            <h4>Connector Service</h4>
+                            <hr className="mb-3" />
+                            <div className='d-flex justify-content-center '>
+                                <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue();}}/>
+                            </div>
+                        </Form.Group>
 
-                    {/* Login Button */}
-                    <Container className="d-flex justify-content-center">
-                        <Button className="mt-5 btn-block" size="lg" variant="outline-success" onClick={handleLogin}>
-                            Login
-                        </Button>
-                        <Button className="ms-3 mt-5 btn-block" size="lg" variant="outline-warning" onClick={handleRegister}>
-                            Register
-                        </Button>
-                    </Container>
+                        {/* Login Button */}
+                        <Container className="d-flex justify-content-center">
+                            <Button className="mt-5 btn-block" size="lg" variant="outline-success" onClick={handleLogin}>
+                                Login
+                            </Button>
+                            <Button className="ms-3 mt-5 btn-block" size="lg" variant="outline-warning" onClick={handleRegister}>
+                                Register
+                            </Button>
+                        </Container>
 
-                    {/* Error Message Display */}
-                    {errorMessage && (
-                        <Alert className="mt-4" variant="danger" onClick={clearError} dismissible>
-                        <strong>Error:</strong> <div style={{color: 'black'}}>{errorMessage}</div>
-                        </Alert>
-                    )}
+                        {/* Error Message Display */}
+                        {errorMessage && (
+                            <Alert className="mt-4" variant="danger" onClick={clearError} dismissible>
+                            <strong>Error:</strong> <div style={{color: 'black'}}>{errorMessage}</div>
+                            </Alert>
+                        )}
                     </Form>
                 </div>
             </div>

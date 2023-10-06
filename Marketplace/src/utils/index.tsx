@@ -2,7 +2,7 @@ import { AbiCoder, BigNumberish, InterfaceAbi, ethers, keccak256, solidityPacked
 import { Credential } from "@iota/identity-wasm/web";
 import contractAddresses from '../addresses/contractAddresses.json'
 
-const SHIMMER_EVM_EXPLORER = import.meta.env.VITE_SHIMMER_EVM_EXPLORER as string;
+const EVM_EXPLORER = import.meta.env.VITE_EVM_EXPLORER as string;
 
 const enum CONTRACT_ADRRESS{
   "Deployer" = 0,
@@ -18,18 +18,21 @@ export const NETWORKS: { [k: string]: string } = {
   1: "Ethereum Main Network",
   1072: "Shimmer Testnet Network",
   31337: "Hardhat Network",
+  11155111: "Sepolia Network",
 };
 
 export const NETWORK_SYMBOL: { [k: string]: string } = {
   1: "ETH",
   1072: "SMR",
-  31337: "CAZZO",
+  31337: "TST",
+  11155111: "SepoliaETH",
 };
 
 export const NETWORK_IMAGE: { [k: string]: string } = {
   1: "ETH",
   1072: "../shimmerlogo.svg",
   31337: "../hardhat-seeklogo.com.svg",
+  11155111: "../sepolia.png"
 };
 
 export const NETWORK_BGCOLOR: { [k: string]: string } = {
@@ -41,11 +44,13 @@ export const NETWORK_BGCOLOR: { [k: string]: string } = {
 export const NETWORK_WIDTH: { [k: string]: number } = {
   1072: 25,
   31337: 80,
+  11155111: 80,
 };
 
 export const NETWORK_HEIGHT: { [k: string]: number } = {
   1072: 30,
   31337: 60,
+  11155111: 80,
 };
 
 export const formatBalance = (rawBalance: string) => {
@@ -200,16 +205,21 @@ export const privKeytoBytes = (text: string): Uint8Array => {
 
 export const fetchIDentityABI = async () => {
   const IDentity_address = getContractAddress("IDentity");
-  const response = await fetch(`${SHIMMER_EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+  console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+
+  // TODO: SEPOLIA etherscan needs an API key
+  const response = await fetch(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
   const json = await response.json();
   return json.result;
 }
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     const IDentity_address = getContractAddress("IDentity");
-    let abi: InterfaceAbi = await fetchIDentityABI();
-    if(abi == null)
-      abi = await getContractABI("IDentity")
+    // let abi: InterfaceAbi = await fetchIDentityABI();
+    // if(abi == null)
+    console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+
+    let abi: InterfaceAbi = await getContractABI("IDentity")
     return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())
 }
 

@@ -7,6 +7,8 @@ import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
+import {formatDid} from '@/utils';
 
 export const Identity = () => {
     const { state } = useLocation();
@@ -168,7 +170,7 @@ export const Identity = () => {
                 <Container fluid className="d-flex mt-3 justify-content-center">
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
-                            <Card.Title style={{fontSize: "25px", fontFamily: "serif"}}>Self-Sovereign Identity</Card.Title>
+                            <Card.Title style={{fontSize: "25px"}}>Self-Sovereign Identity</Card.Title>
                             {
                                 (state !== null) && !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                     <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
@@ -176,35 +178,44 @@ export const Identity = () => {
                                     </Button>
                                 )
                             }
-                            {
-                                (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
-                                    <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={gotoLogin} value="download">
-                                        Go to Login
-                                    </Button>
-                                )
-                            }
                         </Card.Body>
-                        <Form.Group controlId="username" className="mb-3 d-flex justify-content-center">
+                        <Form.Group as={Row} controlId="username" className="mb-3 d-flex justify-content-center">
                             {/* Check if MetaMask is available and no accounts are connected */}
                             {(state !== null) && state.fromLogin && window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
                                 <>
-                                <h4 className="me-2">Connect your wallet</h4>
+                                <Form.Label column sm={3} style={{fontSize: "20px"}}>Connect your wallet</Form.Label>
+                                <Col sm={{ span: 3, offset: 1 }}>
                                 <Button variant="outline-primary" disabled={isConnecting} onClick={connectMetaMask}>Connect MetaMask</Button>
+                                </Col>
                                 </>) 
                             || (state !== null) && state.fromLogin && (
-                                    <><h4 className="me-2" style={{fontSize: "25px", fontFamily: "serif"}}>Connect your wallet</h4>
-                                    <Form.Text style={{fontSize: '18px', color: 'blue'}}>{wallet.accounts[0]}</Form.Text></>
+                                <>
+                                    <Form.Label column sm={3} style={{fontSize: "20px"}}>Your wallet</Form.Label>
+                                    <Col sm={4}>
+                                    <Form.Text style={{fontSize: '20px', color: 'blue'}}>{formatDid(wallet.accounts[0])}</Form.Text>
+                                    </Col>
+                                    </>
                             )}
                         </Form.Group>
                         {
                             ((state !== null) && state.fromLogin ?
-                                <Form.Group controlId="connService" className="mb-3 d-flex justify-content-center">
-                                <h4 style={{fontSize: "25px", fontFamily: "serif"}}>Connector Service URL*</h4>
-                                <div className='d-flex justify-content-center ms-3'>
+                                <Form.Group as={Row} controlId="connService" className="mb-3 d-flex justify-content-center">
+                                    <Form.Label column sm={3} style={{fontSize: "20px"}}>Connector Service URL*</Form.Label>
+                                    <Col sm={4}>
                                     <Form.Control type="input" placeholder="http://127.0.0.1" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue()}}/>
-                                </div>
+                                    </Col>
                                 </Form.Group>
                             : "")
+                        }
+                        {
+                            (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
+                                <Col className="mb-3 ms-auto me-auto" sm={{span:3, offset:4}}>
+                                    <Button style={{width: '100%'}} variant="outline-success" onClick={gotoLogin}>
+                                        Go to Login
+                                    </Button>
+                                </Col>
+
+                            )
                         }
                         {
                             did === undefined 

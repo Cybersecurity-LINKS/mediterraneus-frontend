@@ -9,6 +9,7 @@ export const Navigation = (props: any) => {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
   const { clearSessionStorage } = useIdentity();
+  const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
 
   useEffect(() => {
     const logOut_accountchanged = () => {
@@ -66,7 +67,7 @@ export const Navigation = (props: any) => {
               <Nav.Link 
                 className="text_link tooltip-bottom text-white mt-1"
                 target="_blank"
-                href={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>
+                href={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`}>
                 {formatAddress2(wallet.accounts[0])} 
               </Nav.Link>
           </Row>

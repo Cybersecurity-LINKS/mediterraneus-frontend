@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom'
 export const Display = () => {
 
   const { wallet } = useMetaMask()
-
+  const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
+  
   return (
     <>
       <Toast className='mt-3 ms-5'>
@@ -21,7 +22,7 @@ export const Display = () => {
           </Figure>
           <strong className="mb-auto me-auto mt-auto text-black" style={{ fontSize: 18 }}>{NETWORKS[Number(wallet.chainId)]}</strong>
         </Toast.Header>
-        <Toast.Body className='ms-2'><strong className="text-black" style={{ fontSize: 16}}>Wallet Accounts: </strong><Link target="_blank" to={`https://explorer.evm.testnet.shimmer.network/address/${wallet.accounts[0]}`}>{wallet.accounts[0]}</Link></Toast.Body>
+        <Toast.Body className='ms-2'><strong className="text-black" style={{ fontSize: 16}}>Wallet Accounts: </strong><Link target="_blank" to={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`}>{wallet.accounts[0]}</Link></Toast.Body>
         <Toast.Body className='ms-2'><strong className="text-black" style={{ fontSize: 16 }}>Wallet Balance: </strong> <br></br>{wallet.balance} {NETWORK_SYMBOL[Number(wallet.chainId)]} </Toast.Body>
         <Row xs={2} className='ms-2'>
         <Toast.Body><strong className="text-black" style={{ fontSize: 16 }}>Hex ChainId: </strong> <br></br>{wallet.chainId}</Toast.Body>

@@ -9,7 +9,7 @@ import { IotaDID } from "@iota/identity-wasm/web";
 import { Buffer } from 'buffer';
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
-    const baseExplorerURL = "https://explorer.evm.testnet.shimmer.network/address/";
+    const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
     const { provider, wallet } = useMetaMask();
 
     const [ownerDID, setOwnerDID] = useState<IotaDID>();
@@ -43,7 +43,6 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 setDownloadable(true);
             }
         }
-
         getVCownerDID(props.NFTdataobj.owner);
         if(!loading) {
             getOfferingFromIPFS();
@@ -199,7 +198,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         delay={{ show: 250, hide: 400 }}
                         overlay={renderTooltip}
                     >
-                        <Card.Link href={baseExplorerURL+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2">{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
+                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2">{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
                     </OverlayTrigger> 
                 </Card.Text>
 
@@ -212,7 +211,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         delay={{ show: 250, hide: 400 }}
                         overlay={renderTooltip}
                     >
-                        <Card.Link href={baseExplorerURL+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2">{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
+                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2">{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
                     </OverlayTrigger>
                 </Card.Text>
                 <Card.Title>Asset's Offering</Card.Title>
@@ -227,7 +226,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                     }}/> :
                     <Card style={{backgroundColor: "ThreeDLightShadow"}} className='mb-3 ms-auto me-auto'>
                         {
-                            <pre className="ms-2 mt-2" style={{font: "icon", fontFamily: "cursive", color: "white"}}>
+                            <pre className="ms-2 mt-2" style={{color: "white"}}>
                                 {offering}
                             </pre>
                         }
