@@ -1,9 +1,12 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
-import { Figure, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
+import { Image, Row, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 import { useIdentity } from '@/hooks/useIdentity';
 import { useEffect } from 'react';
+
+        
+const logo = <ion-icon size="large" name="bag-handle-outline"></ion-icon>;
 
 export const Navigation = (props: any) => {
 
@@ -27,63 +30,59 @@ export const Navigation = (props: any) => {
     props.setLoggedIn(false)
   }
 
+  let metamaskNavItem;
+
+  if (!hasProvider) {
+    metamaskNavItem = 
+    <Nav.Item> <Nav.Link href="https://metamask.io" target="_blank">Install MetaMask</Nav.Link> </Nav.Item>;
+  } else if (window.ethereum?.isMetaMask && wallet.accounts.length < 1 && props.loggedIn) {
+     
+    metamaskNavItem = 
+    <Nav.Item>
+      <Button variant="primary" disabled={isConnecting}  onClick={connectMetaMask}>
+        Connect MetaMask
+      </Button>
+    </Nav.Item>;
+  } else if (wallet.accounts.length > 0 && props.loggedIn) {
+    metamaskNavItem =
+      <Nav.Item className="my-auto">
+        <OverlayTrigger placement="bottom" overlay={<Tooltip>Open in Block Explorer</Tooltip>}> 
+          <Button variant="outline-primary" style={{fontSize: '20px', textDecoration: 'none'}}
+            target="_blank" href={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`} >
+            <Image className="me-2"width={25} height={25} src="metamasklogo.svg"/> 
+            {formatAddress2(wallet.accounts[0])} 
+          </Button>
+        </OverlayTrigger>
+      </Nav.Item>
+  }
+  
   return (
     <Navbar bg="light" variant="light">
     <Container fluid>
-      <Navbar.Brand className="float-left ms-5" as={Link} to="/" style={{fontSize: "25px"}}>MARKETPLACE</Navbar.Brand>
+
+      <Navbar.Brand className="d-flex flex-row align-items-center ms-2" as={Link} to="/">
+        {logo}
+        <h4 className="ms-2 mt-2">MARKETPLACE</h4>
+      </Navbar.Brand>
+
       {props.loggedIn ? 
-      <Nav className="" style={{fontSize: "20px"}}>
-        <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
-        <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload Asset</Nav.Link>
-        <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
-        <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue</Nav.Link>
-      </Nav> :  "" }
+        <Nav style={{fontSize: "20px"}}>
+          <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link>
+          <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload Asset</Nav.Link>
+          <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>
+          <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue</Nav.Link>
+        </Nav> :  "" 
+      }
       
-      <Nav className='float-right me-5'>
-      {!hasProvider &&
-        <Nav.Link href="https://metamask.io" target="_blank">Install MetaMask</Nav.Link>
-      }
-      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && props.loggedIn &&
-        <Button variant="primary"disabled={isConnecting}  onClick={connectMetaMask}>
-          Connect MetaMask
-        </Button>
-      }
-      {hasProvider && wallet.accounts.length > 0 && props.loggedIn &&
-        <>
-        <OverlayTrigger  
-              placement="bottom"
-              overlay={<Tooltip>Open in Block Explorer</Tooltip>}
-            > 
-        <Card style={{ width: '12rem' }} border="primary" bg="primary">
-          <Row xs="auto" className="mt-2 ms-2 me-2">
-            <Figure className='mt-2'>
-              <Figure.Image
-                width={30}
-                height={30}
-                src="metamasklogo.svg"
-              />
-            </Figure>
-            
-              <Nav.Link 
-                className="text_link tooltip-bottom text-white mt-1"
-                target="_blank"
-                href={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`}>
-                {formatAddress2(wallet.accounts[0])} 
-              </Nav.Link>
-          </Row>
-        </Card>
-        </OverlayTrigger>
-        </>
-      }
-      {
-        props.loggedIn && 
-          <Button 
-          className='ms-5' 
-          variant='outline-danger' 
-          style={{fontSize: '20px'}} 
-          onClick={handleLogout}
-        >Logout</Button>
-      }
+      <Nav className='me-2'>
+        {metamaskNavItem}
+        { props.loggedIn && 
+          <Nav.Item className='ms-2 my-auto'>
+            <Button  variant='outline-danger' style={{fontSize: '20px'}} onClick={handleLogout}>
+              Logout
+            </Button>
+          </Nav.Item>
+        }
       </Nav>
     </Container>
   </Navbar>

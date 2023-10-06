@@ -68,7 +68,7 @@ export const Login = (props: any) => {
 
                         {/* Connect Wallet Section */}
                         <Form.Group className="mt-5" controlId="username">
-                            <h4>Connect your wallet</h4>
+                            <h4>Wallet</h4>
                             <hr className="mb-3" />
                             {/* Check if MetaMask is available and no accounts are connected */}
                             {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
