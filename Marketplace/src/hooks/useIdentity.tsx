@@ -1,5 +1,6 @@
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
+import isUrl from 'is-url';
 
 interface IdentityData {
     did: IotaDID | undefined
@@ -24,7 +25,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
-    const [loadingStorage, setloadingStorage] = useState(true);
+    const [loadingStorage, setloadingStorage] = useState(true); // TODO: why this is here?
 
     useEffect(() => {
         const url = sessionStorage.getItem("connectorUrl");
@@ -38,6 +39,11 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
     useEffect(() => {
         const getIDfromBackend = async () => {
+            if (!isUrl(connectorUrl)) {
+                throw "Connector url missing";
+            }
+
+            console.log("Get DID and VC from Connector");
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             const response = await fetch(`${connectorUrl}/identity/${accounts[0]}`, {
                 method: 'GET',
@@ -61,7 +67,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
         if(trigger && !loadingStorage){
             window.ethereum.on('accountsChanged', getIDfromBackend);
-            console.log("loading ", connectorUrl)
+            console.log("Connecting to Connector:", connectorUrl)
             if(connectorUrl !== "") {
                 getIDfromBackend();   
             } else {

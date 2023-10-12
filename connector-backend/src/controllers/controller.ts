@@ -4,7 +4,7 @@ import { createIdentity, resolveDID, signData } from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, getIotaDIDfromString, readAsset } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
-import { ethers, keccak256} from 'ethers';
+import { ethers, keccak256 } from 'ethers';
 import { v4 as uuidv4 } from 'uuid';
 import pkg from 'crypto-js';
 const { AES, enc } = pkg;
@@ -46,7 +46,8 @@ export class IdentityController {
 
     public async get(eth_address: string, res) {
         try {
-            const did_get = (await getIdentity(eth_address));
+            // console.log(ethers.getAddress(eth_address));
+            const did_get = await getIdentity(eth_address);
             if(did_get?.did === undefined)
                 throw Error("Could not retrieve any DID from the DB.");
             console.log("Resolving DID: ", did_get.did);
@@ -286,22 +287,24 @@ export class IdentityController {
         h_nonce,
         eth_signature
     }>, res) {
+
         try {
             const download_request = await getDownloadReq(req.body.h_nonce);
+            console.log(download_request);
             const lad_entry = await _getLADentry_byAlias(download_request.nft_name);
+            console.log(lad_entry);
             
             // TODO: missing abi parse of erc721 and call 'verify Proof of Purchase'
             const provider = new ethers.JsonRpcProvider(process.env.LOCALNODE_RPC_PROVIDER);
             const contractIstance = new ethers.Contract(lad_entry.nft_sc_address, abi.abi, provider);
 
             const PoP = await contractIstance.verifyPoP(req.body.eth_signature, req.body.h_nonce);
-            if(PoP){
+            if (PoP) {
                 const asset_json = readAsset(`${lad_entry.asset_path}`);
-                console.log(asset_json);
-                res.status(200).send({asset: asset_json}).end()
+                res.status(200).send({asset: asset_json}).end();
+            } else {
+                res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end();
             }
-            else
-                res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end()
         } catch (error) {
             console.log(error);
             res.status(400).send({error: error}).end();

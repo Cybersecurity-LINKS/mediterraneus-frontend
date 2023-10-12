@@ -217,7 +217,8 @@ export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     const IDentity_address = getContractAddress("IDentity");
     // let abi: InterfaceAbi = await fetchIDentityABI();
     // if(abi == null)
-    console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+    //TODO: remove or fix the abi fetch
+    // console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
 
     let abi: InterfaceAbi = await getContractABI("IDentity")
     return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())

@@ -28,6 +28,7 @@ export const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   
   useEffect(() => {
+    // TODO: remove/change sessionStorage usage, if you change manually the session storage you can navigate within the other web pages
     const loggedIn_ = sessionStorage.getItem("loggedIn");
     if (loggedIn_ === "true") {
       setLoggedIn(true);
@@ -60,23 +61,12 @@ export const App = () => {
               <Identity />
           }/>
           <Route path="publish" element={
-            loggedIn ?
-            <>
-                <Row className="d-flex justify-content-center">
-                  <Col sm={4}>
-                    <Display />
-                    <IdentityToast />
-                  </Col>
-                  <Col sm={8}>
-                    <Publish />
-                  </Col>
-                </Row>
-                <Row className="fixed-bottom">
-                  <MetaMaskError />
-                </Row>
-            </>
-            : 
-            <Navigate to="/login"/>
+            // loggedIn ?
+              <Row className="d-flex justify-content-center">
+                <Publish/>
+              </Row>
+            // : 
+            // <Navigate to="/login"/>
             }
           />
           <Route path="catalogue" element={
@@ -86,32 +76,25 @@ export const App = () => {
               <Navigate to="/login"/>
           } />
           <Route path="identity" element={
-            loggedIn ?
-            <>
+            // loggedIn ?
               <Row className="d-flex justify-content-center">
                 <Identity />
               </Row>
-              <Row className="fixed-bottom">
-                  <MetaMaskError />
-              </Row>
-            </>
-            :
-            <Navigate to="/login"/>
+            // :
+            // <Navigate to="/login"/>
           } />
           <Route path="uploadasset" element={
-            loggedIn ?
-            <>
+            // loggedIn ?
             <Row className="d-flex justify-content-center">
                 <UploadAsset />
             </Row>
-            <Row className="fixed-bottom">
-                  <MetaMaskError />
-            </Row>
-            </>
-            :
-            <Navigate to="/login"/>
+            // :
+            // <Navigate to="/login"/>
           } />
         </Routes>
+        <Row className="fixed-bottom">
+          <MetaMaskError />
+        </Row>
       </Container>
     </IdentityContextProvider>
     </MetaMaskContextProvider>

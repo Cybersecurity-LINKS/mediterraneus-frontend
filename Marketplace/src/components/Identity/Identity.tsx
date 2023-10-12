@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
 import {formatDid} from '@/utils';
+import isUrl from 'is-url';
+
+const issuer_backend = import.meta.env.VITE_ISSUER_BACKEND as string;
 
 export const Identity = () => {
     const { state } = useLocation();
@@ -20,6 +23,10 @@ export const Identity = () => {
     const [cretingIdentity, setCreatingIdentity] = useState(false);
 
     const createIdentity_ext = async (event: any) => {
+        if (!isUrl(connectorUrl)) {
+            throw "Connector url missing";
+        }
+
         try {
             event.preventDefault();
             setCreatingIdentity(true);
@@ -32,7 +39,7 @@ export const Identity = () => {
             body: JSON.stringify({eth_address: wallet.accounts[0]}) 
           });
           await response.json().then(resp => {
-            console.log(resp.did)
+            console.log(resp.did, did)
             setTriggerTrue();
             setCreatingIdentity(false);
           });
@@ -44,9 +51,13 @@ export const Identity = () => {
     }
 
     const requestVC = async () => {
+        if (did === undefined) {
+            throw "DID missing";
+        }
         try {
             setCreatingIdentity(true);
-            const response = await fetch('http://localhost:3213/api/identity', {
+            // TODO: issuer url
+            const response = await fetch(`${issuer_backend}/api/identity`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
@@ -74,7 +85,7 @@ export const Identity = () => {
             const signer = await provider?.getSigner();
             const pseudo_sign = await signer?.signMessage(ethers.toBeArray(`${vcHash}`))
         
-            const inactiveVC_response = await fetch('http://localhost:3213/api/identity/2', {
+            const inactiveVC_response = await fetch(`${issuer_backend}/api/identity/2`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
@@ -170,7 +181,7 @@ export const Identity = () => {
                 <Container fluid className="d-flex mt-3 justify-content-center">
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
-                            <Card.Title style={{fontSize: "25px"}}>Self-Sovereign Identity</Card.Title>
+                            <Card.Title>Self-Sovereign Identity</Card.Title>
                             {
                                 (state !== null) && !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                     <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
@@ -179,34 +190,6 @@ export const Identity = () => {
                                 )
                             }
                         </Card.Body>
-                        <Form.Group as={Row} controlId="username" className="mb-3 d-flex justify-content-center">
-                            {/* Check if MetaMask is available and no accounts are connected */}
-                            {(state !== null) && state.fromLogin && window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
-                                <>
-                                <Form.Label column sm={3} style={{fontSize: "20px"}}>Connect your wallet</Form.Label>
-                                <Col sm={{ span: 3, offset: 1 }}>
-                                <Button variant="outline-primary" disabled={isConnecting} onClick={connectMetaMask}>Connect MetaMask</Button>
-                                </Col>
-                                </>) 
-                            || (state !== null) && state.fromLogin && (
-                                <>
-                                    <Form.Label column sm={3} style={{fontSize: "20px"}}>Your wallet</Form.Label>
-                                    <Col sm={4}>
-                                    <Form.Text style={{fontSize: '20px', color: 'blue'}}>{formatDid(wallet.accounts[0])}</Form.Text>
-                                    </Col>
-                                    </>
-                            )}
-                        </Form.Group>
-                        {
-                            ((state !== null) && state.fromLogin ?
-                                <Form.Group as={Row} controlId="connService" className="mb-3 d-flex justify-content-center">
-                                    <Form.Label column sm={3} style={{fontSize: "20px"}}>Connector Service URL*</Form.Label>
-                                    <Col sm={4}>
-                                    <Form.Control type="input" placeholder="http://127.0.0.1" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue()}}/>
-                                    </Col>
-                                </Form.Group>
-                            : "")
-                        }
                         {
                             (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                 <Col className="mb-3 ms-auto me-auto" sm={{span:3, offset:4}}>
@@ -221,8 +204,8 @@ export const Identity = () => {
                             did === undefined 
                             ? // true
                             <>                            
-                                <IdentityAccordion title={"Decentralized IDentifier"} content={"No Decentralized IDentifier available. Please request one."} />  
-                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={createIdentity_ext}>Request DID</Button>
+                                <IdentityAccordion title={"Decentralized IDentifier"} content={"No Decentralized IDentifier available. Please create one."} />  
+                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={createIdentity_ext}>Create DID on Connector</Button>
                             </>
                             : // false
                             <>
@@ -233,8 +216,8 @@ export const Identity = () => {
                             ((vc as Credential) === undefined) 
                             ? // true
                             <>
-                                <IdentityAccordion title={"Verifiable Credential"} content={""} />
-                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={requestVC}>Request Verifiable Credential</Button>
+                                <IdentityAccordion title={"Verifiable Credential"} content={"No Verifiable Credential available. Please request one."} />
+                                <Button className="mb-2 mt-3 ms-auto me-auto" onClick={requestVC}>Request VC to the Issuer</Button>
                             </>
                             :
                             <IdentityAccordion title={"Verifiable Credential"} content={JSON.stringify(vc, null, 2)} />

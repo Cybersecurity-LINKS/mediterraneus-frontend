@@ -6,6 +6,7 @@ import { getIdentitySC } from "@/utils";
 import { useNavigate } from "react-router";
 import authAPI from '@/api/authAPI';
 import { useIdentity } from "@/hooks/useIdentity";
+import isUrl from "is-url";
 
 
 export const Login = (props: any) => {    
@@ -19,6 +20,11 @@ export const Login = (props: any) => {
     const clearError = () => setErrorMessage('')
 
     const handleLogin = async () => {
+        if (!isUrl(connectorUrl)) {
+            setErrorMessage('Connector url missing');
+            throw "Connector url missing";
+        }
+
         try {
             // login to backend, receive challenge
             let challenge = await authAPI.getChallenge(wallet.accounts[0]);
@@ -28,6 +34,8 @@ export const Login = (props: any) => {
             if((await authAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
                 props.setLoggedIn(true);
                 sessionStorage.setItem("loggedIn", "true");
+                // console.log("login trigger");
+                // setTriggerTrue();
             } else {
                 setErrorMessage('Login failed!');
             } 
@@ -38,6 +46,11 @@ export const Login = (props: any) => {
     }
 
     const handleRegister = async () => {
+        if (!isUrl(connectorUrl)) {
+            setErrorMessage('Connector url missing');
+            throw "Connector url missing";
+        }
+
         try {
             const IDSC_istance = await getIdentitySC(provider!);
             const is_active = await IDSC_istance.isVCActive_Addr(wallet.accounts[0]);
@@ -64,40 +77,14 @@ export const Login = (props: any) => {
             <div className="login-container">
                 <div className="login-box">
                     <Form className="login-form p-4 rounded">
-                        <h1 className="text-center" style={{color: 'blue'}}>Login</h1>
-
-                        {/* Connect Wallet Section */}
-                        <Form.Group className="mt-5" controlId="username">
-                            <h4>Wallet</h4>
-                            <hr className="mb-3" />
-                            {/* Check if MetaMask is available and no accounts are connected */}
-                            {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
-                            <Button
-                                variant="outline-primary"
-                                disabled={isConnecting}
-                                onClick={connectMetaMask}
-                            >
-                                Connect MetaMask
-                            </Button>
-                            ) || <Form.Text style={{fontSize: '18px', color: 'blue'}}>{wallet.accounts[0]}</Form.Text>
-                            }
-                        </Form.Group>
-
-                        <Form.Group controlId="connService" className="mt-5">
-                            <h4>Connector Service</h4>
-                            <hr className="mb-3" />
-                            <div className='d-flex justify-content-center '>
-                                <Form.Control type="input" size="lg" value={connectorUrl} onChange={(event) => {setConnector(event.target.value); setTriggerTrue();}}/>
-                            </div>
-                        </Form.Group>
-
-                        {/* Login Button */}
+                        <h1 className="text-center">Hello!</h1>
+                        {/* Login Buttons */}
                         <Container className="d-flex justify-content-center">
-                            <Button className="mt-5 btn-block" size="lg" variant="outline-success" onClick={handleLogin}>
-                                Login
+                            <Button className="mt-5" variant="outline-info" onClick={handleLogin}>
+                                Log in
                             </Button>
-                            <Button className="ms-3 mt-5 btn-block" size="lg" variant="outline-warning" onClick={handleRegister}>
-                                Register
+                            <Button className="ms-3 mt-5" variant="outline-dark" onClick={handleRegister}>
+                                Sign up
                             </Button>
                         </Container>
 

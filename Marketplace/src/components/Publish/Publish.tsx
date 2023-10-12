@@ -5,6 +5,7 @@ import { extractNumberFromVCid, getContractABI, getContractAddress, getPermitDig
 import { useMetaMask } from '@/hooks/useMetaMask';
 import { TbInfoCircle } from 'react-icons/tb';
 import { useIdentity } from '@/hooks/useIdentity';
+import isUrl from "is-url";
 
 export const Publish = () => {
     const [NFTname, setNFTname] = useState("");
@@ -26,25 +27,23 @@ export const Publish = () => {
     const [publishing, setPublishing] = useState(false);
 
     const { wallet, provider } = useMetaMask()
-    const { vc, connectorUrl } = useIdentity();
+    const { did, vc, connectorUrl } = useIdentity();
 
     useEffect(() => {
         const getAssetAliases = async () => {
             try {
-                const response = await fetch(`${connectorUrl}/assetAliases`, {
-                    method: "GET"
-                });
+                const response = await fetch(`${connectorUrl}/assetAliases`);
                 const body = await response.json();
                 if(response.status == 200) {
-                    console.log(body.aliases)
-                    setNFTnames(body.aliases)
+                    console.log("Available asset inside Connector:", body.aliases);
+                    setNFTnames(body.aliases);
                 } else {
                     const err = new Error(body["error"]);
-                    setError(err.message)
+                    setError(err.message);
                     throw err;
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         }
 
@@ -52,6 +51,7 @@ export const Publish = () => {
     }, []);
 
     const handleNFTnameChoice = async (chosen_alias: string) => {
+        console.log("Reading NFT info...");
         if(chosen_alias == "Choose an NFT Name") {
             setNFTname("");
             setEncCID("");
@@ -61,9 +61,7 @@ export const Publish = () => {
             return;
         }
         try {
-            const response = await fetch(`${connectorUrl}/ladInfo/${wallet.accounts[0]}/${chosen_alias}`, {
-                method: "GET",
-            })
+            const response = await fetch(`${connectorUrl}/ladInfo/${wallet.accounts[0]}/${chosen_alias}`)
             const body = await response.json();
 
             if(response.status == 200) {
@@ -89,8 +87,27 @@ export const Publish = () => {
     }
 
     const handleSubmit = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+        event.preventDefault();
+
         try{
-            event.preventDefault();
+            if( wallet.accounts[0] === undefined ) {
+                const err = new Error("Please connect your wallet!")
+                setError(err.message)
+                throw err;
+            } 
+
+            if (!isUrl(connectorUrl)) {
+                const err = new Error('Connector url error')
+                setError(err.message);
+                throw err;
+            }
+
+            if( did === undefined || vc == undefined ) {
+                const err = new Error("You might no have a DID or VC")
+                setError(err.message)
+                throw err;
+            } 
+
             setPublishing(true);
             const signer = await provider!.getSigner(wallet.accounts[0]);
 
@@ -216,8 +233,8 @@ export const Publish = () => {
                 }
             }
             setPublishing(false);
-        } catch (err) {
-            console.log(err);
+        } catch (e) {
+            if (e instanceof Error) console.log(e.message);
             setPublishing(false);
         }
     }
@@ -244,7 +261,7 @@ export const Publish = () => {
                     <Card.Title className="text-center">Create your NFT</Card.Title>
                     <Card.Body>
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
-                            <Form.Label column sm={3} style={{fontSize: "20px"}}>
+                            <Form.Label column sm={3}>
                                 NFT Name/Asset Alias
                             </Form.Label>
                             <Col sm={1}>
@@ -253,7 +270,7 @@ export const Publish = () => {
                                 </OverlayTrigger>
                             </Col>
                             <Col sm={8}>
-                                <Form.Select size="lg" defaultValue="Choose an NFT Name" onChange={(event) => { handleNFTnameChoice(event.target.value) }}>
+                                <Form.Select defaultValue="Choose an NFT Name" onChange={(event) => { handleNFTnameChoice(event.target.value) }}>
                                     <option>Choose an NFT Name</option>
                                     {NFTnames.map(nftname => <option key={nftname} value={nftname}>{nftname}</option>)}
                                 </Form.Select>
@@ -261,24 +278,24 @@ export const Publish = () => {
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTsymbol">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>NFT Symbol</Form.Label> 
+                            <Form.Label column sm={4}>NFT Symbol</Form.Label> 
                             <Col sm={8}>
-                                <Form.Control size="lg" type="input" placeholder="Choose an NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
+                                <Form.Control type="input" placeholder="Choose an NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
                             </Col>
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
-                                <Form.Label column sm={4} style={{fontSize: "20px"}}>Download URL</Form.Label>
+                                <Form.Label column sm={4}>Download URL</Form.Label>
                                 <Col sm={8}>
-                                    <Form.Control size="lg" type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
+                                    <Form.Control type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
                                 </Col>
                             </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>Encrypted Offering's CID</Form.Label>
+                            <Form.Label column sm={4}>Encrypted Offering's CID</Form.Label>
                             <Col sm={8}>
-                                <Form.Control className="text-truncate"  disabled={true} size="lg" type="text" placeholder="Asymmetrically Encrypted CID" 
-                                    value={EncCID.length == 0 ? "" : EncCID} style={{fontSize: "20px"}}/>
+                                <Form.Control className="text-truncate"  disabled={true} type="text" placeholder="Asymmetrically Encrypted CID" 
+                                    value={EncCID.length == 0 ? "" : EncCID}/>
                             </Col>
                         </Form.Group>
                     </Card.Body>
@@ -286,23 +303,23 @@ export const Publish = () => {
                     <Card.Title className="text-center">Create your fungible Data Token</Card.Title>
                     <Card.Body>
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTname">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>DataToken Name</Form.Label>
+                            <Form.Label column sm={4}>DataToken Name</Form.Label>
                             <Col sm={8}>
-                                <Form.Control size="lg" type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
+                                <Form.Control type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
                             </Col>
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTsymbol">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>DataToken Symbol</Form.Label>
+                            <Form.Label column sm={4}>DataToken Symbol</Form.Label>
                             <Col sm={8}>
-                                <Form.Control size="lg" type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
+                                <Form.Control type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
                             </Col>
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTmaxSupply">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>Maximum Supply</Form.Label>
+                            <Form.Label column sm={4}>Maximum Supply</Form.Label>
                             <Col sm={8}>
-                                <Form.Control size="lg" type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
+                                <Form.Control type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
                             </Col>
                         </Form.Group>
                     </Card.Body>
@@ -310,33 +327,33 @@ export const Publish = () => {
                     <Card.Title className="text-center">Trust Metadata</Card.Title>
                     <Card.Body>
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetHash">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>Asset Hash</Form.Label>
+                            <Form.Label column sm={4}>Asset Hash</Form.Label>
                             <Col sm={8}>
-                                <Form.Control className="text-truncate"  size="lg" type="input" placeholder="Hash of the Asset" disabled 
-                                value={Assethash.length == 0 ? "" : Assethash} style={{fontSize: "20px"}} />
+                                <Form.Control className="text-truncate" type="input" placeholder="Hash of the Asset" disabled 
+                                value={Assethash.length == 0 ? "" : Assethash}/>
                             </Col>
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="offeringHash">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>Offering Hash</Form.Label>
+                            <Form.Label column sm={4}>Offering Hash</Form.Label>
                             <Col sm={8}>
-                                <Form.Control className="text-truncate"  size="lg" type="input" placeholder="Hash of the Offering" disabled
-                                value={OfferingHash.length == 0 ? "" : OfferingHash} style={{fontSize: "20px"}} />
+                                <Form.Control className="text-truncate" type="input" placeholder="Hash of the Offering" disabled
+                                value={OfferingHash.length == 0 ? "" : OfferingHash}/>
                             </Col>
                         </Form.Group>
 
                         <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="trustSign">
-                            <Form.Label column sm={4} style={{fontSize: "20px"}}>Trust Signature</Form.Label>
+                            <Form.Label column sm={4}>Trust Signature</Form.Label>
                             <Col sm={8}>
-                                <Form.Control className="text-truncate" size="lg" type="input" placeholder="Trust Signature" disabled
-                                value={TrustSign.length == 0 ? "" : TrustSign} style={{fontSize: "20px"}} />
+                                <Form.Control className="text-truncate" type="input" placeholder="Trust Signature" disabled
+                                value={TrustSign.length == 0 ? "" : TrustSign}/>
                             </Col>
                         </Form.Group>
 
                     </Card.Body>
 
                     <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { handleSubmit(event) }}>
-                        Submit
+                        Publish
                     </Button>
                 </Form>
             </Card>

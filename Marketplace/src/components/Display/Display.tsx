@@ -20,13 +20,12 @@ export const Display = () => {
               className="ms-3 me-3 mt-3 mb-3"
             />
           </Figure>
-          <strong className="mb-auto me-auto mt-auto text-black" style={{ fontSize: 18 }}>{NETWORKS[Number(wallet.chainId)]}</strong>
+          <strong className="mb-auto me-auto mt-auto text-black">{NETWORKS[Number(wallet.chainId)]}</strong>
         </Toast.Header>
-        <Toast.Body className='ms-2'><strong className="text-black" style={{ fontSize: 16}}>Wallet Accounts: </strong><Link target="_blank" to={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`}>{wallet.accounts[0]}</Link></Toast.Body>
-        <Toast.Body className='ms-2'><strong className="text-black" style={{ fontSize: 16 }}>Wallet Balance: </strong> <br></br>{wallet.balance} {NETWORK_SYMBOL[Number(wallet.chainId)]} </Toast.Body>
+        <Toast.Body className='ms-2'><strong className="text-black">Wallet Account: </strong><Link target="_blank" to={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`} style={{textDecoration: 'none'}}>{wallet.accounts[0]}</Link></Toast.Body>
+        <Toast.Body className='ms-2'><strong className="text-black">Balance: </strong>{wallet.balance} {NETWORK_SYMBOL[Number(wallet.chainId)]} </Toast.Body>
         <Row xs={2} className='ms-2'>
-        <Toast.Body><strong className="text-black" style={{ fontSize: 16 }}>Hex ChainId: </strong> <br></br>{wallet.chainId}</Toast.Body>
-        <Toast.Body><strong className="text-black" style={{ fontSize: 16 }}>Numeric ChainId: </strong> <br></br>{formatChainAsNum(wallet.chainId)}</Toast.Body>
+        <Toast.Body><strong className="text-black">ChainId: </strong>{formatChainAsNum(wallet.chainId)}</Toast.Body>
         </Row>
       </Toast>
     </>

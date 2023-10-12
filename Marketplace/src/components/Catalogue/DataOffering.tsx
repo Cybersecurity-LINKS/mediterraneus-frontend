@@ -1,12 +1,40 @@
-import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
+import { ListGroup, Modal, Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, ModalProps, Row, Col } from "react-bootstrap";
 import { IDataOffering } from "./Catalogue";
-import { RefAttributes, MouseEvent, useState, useEffect } from "react";
+import { RefAttributes, MouseEvent, useState, useEffect, DetailedHTMLProps, HTMLAttributes, ReactNode, RefObject } from "react";
 import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress, getIdentitySC } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { AbiCoder, ethers, keccak256 } from "ethers";
 import CardHeader from "react-bootstrap/esm/CardHeader";
 import { IotaDID } from "@iota/identity-wasm/web";
 import { Buffer } from 'buffer';
+import { Omit, BsPrefixProps } from "react-bootstrap/esm/helpers";
+import { Link } from 'react-router-dom';
+
+const catalogue_backend = import.meta.env.VITE_CATALOGUE_BACKEND as string;
+
+function VerticallyCenteredModal(props: JSX.IntrinsicAttributes & Omit<Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "ref"> & { ref?: ((instance: HTMLDivElement | null) => void) | RefObject<HTMLDivElement> | null | undefined; }, BsPrefixProps<"div"> & ModalProps> & BsPrefixProps<"div"> & ModalProps & { children?: ReactNode; }) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Offering
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{backgroundColor: "ThreeDLightShadow"}}>
+            <pre className="ms-2 mt-2" style={{color: "white"}}>
+                {props.offering}
+            </pre>
+        </Modal.Body>
+        <Modal.Footer>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
@@ -19,6 +47,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const [loading, setLoading] = useState(true);
     const [loadingOffering, setLoadingOffering] = useState(true); 
     const [downloadable, setDownloadable] = useState(false); 
+    const [modalShow, setModalShow] = useState(false);
 
     const renderTooltip = (props: JSX.IntrinsicAttributes & TooltipProps & RefAttributes<HTMLDivElement>) => (
         <Tooltip id="button-tooltip" {...props}>
@@ -54,7 +83,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
 
     const getOfferingFromIPFS = async () => {
         // need the owner pub key and the gc priv key to derive the shared key and decrypt the cid
-        const response = await fetch("http://localhost:7777/decryptCID", {
+        const response = await fetch(`${catalogue_backend}/decryptCID`, {
             method: 'POST',
             headers: {
                 "Content-type": "application/json"
@@ -65,7 +94,14 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             })  
         })
         const json = await response.json();
-        setOffering(json["offering"]);
+        
+        if (response.ok){
+            setOffering(json["offering"]);
+        } else {
+            let err = {status: response.status, errObj: json};
+            throw err;  // An object with the error coming from the server
+        }
+        
     }
 
     const getDT_Price = async () => {
@@ -89,7 +125,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const res: BigInt = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
         const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
-        console.log(`owner: ${ownerBalance} exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
+        console.log(`Data token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 
@@ -161,7 +197,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 const asset_json = asset_resp["asset"];
                 console.log(asset_json)
                 const file = new Blob([JSON.stringify(asset_json)], {type: "text/json;charset=utf-8"})
-
+                // TODO: check trust metadata!!!! here is missing
                 // anchor link
                 const element = document.createElement("a");
                 element.href = URL.createObjectURL(file);
@@ -177,76 +213,85 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     }
 
     return (
-        <Card className="m-2" style={{ width: '32rem' }}>
-            <CardHeader className="">
-                <Card.Title className="mb-2">
-                    Owner:
-                </Card.Title>
-                <Card.Subtitle className="mb-2">{props.NFTdataobj.owner}</Card.Subtitle>
-                <Card.Title className="mb-2">
-                    DID:
-                </Card.Title>
-                <Card.Subtitle className="mb-2">{formatDid(ownerDID?.toString())}</Card.Subtitle>
+        <Card className="m-2" style={{ width: '30rem' }}>
+            <CardHeader>
+                <Card.Title>Owner</Card.Title>
+                <Card.Subtitle className="mb-2">
+                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
+                        <Link to={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
+                            {formatDid(props.NFTdataobj.owner)}
+                        </Link>
+                    </OverlayTrigger>
+                </Card.Subtitle>
+                <Card.Title>DID Owner</Card.Title>
+                <Card.Subtitle className="mb-2 text-muted">
+                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
+                        <Link to={`https://explorer.shimmer.network/testnet/identity-resolver/${ownerDID?.toString()}`} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
+                            {formatDid(ownerDID?.toString())}
+                        </Link>
+                    </OverlayTrigger>
+                </Card.Subtitle>
             </CardHeader>
             <Card.Body>
-                <Card.Title className="mb-2">NFT Name: {props.NFTdataobj.NFTname}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">NFT Symbol: {props.NFTdataobj.NFTsymbol}</Card.Subtitle>
-                <Card.Text>
-                    NFT Contract Address: 
-                    <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 250, hide: 400 }}
-                        overlay={renderTooltip}
-                    >
-                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2">{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
-                    </OverlayTrigger> 
+                <Card.Text> NFT name<span className="float-end">{props.NFTdataobj.NFTname}</span> </Card.Text>
+                <Card.Text> NFT symbol<span className="float-end">{props.NFTdataobj.NFTsymbol}</span> </Card.Text>
+                <Card.Text> NFT address
+                    <span className="float-end">
+                        <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
+                            <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
+                        </OverlayTrigger>
+                    </span>
                 </Card.Text>
-
-                <Card.Title className="mb-2 mt-3">Data Token Name: {props.NFTdataobj.DTname}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">Data Token Symbol: {props.NFTdataobj.DTsymbol}</Card.Subtitle>
-                <Card.Text>
-                    Data Token address: 
-                    <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 250, hide: 400 }}
-                        overlay={renderTooltip}
-                    >
-                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2">{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
+                <Card.Text>Data Token name<span className="float-end">{props.NFTdataobj.DTname}</span></Card.Text>
+                <Card.Text>Data Token symbol<span className="float-end">{props.NFTdataobj.DTsymbol}</span></Card.Text>
+                <Card.Text>Data Token address 
+                    <span className="float-end">
+                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip}>
+                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
                     </OverlayTrigger>
+                    </span> 
                 </Card.Text>
-                <Card.Title>Asset's Offering</Card.Title>
+                <Card.Text>Asset access price
+                    <span className="float-end">
+                        <OverlayTrigger delay={{ show: 250, hide: 400 }} overlay={<Tooltip><strong>Exchange Rate:</strong><br/>1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Tooltip>}>          
+                            <a>1 {`${props.NFTdataobj.DTsymbol}`} </a>
+                        </OverlayTrigger>
+                    </span>  
+                </Card.Text>
+            </Card.Body>
+            <Card.Footer>
                 {
-                    loadingOffering ? <Spinner animation="border" variant="success" style={{
-                        width: '3rem', 
-                        height: '3rem', 
+                    loadingOffering ? <Spinner animation="border" variant="info" style={{
+                        width: '2rem', 
+                        height: '2rem', 
                         marginLeft: '13rem',
                         position: 'relative',
                         justifyContent: 'center',
                         flex: 1,
                     }}/> :
-                    <Card style={{backgroundColor: "ThreeDLightShadow"}} className='mb-3 ms-auto me-auto'>
-                        {
-                            <pre className="ms-2 mt-2" style={{color: "white"}}>
-                                {offering}
-                            </pre>
-                        }
-                    </Card>
+                    <>
+                    <Button variant="outline-secondary" className="me-2" onClick={() => setModalShow(true)}>
+                        Show offering
+                    </Button>
+                    <VerticallyCenteredModal
+                        show={modalShow}
+                        onHide={() => setModalShow(false)}
+                        offering={offering}
+                    />
+                    </>    
                 }
-                
-                <Card.Title className="mb-3">Price for Asset Access: 1 {`${props.NFTdataobj.DTsymbol}`}</Card.Title>
-                <Card.Title className="mb-3">Exchange Rate: 1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Card.Title>
                 {
                     downloadable ? 
-                    <Button type="submit" onClick={(event) => { downloadAsset(event)}}>
+                    <Button type="submit" variant="warning" onClick={(event) => { downloadAsset(event)}}>
                         Download Asset
                     </Button> 
                     :
                     ((wallet.accounts[0] as string).toString().toLowerCase() !== props.NFTdataobj.owner.toLowerCase()) &&
                     <Button type="submit" onClick={(event) => { handleSubmit(event)}}>
-                        Buy Data/Service Access
+                        Buy Asset access
                     </Button>
                 }
-            </Card.Body>
+                </Card.Footer>
         </Card>
   );
 }
