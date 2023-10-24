@@ -28,6 +28,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const [loadingStorage, setloadingStorage] = useState(true); // TODO: why this is here?
 
     useEffect(() => {
+        // console.log("Use effect, use identity");
         const url = sessionStorage.getItem("connectorUrl");
         if (url != null && url != undefined) {
             setConnectorUrl(url);
@@ -38,7 +39,9 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     }, []);   
 
     useEffect(() => {
+        // console.log("Use effect 2, use identity");
         const getIDfromBackend = async () => {
+            // console.log("Here...");
             if (!isUrl(connectorUrl)) {
                 throw "Connector url missing";
             }
@@ -65,9 +68,10 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             setLoading(false);
         };
 
+        // console.log(trigger, !loadingStorage);
         if(trigger && !loadingStorage){
             window.ethereum.on('accountsChanged', getIDfromBackend);
-            console.log("Connecting to Connector:", connectorUrl)
+            // console.log("Connecting to Connector:", connectorUrl)
             if(connectorUrl !== "") {
                 getIDfromBackend();   
             } else {

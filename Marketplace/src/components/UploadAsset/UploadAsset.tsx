@@ -36,7 +36,7 @@ export const UploadAsset = () => {
             }
 
             if( did === undefined || vc == undefined ) {
-                const err = new Error("You might no have a DID or VC")
+                const err = new Error("DID undefined")
                 setError(err.message)
                 throw err;
             } 

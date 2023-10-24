@@ -11,7 +11,7 @@ import { Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstra
 import {formatDid} from '@/utils';
 import isUrl from 'is-url';
 
-const issuer_backend = import.meta.env.VITE_ISSUER_BACKEND as string;
+const issuer_api = import.meta.env.VITE_ISSUER_API as string;
 
 export const Identity = () => {
     const { state } = useLocation();
@@ -57,45 +57,42 @@ export const Identity = () => {
         try {
             setCreatingIdentity(true);
             // TODO: issuer url
-            const response = await fetch(`${issuer_backend}/api/identity`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({did: did!.toString()})   
-            });
-            const json_resp = await response.json();
-            console.log(json_resp);
-            const vcHash = `${json_resp.vchash}`;
-
+            const response = await fetch(`${issuer_api}/challenges?did=${did!.toString()}`);
+            if (!response.ok) {
+                console.log("Request already present");
+                throw response.json();
+            }
+            // TODO: throw and catch error if response is not ok
+            const nonce = (await response.json()).nonce;
+            console.log("challenge: ", nonce);
             const responseSign = await fetch(`${connectorUrl}/signdata`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
                 },
-                body: JSON.stringify({eth_address: wallet.accounts[0], vchash: vcHash}) 
+                body: JSON.stringify({eth_address: wallet.accounts[0], payload: nonce}) 
             });
             const json_sign = await responseSign.json();
-            console.log(json_sign);
+            console.log("ssi signature: ", json_sign.ssi_signature);
             // const ssi_signature = privKeytoBytes(json_sign.ssi_signature)
             // if(ssi_signature === undefined || ssi_signature.length != 64) { // hex len = 64 * 2
             //     console.log("Signature undefined or invalid");
             //     throw Error("Signature undefined or invalid");
             // }
             const signer = await provider?.getSigner();
-            const pseudo_sign = await signer?.signMessage(ethers.toBeArray(`${vcHash}`))
-        
-            const inactiveVC_response = await fetch(`${issuer_backend}/api/identity/2`, {
+            const pseudo_sign = await signer?.signMessage(nonce);
+            const inactiveVC_response = await fetch(`${issuer_api}/credentials`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
                 },
                 body: JSON.stringify({
-                    vc_hash: vcHash,
+                    did: did!.toString(),
+                    nonce: nonce,
                     ssi_signature: json_sign.ssi_signature.toString(),
                     pseudo_sign: pseudo_sign
                 })
-            }) 
+            }); 
             const inactiveVC_json = await inactiveVC_response.json();
             const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
             const vc_numId = extractNumberFromVCid(vc_cred);

@@ -64,14 +64,14 @@ export class IdentityController {
     }
 
     public async postSign(req: TypedRequestBody<{
-        vchash,
+        payload, // data do be signed
         eth_address
     }>, res) {
         try {
             const identity = (await getIdentity(req.body.eth_address));
             if(identity === undefined)
                 throw Error("Could retrieve any private key from the DB.");
-            const ssi_signature = buf2hex(signData(stringToBytes(req.body.vchash), privKeytoBytes(identity!.privkey)));
+            const ssi_signature = buf2hex(signData(stringToBytes(req.body.payload), privKeytoBytes(identity!.privkey)));
             res.status(201).send({ssi_signature: `${ssi_signature}`}).end();
         } catch (error) {
             console.log(error);
@@ -299,14 +299,17 @@ export class IdentityController {
             const contractIstance = new ethers.Contract(lad_entry.nft_sc_address, abi.abi, provider);
 
             const PoP = await contractIstance.verifyPoP(req.body.eth_signature, req.body.h_nonce);
+            console.log(PoP);
             if (PoP) {
                 const asset_json = readAsset(`${lad_entry.asset_path}`);
+                console.log(asset_json);
                 res.status(200).send({asset: asset_json}).end();
             } else {
+                console.log("Proof of possesion failed!");
                 res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end();
             }
         } catch (error) {
-            console.log(error);
+            console.log("errore: ", error);
             res.status(400).send({error: error}).end();
         }
         

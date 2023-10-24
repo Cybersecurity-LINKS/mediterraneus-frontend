@@ -103,7 +103,7 @@ export const Publish = () => {
             }
 
             if( did === undefined || vc == undefined ) {
-                const err = new Error("You might no have a DID or VC")
+                const err = new Error("DID undefined")
                 setError(err.message)
                 throw err;
             } 
@@ -234,7 +234,10 @@ export const Publish = () => {
             }
             setPublishing(false);
         } catch (e) {
-            if (e instanceof Error) console.log(e.message);
+            if (e instanceof Error) {
+                console.log(e.message);
+                setError(e.message);
+            }
             setPublishing(false);
         }
     }
