@@ -48,7 +48,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
             console.log("Get DID and VC from Connector");
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const response = await fetch(`${connectorUrl}/identity/${accounts[0]}`, {
+            const response = await fetch(`${connectorUrl}/identities/${accounts[0]}`, {
                 method: 'GET',
                 headers: {
                     "Content-type": "application/json"

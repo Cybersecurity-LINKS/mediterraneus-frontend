@@ -9,10 +9,10 @@ import {
     MethodScope,
 } from "@iota/identity-wasm/node/index.js";
 import { Bech32Helper, IAliasOutput } from "@iota/iota.js";
-import { connectorWallet } from "../app.js";
+import { connectorWallet } from "../index.js";
 import { ensureAddressHasFunds } from "../utils.js";
 
- export async function createIdentity(): Promise<{
+export async function createIdentity(): Promise<{
     did: IotaDID,
     keypair: KeyPair 
 }> {

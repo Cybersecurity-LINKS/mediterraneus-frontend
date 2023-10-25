@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import { Account, AccountManager, AccountManagerOptions, Address, ClientOptions, CoinType } from '@iota/wallet'
 import { SecretManager, Client } from '@iota/client-wasm/node/lib/index.js'
 import { ensureAddressHasFunds } from './utils.js';
-import { Bip39 } from "@iota/crypto.js";
 
 dotenv.config()
 

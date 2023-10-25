@@ -29,7 +29,7 @@ export const Login = (props: any) => {
             // login to backend, receive challenge
             let challenge = await authAPI.getChallenge(wallet.accounts[0]);
             // ask connector (identity key wallet) to create a vp
-            let signed_vp = await authAPI.createVP(connectorUrl, challenge, wallet.accounts[0]);
+            let signed_vp = await authAPI.generateVP(connectorUrl, challenge, wallet.accounts[0]);
             // send vp to verifier (catalogue)
             if((await authAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
                 props.setLoggedIn(true);

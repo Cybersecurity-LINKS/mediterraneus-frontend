@@ -14,15 +14,14 @@ const getChallenge = async (eth_address: string) => {
     }
 }
 
-const createVP = async (connectorUrl: string, challenge: string, eth_address: string) => {
+const generateVP = async (connectorUrl: string, challenge: string, eth_address: string) => {
     
-    const response = await fetch(`${connectorUrl}/generate_vp`, {
+    const response = await fetch(`${connectorUrl}/identities/${eth_address}/gen-presentation`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc. ? LOL
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            eth_address: eth_address,
             challenge: challenge
         }), // body data type must match "Content-Type" header
       });
@@ -59,5 +58,5 @@ const login = async (signed_vp: string, eth_addrres: string) => {
     }
 }
 
-const authAPI = { getChallenge, createVP, login };
+const authAPI = { getChallenge, generateVP, login };
 export default authAPI;

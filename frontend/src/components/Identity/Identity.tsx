@@ -30,19 +30,19 @@ export const Identity = () => {
         try {
             event.preventDefault();
             setCreatingIdentity(true);
-            console.log(wallet.accounts[0]);
-            const response = await fetch(`${connectorUrl}/identity`, {
-            method: 'POST',
-            headers: {
-              "Content-type": "application/json"
-            },
-            body: JSON.stringify({eth_address: wallet.accounts[0]}) 
-          });
-          await response.json().then(resp => {
-            console.log(resp.did, did)
-            setTriggerTrue();
-            setCreatingIdentity(false);
-          });
+            console.log("Wallet address: ", wallet.accounts[0]);
+            const response = await fetch(`${connectorUrl}/identities`, {
+                method: 'POST',
+                headers: {
+                "Content-type": "application/json"
+                },
+                body: JSON.stringify({eth_address: wallet.accounts[0]}) 
+            });
+            await response.json().then(resp => {
+                console.log(resp.did, did)
+                setTriggerTrue();
+                setCreatingIdentity(false);
+            });
         } catch (error) {
             console.log(error)
             setCreatingIdentity(false);
@@ -65,12 +65,12 @@ export const Identity = () => {
             // TODO: throw and catch error if response is not ok
             const nonce = (await response.json()).nonce;
             console.log("challenge: ", nonce);
-            const responseSign = await fetch(`${connectorUrl}/signdata`, {
+            const responseSign = await fetch(`${connectorUrl}/identities/${wallet.accounts[0]}/sign-data`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"
                 },
-                body: JSON.stringify({eth_address: wallet.accounts[0], payload: nonce}) 
+                body: JSON.stringify({payload: nonce}) 
             });
             const json_sign = await responseSign.json();
             console.log("ssi signature: ", json_sign.ssi_signature);
@@ -96,19 +96,18 @@ export const Identity = () => {
             const inactiveVC_json = await inactiveVC_response.json();
             const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
             const vc_numId = extractNumberFromVCid(vc_cred);
-            console.log(ethers.toBigInt(vc_numId))
+            console.log("VC id:", ethers.toBigInt(vc_numId))
 
             const IDSC_istance = await getIdentitySC(provider!);
             let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
             await tx.wait();
             // store VC in connector's backend.
-            const storeVCresp = await fetch(`${connectorUrl}/storeVC`, {
-                method: 'POST',
+            const storeVCresp = await fetch(`${connectorUrl}/identities/${wallet.accounts[0]}`, {
+                method: 'PATCH',
                 headers: {
                     "Content-type": "application/json"
                 },
                 body: JSON.stringify({
-                    eth_address: wallet.accounts[0],
                     vc: vc_cred?.toJSON(),
                 })
             });
@@ -123,30 +122,30 @@ export const Identity = () => {
         }
     }
 
-    const downloadIdentity = async () => {
-        const response = await fetch(`${connectorUrl}/identitymaterial/${wallet.accounts[0]}`, {
-            method: 'GET',
-            headers: {
-                "Content-type": "application/json"
-            },
-        });
-        if(response.status == 200){
-            const identityMat = await response.json();
-            console.log(identityMat)
-            const file = new Blob([JSON.stringify(identityMat)], {type: "text/json;charset=utf-8"})
+    // const downloadIdentity = async () => {
+    //     const response = await fetch(`${connectorUrl}/identitymaterial/${wallet.accounts[0]}`, {
+    //         method: 'GET',
+    //         headers: {
+    //             "Content-type": "application/json"
+    //         },
+    //     });
+    //     if(response.status == 200){
+    //         const identityMat = await response.json();
+    //         console.log(identityMat)
+    //         const file = new Blob([JSON.stringify(identityMat)], {type: "text/json;charset=utf-8"})
 
-            // anchor link
-            const element = document.createElement("a");
-            element.href = URL.createObjectURL(file);
-            element.download = "IdentityMat-" + Date.now() + ".json";
+    //         // anchor link
+    //         const element = document.createElement("a");
+    //         element.href = URL.createObjectURL(file);
+    //         element.download = "IdentityMat-" + Date.now() + ".json";
 
-            // simulate link click
-            document.body.appendChild(element); // Required for this to work in FireFox
-            element.click();
-        } else {
-            // set error message
-        }
-    }
+    //         // simulate link click
+    //         document.body.appendChild(element); // Required for this to work in FireFox
+    //         element.click();
+    //     } else {
+    //         // set error message
+    //     }
+    // }
 
     const gotoLogin = async () => {
         navigate("/login");
@@ -179,13 +178,13 @@ export const Identity = () => {
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
                             <Card.Title>Self-Sovereign Identity</Card.Title>
-                            {
+                            {/* {
                                 (state !== null) && !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                     <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
                                         Download your IDentity
                                     </Button>
                                 )
-                            }
+                            } */}
                         </Card.Body>
                         {
                             (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (

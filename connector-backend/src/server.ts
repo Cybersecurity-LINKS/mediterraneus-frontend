@@ -1,10 +1,10 @@
-import express from 'express';
+import express, {Express} from 'express';
 import bodyParser from 'body-parser';
 import router from './routers/router.js';
 import morgan from 'morgan';
 
 class Server {
-    private app;
+    private app: Express;
 
     constructor() {
         this.app = express();
@@ -18,8 +18,8 @@ class Server {
         this.app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
         this.app.use(express.json())
         this.app.use((_, res, next) => {
-            res.append('Access-Control-Allow-Origin', ['http://localhost:5174']);
-            res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+            res.append('Access-Control-Allow-Origin', ['http://localhost:5174']); // FRONTEND
+            res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,PATCH,DELETE');
             res.append('Access-Control-Allow-Headers', 'Content-Type');
             next();
         })
