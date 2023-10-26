@@ -167,22 +167,18 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     }
 
     const downloadAsset = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+        const NFTname = props.NFTdataobj.NFTname; 
+        const providerConnectorUrl = props.NFTdataobj.AssetDownloadURL;
         event.preventDefault();
         try {
-            const resp_nonce = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_req`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({nft_name: props.NFTdataobj.NFTname})
-            });
+            const resp_nonce = await fetch(`${providerConnectorUrl}/assets/${NFTname}/get-challenge`);
             const json_nonce_resp = await resp_nonce.json();
             const h_nonce = keccak256(Buffer.from(json_nonce_resp["nonce"]));
 
             const signer = await provider?.getSigner();
             const eth_signature = await signer?.signMessage(ethers.toBeArray(`${h_nonce}`));
 
-            const asset_req = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_sign`, {
+            const asset_req = await fetch(`${providerConnectorUrl}/assets/${NFTname}/download`, {
                 method: 'POST',
                 headers: {
                     "Content-type": "application/json"

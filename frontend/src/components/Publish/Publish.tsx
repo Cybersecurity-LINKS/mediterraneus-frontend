@@ -32,7 +32,7 @@ export const Publish = () => {
     useEffect(() => {
         const getAssetAliases = async () => {
             try {
-                const response = await fetch(`${connectorUrl}/assetAliases`);
+                const response = await fetch(`${connectorUrl}/assets?fields=alias`);
                 const body = await response.json();
                 if(response.status == 200) {
                     console.log("Available asset inside Connector:", body.aliases);
@@ -61,7 +61,7 @@ export const Publish = () => {
             return;
         }
         try {
-            const response = await fetch(`${connectorUrl}/ladInfo/${wallet.accounts[0]}/${chosen_alias}`)
+            const response = await fetch(`${connectorUrl}/assets/${chosen_alias}?eth_address=${wallet.accounts[0]}`)
             const body = await response.json();
 
             if(response.status == 200) {
@@ -138,13 +138,12 @@ export const Publish = () => {
                 let event = rc.logs[i];
                 if(event.eventName == 'NFTCreated' && event.eventSignature == "NFTCreated(address,address,string,address,string,string)"){
                 console.log(`event ${event.eventName}: address ${event.args[0]}`);
-                    const resp = await fetch(`${connectorUrl}/update_nft_address`, {
-                        method: 'POST',
+                    const resp = await fetch(`${connectorUrl}/assets/${NFTname}`, {
+                        method: 'PATCH',
                         headers: {
                             "Content-type": "application/json"
                         },
                         body: JSON.stringify({
-                            nft_name: NFTname,
                             nft_sc_address: event.args[0],
                         })
                     });

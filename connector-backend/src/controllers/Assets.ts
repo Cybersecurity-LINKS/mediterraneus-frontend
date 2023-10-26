@@ -97,7 +97,7 @@ async function uploadOnLAD(req: Request, res: Response) {
 }
 
 async function addNFT_addressOnLAD(req: Request, res: Response) {
-    const nft_name = req.body.nft_name;
+    const nft_name = req.params.asset_id;
     const nft_sc_address = req.body.nft_sc_address;
     try {
         console.log(`Upload ${nft_name} ${nft_sc_address}`)
@@ -122,8 +122,8 @@ async function getAssetAliases(req: Request, res: Response) {
 }
 
 async function getLADentry_byAlias(req: Request, res: Response) {
-    const asset_alias = req.params.asset_alias;
-    const eth_address = req.params.eth_address;
+    const asset_alias = req.params.asset_id;
+    const eth_address = req.query.eth_address as string; // TODO: Define Request interface type?
     try {
         console.log(`${asset_alias} ${eth_address}`)
         const lad_entry = await DbOperations._getLADentry_byAlias(asset_alias);
@@ -164,7 +164,7 @@ async function getLADentry_byAlias(req: Request, res: Response) {
 }
 
 async function downloadRequest(req: Request, res: Response) {
-    const nft_name = req.body.nft_name;
+    const nft_name = req.params.asset_id;
     try {
         // check I actually own the asset
         const lad_entry = await DbOperations._getLADentry_byAlias(nft_name);
@@ -181,6 +181,7 @@ async function downloadRequest(req: Request, res: Response) {
 }
 
 async function downalodReq_sign(req: Request, res: Response) {
+    //TODO: use req.params.asset_id
     const h_nonce = req.body.h_nonce;
     const eth_signature = req.body.eth_signature;
 

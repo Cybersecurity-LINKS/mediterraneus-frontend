@@ -55,12 +55,10 @@ export const UploadAsset = () => {
                     eth_address: wallet.accounts[0],
                     asset_alias: assetAlias
                 }));
-                const response = await fetch(`${connectorUrl}/uploadOnLAD`,
-                    {
-                        body: formData,
-                        method: "POST",
-                    }
-                );
+                const response = await fetch(`${connectorUrl}/assets`, {
+                    method: "POST",
+                    body: formData,
+                });
 
                 const result = await response.json()
                 console.log(result)

@@ -74,11 +74,6 @@ export const Identity = () => {
             });
             const json_sign = await responseSign.json();
             console.log("ssi signature: ", json_sign.ssi_signature);
-            // const ssi_signature = privKeytoBytes(json_sign.ssi_signature)
-            // if(ssi_signature === undefined || ssi_signature.length != 64) { // hex len = 64 * 2
-            //     console.log("Signature undefined or invalid");
-            //     throw Error("Signature undefined or invalid");
-            // }
             const signer = await provider?.getSigner();
             const pseudo_sign = await signer?.signMessage(nonce);
             const inactiveVC_response = await fetch(`${issuer_api}/credentials`, {
@@ -122,31 +117,6 @@ export const Identity = () => {
         }
     }
 
-    // const downloadIdentity = async () => {
-    //     const response = await fetch(`${connectorUrl}/identitymaterial/${wallet.accounts[0]}`, {
-    //         method: 'GET',
-    //         headers: {
-    //             "Content-type": "application/json"
-    //         },
-    //     });
-    //     if(response.status == 200){
-    //         const identityMat = await response.json();
-    //         console.log(identityMat)
-    //         const file = new Blob([JSON.stringify(identityMat)], {type: "text/json;charset=utf-8"})
-
-    //         // anchor link
-    //         const element = document.createElement("a");
-    //         element.href = URL.createObjectURL(file);
-    //         element.download = "IdentityMat-" + Date.now() + ".json";
-
-    //         // simulate link click
-    //         document.body.appendChild(element); // Required for this to work in FireFox
-    //         element.click();
-    //     } else {
-    //         // set error message
-    //     }
-    // }
-
     const gotoLogin = async () => {
         navigate("/login");
     }
@@ -178,13 +148,6 @@ export const Identity = () => {
                     <Card style={{width: '70rem'}} className='d-flex justify-content-center mb-5 mt-3'>
                         <Card.Body className='mb-2 mt-3 ms-auto me-auto'>
                             <Card.Title>Self-Sovereign Identity</Card.Title>
-                            {/* {
-                                (state !== null) && !state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
-                                    <Button className="mt-3 ms-auto me-auto" style={{width: '100%'}} size="lg" variant="outline-success" onClick={downloadIdentity} value="download">
-                                        Download your IDentity
-                                    </Button>
-                                )
-                            } */}
                         </Card.Body>
                         {
                             (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
