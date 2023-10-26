@@ -10,7 +10,7 @@ import pkg from 'crypto-js';
 import crypto from 'crypto'
 
 import abi from '../abi/erc721-abi.json' assert {type: "json"};
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 import multer from 'multer';
 
 const storage = multer.diskStorage({
@@ -20,10 +20,11 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + file.originalname.match(/\..*$/)![0])
     }
 });
-const upload = multer({storage}).array("files");
 
-async function uploadOnLAD(req: Request, res: Response) {
-    upload(req, res, async function (err) {
+function uploadFiles(req: Request, res: Response, next: NextFunction) {
+    const upload = multer({storage}).array("files");
+
+    upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } }).end();
@@ -37,9 +38,13 @@ async function uploadOnLAD(req: Request, res: Response) {
             }
             return;
         }
-    });
-    
-    // Everything went fine.
+        // Everything went fine. 
+        next()
+    })
+}
+
+async function uploadOnLAD(req: Request, res: Response) {
+
     try {
         let additional = JSON.parse(req.body.additional);
         /**  
@@ -206,5 +211,5 @@ async function downalodReq_sign(req: Request, res: Response) {
     
 }
 
-const AssetsController = { uploadOnLAD, addNFT_addressOnLAD, getAssetAliases, getLADentry_byAlias, downloadRequest, downalodReq_sign };
+const AssetsController = { uploadFiles, uploadOnLAD, addNFT_addressOnLAD, getAssetAliases, getLADentry_byAlias, downloadRequest, downalodReq_sign };
 export default AssetsController;
