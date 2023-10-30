@@ -97,7 +97,7 @@ async function uploadOnLAD(req: Request, res: Response) {
 }
 
 async function addNFT_addressOnLAD(req: Request, res: Response) {
-    const nft_name = req.params.asset_id;
+    const nft_name = req.params.assetId;
     const nft_sc_address = req.body.nft_sc_address;
     try {
         console.log(`Upload ${nft_name} ${nft_sc_address}`)
@@ -122,7 +122,7 @@ async function getAssetAliases(req: Request, res: Response) {
 }
 
 async function getLADentry_byAlias(req: Request, res: Response) {
-    const asset_alias = req.params.asset_id;
+    const asset_alias = req.params.assetId;
     const eth_address = req.query.eth_address as string; // TODO: Define Request interface type?
     try {
         console.log(`${asset_alias} ${eth_address}`)
@@ -131,9 +131,7 @@ async function getLADentry_byAlias(req: Request, res: Response) {
             throw "";
         const identity = await DbOperations.getIdentity(eth_address);
 
-        const gc_resp = await fetch(`${process.env.GLOBAL_CATALOGUE_ENDPOINT}/catalogueDID`, {
-            method: "GET"
-        })
+        const gc_resp = await fetch(`${process.env.GLOBAL_CATALOGUE_ENDPOINT}/dids`);
         const gc_did = (await gc_resp.json())["did"]
         const gc_doc = await IdentityService.resolveDID(IotaDID.parse(gc_did))
 
@@ -164,7 +162,7 @@ async function getLADentry_byAlias(req: Request, res: Response) {
 }
 
 async function downloadRequest(req: Request, res: Response) {
-    const nft_name = req.params.asset_id;
+    const nft_name = req.params.assetId;
     try {
         // check I actually own the asset
         const lad_entry = await DbOperations._getLADentry_byAlias(nft_name);
@@ -181,7 +179,7 @@ async function downloadRequest(req: Request, res: Response) {
 }
 
 async function downalodReq_sign(req: Request, res: Response) {
-    //TODO: use req.params.asset_id
+    //TODO: use req.params.assetId
     const h_nonce = req.body.h_nonce;
     const eth_signature = req.body.eth_signature;
 

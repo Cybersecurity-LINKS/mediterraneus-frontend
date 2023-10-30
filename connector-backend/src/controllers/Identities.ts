@@ -2,16 +2,16 @@ import { IotaDID, IotaDocument, Presentation, Credential, ProofOptions } from '@
 import * as DbOperations from '../models/db-operations.js'
 import * as IdentityService from '../services/identity.js'
 import { privKeytoBytes, stringToBytes, buf2hex, getIotaDIDfromString } from '../utils.js'
-import Identity from '../__generated__/identity.js';
+import Identity from '../db/__generated__/identity.js';
 
 import {Request, Response} from 'express';
 
 async function createIdentity(req: Request, res: Response) {
-    const eth_address = req.body.eth_address;
-    if(eth_address !== undefined) {
+    const ethAddress = req.body.ethAddress;
+    if(ethAddress !== undefined) {
         IdentityService.createIdentity().then(({did, keypair}) => {
             DbOperations.insertIdentity(
-                eth_address.toString(),
+                ethAddress.toString(),
                 did.toString(), 
                 keypair.private().toString(), 
             ).then( () => {
@@ -30,10 +30,10 @@ async function createIdentity(req: Request, res: Response) {
 }
 
 async function getIdentity(req: Request, res: Response) {
-    const eth_address = req.params.eth_address;
+    const ethAddress = req.params.ethAddress;
     try {
-        // console.log(ethers.getAddress(eth_address));
-        const did_get = await DbOperations.getIdentity(eth_address);
+        // console.log(ethers.getAddress(ethAddress));
+        const did_get = await DbOperations.getIdentity(ethAddress);
         if(did_get?.did === undefined)
             throw Error("Could not retrieve any DID from the DB.");
         console.log("Resolving DID: ", did_get.did);
@@ -50,11 +50,11 @@ async function getIdentity(req: Request, res: Response) {
 }
 
  async function signData(req: Request, res: Response) {
-    const eth_address = req.params.eth_address;
+    const ethAddress = req.params.ethAddress;
     const payload = req.body.payload; // data do be signed
 
     try {
-        const identity = await DbOperations.getIdentity(eth_address);
+        const identity = await DbOperations.getIdentity(ethAddress);
         if(identity === undefined)
             throw Error("Could retrieve any private key from the DB.");
         const ssi_signature = buf2hex(IdentityService.signData(stringToBytes(payload), privKeytoBytes(identity!.privkey)));
@@ -66,10 +66,10 @@ async function getIdentity(req: Request, res: Response) {
 }
 
 async function storeVC(req: Request, res: Response) {
-    const eth_address = req.params.eth_address;
+    const ethAddress = req.params.ethAddress;
     const vc = req.body.vc as JSON
     try {
-        await DbOperations.insertVCintoExistingIdentity(eth_address, vc);
+        await DbOperations.insertVCintoExistingIdentity(ethAddress, vc);
         res.status(201).end();
     } catch (error) {
         console.log(error);
@@ -79,11 +79,11 @@ async function storeVC(req: Request, res: Response) {
 
 async function generateVP(req: Request, res: Response) {
 
-    const eth_address = req.params.eth_address;
+    const ethAddress = req.params.ethAddress;
     const challenge = req.body.challenge;
 
     try {
-        const identity: Identity = await DbOperations.getIdentity(eth_address);
+        const identity: Identity = await DbOperations.getIdentity(ethAddress);
         const did_doc = await IdentityService.resolveDID(getIotaDIDfromString(identity.did))
 
         const unsignedVp = new Presentation({

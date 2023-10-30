@@ -1,5 +1,5 @@
-import { LocalAssetDb } from '../__generated__/index.js';
-import db, { download_request, identity, local_asset_db} from '../dbconfig/dbconnector.js';
+import { LocalAssetDb } from '../db/__generated__/index.js';
+import db, { download_request, identity, local_asset_db} from '../db/dbconfig/dbconnector.js';
 
 export async function insertIdentity(
     eth_address: string,
