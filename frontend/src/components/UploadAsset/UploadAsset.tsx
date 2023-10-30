@@ -71,7 +71,10 @@ export const UploadAsset = () => {
                 }
             }
         } catch (e) {
-            if (e instanceof Error) console.log(e.message);
+            if (e instanceof Error) {
+                console.log(e.message);
+                setError(e.message);
+            }
         }
     }
 

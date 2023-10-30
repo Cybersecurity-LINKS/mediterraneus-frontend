@@ -5,44 +5,34 @@ import { ContractTransactionResponse, ethers } from "ethers";
 import { Button, Card, Container, Form, Spinner } from "react-bootstrap";
 import { IdentityAccordion } from "./IdentityAccordion";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Col, Row, Alert, OverlayTrigger, Tooltip, Figure } from 'react-bootstrap';
-import {formatDid} from '@/utils';
 import isUrl from 'is-url';
 
-const issuer_api = import.meta.env.VITE_ISSUER_API as string;
+import issuerAPI from "@/api/issuerAPIs";
+import connectorAPI from "@/api/connectorAPIs";
 
 export const Identity = () => {
-    const { state } = useLocation();
     const navigate = useNavigate();
-
-    const { provider, wallet, isConnecting, connectMetaMask } = useMetaMask();
+    const { state } = useLocation();
+    const { provider, wallet } = useMetaMask();
     const { did, didDoc, vc, setTriggerTrue, loading, connectorUrl, setConnector } = useIdentity();
 
     const [cretingIdentity, setCreatingIdentity] = useState(false);
 
+    //TODO: why don't use hooks for setting the did and vc and do that call there? 
     const createIdentity_ext = async (event: any) => {
         if (!isUrl(connectorUrl)) {
             throw "Connector url missing";
         }
-
         try {
             event.preventDefault();
             setCreatingIdentity(true);
             console.log("Wallet address: ", wallet.accounts[0]);
-            const response = await fetch(`${connectorUrl}/identities`, {
-                method: 'POST',
-                headers: {
-                "Content-type": "application/json"
-                },
-                body: JSON.stringify({eth_address: wallet.accounts[0]}) 
-            });
-            await response.json().then(resp => {
-                console.log(resp.did, did)
-                setTriggerTrue();
-                setCreatingIdentity(false);
-            });
+            await connectorAPI.createDID(connectorUrl,  wallet.accounts[0]);
+            setTriggerTrue();
+            setCreatingIdentity(false);
         } catch (error) {
             console.log(error)
             setCreatingIdentity(false);
@@ -56,58 +46,31 @@ export const Identity = () => {
         }
         try {
             setCreatingIdentity(true);
-            // TODO: issuer url
-            const response = await fetch(`${issuer_api}/challenges?did=${did!.toString()}`);
-            if (!response.ok) {
-                console.log("Request already present");
-                throw response.json();
-            }
-            // TODO: throw and catch error if response is not ok
-            const nonce = (await response.json()).nonce;
-            console.log("challenge: ", nonce);
-            const responseSign = await fetch(`${connectorUrl}/identities/${wallet.accounts[0]}/sign-data`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({payload: nonce}) 
-            });
-            const json_sign = await responseSign.json();
-            console.log("ssi signature: ", json_sign.ssi_signature);
+            const nonce = await issuerAPI.getChallenge(did!.toString());
+            const identitySignature = await connectorAPI.signData(
+                connectorUrl, 
+                wallet.accounts[0], 
+                nonce
+            );
             const signer = await provider?.getSigner();
-            const pseudo_sign = await signer?.signMessage(nonce);
-            const inactiveVC_response = await fetch(`${issuer_api}/credentials`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({
-                    did: did!.toString(),
-                    nonce: nonce,
-                    ssi_signature: json_sign.ssi_signature.toString(),
-                    pseudo_sign: pseudo_sign
-                })
-            }); 
-            const inactiveVC_json = await inactiveVC_response.json();
-            const vc_cred = Credential.fromJSON(JSON.parse(inactiveVC_json.vc))
-            const vc_numId = extractNumberFromVCid(vc_cred);
-            console.log("VC id:", ethers.toBigInt(vc_numId))
+            const walletSignature = await signer?.signMessage(nonce);
+            const credential = await issuerAPI.requestCredential(
+                did!.toString(), 
+                nonce, 
+                identitySignature,
+                walletSignature!
+            );
+            const credentialId = extractNumberFromVCid(Credential.fromJSON(credential));
+            console.log("VC id:", ethers.toBigInt(credentialId))
 
             const IDSC_istance = await getIdentitySC(provider!);
-            let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(vc_numId));
+            let tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(credentialId));
             await tx.wait();
-            // store VC in connector's backend.
-            const storeVCresp = await fetch(`${connectorUrl}/identities/${wallet.accounts[0]}`, {
-                method: 'PATCH',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({
-                    vc: vc_cred?.toJSON(),
-                })
-            });
-            if(!storeVCresp.ok || storeVCresp.status != 201)
-                throw Error("Cannot store VC");
+            await connectorAPI.storeCredential(
+                connectorUrl,
+                wallet.accounts[0],
+                credential
+            );
             setTriggerTrue();
             setCreatingIdentity(false);
         } catch (error) {
@@ -115,10 +78,6 @@ export const Identity = () => {
             setCreatingIdentity(false);
             throw error;
         }
-    }
-
-    const gotoLogin = async () => {
-        navigate("/login");
     }
 
     return (
@@ -152,7 +111,7 @@ export const Identity = () => {
                         {
                             (state !== null) && state.fromLogin && !cretingIdentity && ((vc as Credential) !== undefined) && (did !== undefined) && (
                                 <Col className="mb-3 ms-auto me-auto" sm={{span:3, offset:4}}>
-                                    <Button style={{width: '100%'}} variant="outline-success" onClick={gotoLogin}>
+                                    <Button style={{width: '100%'}} variant="outline-success" onClick={()=>navigate("/login")}>
                                         Go to Login
                                     </Button>
                                 </Col>

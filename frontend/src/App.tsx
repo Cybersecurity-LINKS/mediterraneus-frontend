@@ -1,28 +1,25 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-import { Navigation } from './components/Navigation'
-import { Display } from './components/Display'
-import { Publish} from './components/Publish';
-
-import { MetaMaskError } from './components/MetaMaskError'
-import { MetaMaskContextProvider } from './hooks/useMetaMask'
-import { Col, Container, Row, ToastContainer } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Container, Row, ToastContainer } from 'react-bootstrap';
 import { Routes, Route, Navigate } from 'react-router';
+
+import { MetaMaskError } from './components/MetaMaskError';
+import { Navigation } from './components/Navigation';
+import { Login } from './components/Login';
+import { Display } from './components/Display';
+import { UploadAsset } from './components/UploadAsset';
+import { Publish} from './components/Publish';
 import { Identity } from './components/Identity';
+import { IdentityToast } from './components/Identity/DisplayToast';
+import { Catalogue } from './components/Catalogue';
+
+import { MetaMaskContextProvider } from './hooks/useMetaMask';
+import { IdentityContextProvider } from './hooks/useIdentity';
 
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
-import { UploadAsset } from './components/UploadAsset';
-import { IdentityContextProvider } from './hooks/useIdentity';
-import { IdentityToast } from './components/Identity/DisplayToast';
-import { useState, useEffect } from 'react';
-import { Login } from './components/Login';
-import { Catalogue } from './components/Catalogue';
 
-
-client
-  .init("client_wasm_bg.wasm")
-  .then(() => identity.init("identity_wasm_bg.wasm"));
+client.init("client_wasm_bg.wasm").then(() => identity.init("identity_wasm_bg.wasm"));
 
 export const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -42,56 +39,48 @@ export const App = () => {
     <IdentityContextProvider>
         <Navigation loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>
         <Container fluid>
-        <Routes>
-        <Route path="/" element={
-            loggedIn ?
-            <Row>
-              <ToastContainer>
-                    <Display />
-                    <IdentityToast />
-              </ToastContainer>
-            </Row>
-            :
-            <Navigate to="/login"/>
-          }/>
-          <Route path="/login" element={
-              loggedIn ? <Navigate to="/" /> : <Login setLoggedIn={setLoggedIn} />
-          }/>
-          <Route path="/register" element={
-              <Identity />
-          }/>
-          <Route path="publish" element={
-            // loggedIn ?
-              <Row className="d-flex justify-content-center">
-                <Publish/>
+          <Routes>
+            <Route path="/" element={
+              loggedIn ?
+              <Row>
+                <ToastContainer>
+                      <Display />
+                      <IdentityToast />
+                </ToastContainer>
               </Row>
-            // : 
-            // <Navigate to="/login"/>
-            }
-          />
-          <Route path="catalogue" element={
-            loggedIn ?
-              <Catalogue/>
-            :
+              :
               <Navigate to="/login"/>
-          } />
-          <Route path="identity" element={
-            // loggedIn ?
-              <Row className="d-flex justify-content-center">
+            }/>
+            <Route path="/login" element={
+                loggedIn ? <Navigate to="/" /> : <Login setLoggedIn={setLoggedIn} />
+            }/>
+            <Route path="/register" element={
                 <Identity />
+            }/>
+            <Route path="publish" element={
+                <Row className="d-flex justify-content-center">
+                  <Publish/>
+                </Row>
+              }
+            />
+            <Route path="catalogue" element={
+              loggedIn ?
+                <Catalogue/>
+              :
+                <Navigate to="/login"/>
+            } />
+            <Route path="identity" element={
+                <Row className="d-flex justify-content-center">
+                  <Identity />
+                </Row>
+            } />
+            <Route path="uploadasset" element={
+              <Row className="d-flex justify-content-center">
+                  <UploadAsset />
               </Row>
-            // :
-            // <Navigate to="/login"/>
-          } />
-          <Route path="uploadasset" element={
-            // loggedIn ?
-            <Row className="d-flex justify-content-center">
-                <UploadAsset />
-            </Row>
-            // :
-            // <Navigate to="/login"/>
-          } />
-        </Routes>
+
+            } />
+          </Routes>
         <Row className="fixed-bottom">
           <MetaMaskError />
         </Row>
