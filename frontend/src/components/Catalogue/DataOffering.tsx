@@ -1,40 +1,35 @@
-import { ListGroup, Modal, Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, ModalProps, Row, Col } from "react-bootstrap";
-import { IDataOffering } from "./Catalogue";
-import { RefAttributes, MouseEvent, useState, useEffect, DetailedHTMLProps, HTMLAttributes, ReactNode, RefObject } from "react";
-import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress, getIdentitySC } from "@/utils";
-import { useMetaMask } from "@/hooks/useMetaMask";
-import { AbiCoder, ethers, keccak256 } from "ethers";
-import CardHeader from "react-bootstrap/esm/CardHeader";
-import { IotaDID } from "@iota/identity-wasm/web";
-import { Buffer } from 'buffer';
-import { Omit, BsPrefixProps } from "react-bootstrap/esm/helpers";
+import { RefAttributes, MouseEvent, useState, useEffect} from "react";
+import { Modal, Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
 import { Link } from 'react-router-dom';
 
-const catalogue_backend = import.meta.env.VITE_CATALOGUE_BACKEND as string;
+import { IDataOffering } from "./Catalogue";
+import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress, getIdentitySC } from "@/utils";
+import { useMetaMask } from "@/hooks/useMetaMask";
+import { IotaDID } from "@iota/identity-wasm/web";
+import { AbiCoder, ethers, keccak256 } from "ethers";
+import { Buffer } from 'buffer';
 
-function VerticallyCenteredModal(props: JSX.IntrinsicAttributes & Omit<Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "ref"> & { ref?: ((instance: HTMLDivElement | null) => void) | RefObject<HTMLDivElement> | null | undefined; }, BsPrefixProps<"div"> & ModalProps> & BsPrefixProps<"div"> & ModalProps & { children?: ReactNode; }) {
+import catalogueAPI from "@/api/catalogueAPIs";
+import connectorAPI from "@/api/connectorAPIs";
+
+function VerticallyCenteredModal(props: any) {
     return (
-      <Modal
-        {...props}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Offering
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{backgroundColor: "ThreeDLightShadow"}}>
-            <pre className="ms-2 mt-2" style={{color: "white"}}>
-                {props.offering}
-            </pre>
-        </Modal.Body>
-        <Modal.Footer>
-        </Modal.Footer>
-      </Modal>
+        <Modal {...props} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter">
+                    Offering
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{backgroundColor: "ThreeDLightShadow"}}>
+                <pre className="ms-2 mt-2" style={{color: "white"}}>
+                    {props.offering}
+                </pre>
+            </Modal.Body>
+            <Modal.Footer>
+            </Modal.Footer>
+        </Modal>
     );
-  }
+}
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
@@ -82,26 +77,13 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     }, [props.NFTdataobj.owner, loading])
 
     const getOfferingFromIPFS = async () => {
-        // need the owner pub key and the gc priv key to derive the shared key and decrypt the cid
-        const response = await fetch(`${catalogue_backend}/decryptCID`, {
-            method: 'POST',
-            headers: {
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify({
-                ciphertext: props.NFTdataobj.NFTmetadataURI,
-                asset_owner_did: ownerDID?.toString()
-            })  
-        })
-        const json = await response.json();
-        
-        if (response.ok){
-            setOffering(json["offering"]);
+        //TODO: handle err
+        if ( ownerDID !== undefined) {
+            const offering = await catalogueAPI.getOfferingContent(props.NFTdataobj.NFTmetadataURI, ownerDID.toString());
+            setOffering(offering);
         } else {
-            let err = {status: response.status, errObj: json};
-            throw err;  // An object with the error coming from the server
-        }
-        
+            console.log("DID of the owner not defined");
+        }   
     }
 
     const getDT_Price = async () => {
@@ -168,45 +150,27 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
 
     const downloadAsset = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         event.preventDefault();
+
+        const NFTname = props.NFTdataobj.NFTname; 
+        const providerConnectorUrl = props.NFTdataobj.AssetDownloadURL;
         try {
-            const resp_nonce = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_req`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({nft_name: props.NFTdataobj.NFTname})
-            });
-            const json_nonce_resp = await resp_nonce.json();
-            const h_nonce = keccak256(Buffer.from(json_nonce_resp["nonce"]));
+            const challenge = await connectorAPI.getChallenge(providerConnectorUrl, NFTname);
+            const hashedChallenge = keccak256(Buffer.from(challenge)); //TODO: remove this
 
             const signer = await provider?.getSigner();
-            const eth_signature = await signer?.signMessage(ethers.toBeArray(`${h_nonce}`));
+            const signature = await signer?.signMessage(ethers.toBeArray(`${hashedChallenge}`));
 
-            const asset_req = await fetch(`${props.NFTdataobj.AssetDownloadURL}/downalod_asset_sign`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json"
-                },
-                body: JSON.stringify({
-                    h_nonce: h_nonce,
-                    eth_signature: eth_signature
-                })
-            })
-            const asset_resp = await asset_req.json();
-            if(asset_req.status === 200) {
-                const asset_json = asset_resp["asset"];
-                console.log(asset_json)
-                const file = new Blob([JSON.stringify(asset_json)], {type: "text/json;charset=utf-8"})
-                // TODO: check trust metadata!!!! here is missing
-                // anchor link
-                const element = document.createElement("a");
-                element.href = URL.createObjectURL(file);
-                element.download = `Asset-${props.NFTdataobj.NFTname}-` + Date.now() + ".json";
+            const asset = await connectorAPI.downloadAsset(providerConnectorUrl, NFTname, challenge, signature!);
+            // TODO: check trust metadata!!!! here is missing
+            // anchor link
+            const element = document.createElement("a");
+            element.href = URL.createObjectURL(asset);
+            element.download = `Asset-${NFTname}-` + Date.now() + ".json";
 
-                // simulate link click
-                document.body.appendChild(element); // Required for this to work in FireFox
-                element.click();
-            }
+            // simulate link click
+            document.body.appendChild(element); // Required for this to work in FireFox
+            element.click();
+            
         } catch (err) {
             console.log(err);
         }
@@ -214,7 +178,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
 
     return (
         <Card className="m-2" style={{ width: '30rem' }}>
-            <CardHeader>
+            <Card.Header>
                 <Card.Title>Owner</Card.Title>
                 <Card.Subtitle className="mb-2">
                     <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
@@ -231,7 +195,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         </Link>
                     </OverlayTrigger>
                 </Card.Subtitle>
-            </CardHeader>
+            </Card.Header>
             <Card.Body>
                 <Card.Text> NFT name<span className="float-end">{props.NFTdataobj.NFTname}</span> </Card.Text>
                 <Card.Text> NFT symbol<span className="float-end">{props.NFTdataobj.NFTsymbol}</span> </Card.Text>

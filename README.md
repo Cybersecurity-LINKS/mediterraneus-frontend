@@ -8,7 +8,7 @@ This results in having also the **iota-client** dependency, that is automaticall
 In order to use the identity framework we have to install the dependency using npm
 
 ```sh
-cd Marketplace
+cd frontend
 npm i @iota/identity-wasm@0.7.0-alpha.5
 ```
 To use this in a web application we have enable the library. The loads the WASM file with an HTTP GET request, so the .wasm file must be copied to the root of the dist folder.
@@ -61,7 +61,7 @@ To run the frontend application follow these steps:
 1. Install the dependencies
 
 ```sh
-cd Marketplace
+cd frontend
 
 npm install
 ```
@@ -130,7 +130,7 @@ $ docker compose down
 
 2. Remove the `postgredata` folder
 
-3. Modify the `migrations/dbinit.sql` file as you wish
+3. Modify the `db/migrations/dbinit.sql` file as you wish
 
 4. Start up the container 
 ```sh
@@ -141,9 +141,9 @@ $ docker compose up -d
 ```sh
 # generate the schema to enable non-native ORM in typescript
 # User and password are defined in the docker compose, while the table name is defined in the initialization script
-# located in connector-backend/src/migrations/dbinit.sql
+# located in connector-backend/src/db/migrations/dbinit.sql
 # do this command only if:
 # 1. When the Postgres-DB is initialized
 # 2. When the dbinit.sql is modified
-npx @databases/pg-schema-cli --database postgres://<user>:<pswd>@localhost:5432/identity --directory src/__generated__
+npx @databases/pg-schema-cli --database postgres://<user>:<pswd>@localhost:5432/identity --directory src/db/__generated__
 ```

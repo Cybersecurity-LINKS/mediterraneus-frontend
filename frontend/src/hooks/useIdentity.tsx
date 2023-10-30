@@ -1,6 +1,7 @@
 import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
 import isUrl from 'is-url';
+import connectorAPI from "@/api/connectorAPIs";
 
 interface IdentityData {
     did: IotaDID | undefined
@@ -25,39 +26,35 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
-    const [loadingStorage, setloadingStorage] = useState(true); // TODO: why this is here?
 
     useEffect(() => {
+        // console.log("Use effect, use identity");
         const url = sessionStorage.getItem("connectorUrl");
         if (url != null && url != undefined) {
             setConnectorUrl(url);
             setTrigger(true);
-            setloadingStorage(false);
         }
     
     }, []);   
 
     useEffect(() => {
+        // console.log("Use effect 2, use identity");
         const getIDfromBackend = async () => {
+            // console.log("Here...");
             if (!isUrl(connectorUrl)) {
                 throw "Connector url missing";
             }
 
-            console.log("Get DID and VC from Connector");
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const response = await fetch(`${connectorUrl}/identity/${accounts[0]}`, {
-                method: 'GET',
-                headers: {
-                    "Content-type": "application/json"
-                },
-            });
-            if(response.status == 200){
-                const json_resp = await response.json();
-                setDid(json_resp.did);
-                setDidDoc(json_resp.did_doc);
-                if(json_resp.vc != null)
-                    setVc(Credential.fromJSON(json_resp.vc));
-            } else {
+            //TODO: remove this from here
+            try {
+                console.log("Get DID and VC from Connector");
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const identity = await connectorAPI.getIdentity(connectorUrl, accounts[0]);
+                setDid(identity.did);
+                setDidDoc(identity.did_doc);
+                if(identity.vc != null)
+                    setVc(Credential.fromJSON(identity.vc));
+            } catch (err) {
                 setDid(undefined);
                 setDidDoc(undefined);
                 setVc(undefined);
@@ -65,9 +62,9 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             setLoading(false);
         };
 
-        if(trigger && !loadingStorage){
+        if(trigger){
             window.ethereum.on('accountsChanged', getIDfromBackend);
-            console.log("Connecting to Connector:", connectorUrl)
+            // console.log("Connecting to Connector:", connectorUrl)
             if(connectorUrl !== "") {
                 getIDfromBackend();   
             } else {
@@ -78,7 +75,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             }
             setTrigger(false);
         }
-    }, [trigger, connectorUrl, loadingStorage]);
+    }, [trigger, connectorUrl]);
 
     const setTriggerTrue = () => {
         setTrigger(true);

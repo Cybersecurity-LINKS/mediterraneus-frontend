@@ -63,8 +63,10 @@ export const Navigation = (props: any) => {
     // Prevent the browser from reloading the page
     e.preventDefault();
 
-    if (disabled == false)
+    if (disabled == false) {
+      // console.log("trigger");
       setTriggerTrue(); 
+    }
 
     setDisabled(!disabled);
 

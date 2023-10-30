@@ -36,7 +36,7 @@ export const UploadAsset = () => {
             }
 
             if( did === undefined || vc == undefined ) {
-                const err = new Error("You might no have a DID or VC")
+                const err = new Error("DID undefined")
                 setError(err.message)
                 throw err;
             } 
@@ -55,12 +55,10 @@ export const UploadAsset = () => {
                     eth_address: wallet.accounts[0],
                     asset_alias: assetAlias
                 }));
-                const response = await fetch(`${connectorUrl}/uploadOnLAD`,
-                    {
-                        body: formData,
-                        method: "POST",
-                    }
-                );
+                const response = await fetch(`${connectorUrl}/assets`, {
+                    method: "POST",
+                    body: formData,
+                });
 
                 const result = await response.json()
                 console.log(result)
@@ -73,7 +71,10 @@ export const UploadAsset = () => {
                 }
             }
         } catch (e) {
-            if (e instanceof Error) console.log(e.message);
+            if (e instanceof Error) {
+                console.log(e.message);
+                setError(e.message);
+            }
         }
     }
 

@@ -4,7 +4,9 @@ import { Alert, Button, Container, Form } from "react-bootstrap"
 import './Login.css'
 import { getIdentitySC } from "@/utils";
 import { useNavigate } from "react-router";
-import authAPI from '@/api/authAPI';
+import catalogueAPI from '@/api/catalogueAPIs';
+import connectorAPI from '@/api/connectorAPIs';
+
 import { useIdentity } from "@/hooks/useIdentity";
 import isUrl from "is-url";
 
@@ -27,11 +29,11 @@ export const Login = (props: any) => {
 
         try {
             // login to backend, receive challenge
-            let challenge = await authAPI.getChallenge(wallet.accounts[0]);
+            let challenge = await catalogueAPI.getChallenge(wallet.accounts[0]);
             // ask connector (identity key wallet) to create a vp
-            let signed_vp = await authAPI.createVP(connectorUrl, challenge, wallet.accounts[0]);
+            let signed_vp = await connectorAPI.generatePresentation(connectorUrl, challenge, wallet.accounts[0]);
             // send vp to verifier (catalogue)
-            if((await authAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
+            if((await catalogueAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
                 props.setLoggedIn(true);
                 sessionStorage.setItem("loggedIn", "true");
                 // console.log("login trigger");
@@ -50,8 +52,8 @@ export const Login = (props: any) => {
             setErrorMessage('Connector url missing');
             throw "Connector url missing";
         }
-
         try {
+            // TODO: check if the credential is set, then check if it is still active 
             const IDSC_istance = await getIdentitySC(provider!);
             const is_active = await IDSC_istance.isVCActive_Addr(wallet.accounts[0]);
             if(is_active === true) {
