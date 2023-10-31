@@ -18,7 +18,7 @@ class Server {
         this.app.use(bodyParser.json({ limit: '1mb' })); // 100kb default
         this.app.use(express.json())
         this.app.use((_, res, next) => {
-            res.append('Access-Control-Allow-Origin', ['http://localhost:5174']); // FRONTEND
+            res.append('Access-Control-Allow-Origin', [`${process.env.FRONTEND}`]); // FRONTEND
             res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,PATCH,DELETE');
             res.append('Access-Control-Allow-Headers', 'Content-Type');
             next();
@@ -33,7 +33,7 @@ class Server {
         return new Promise((resolve, reject) => {
             this.app.listen(port, () => {
                 resolve(port);
-            }).on('error', (err: Object) => reject(err));
+            }).on('error', (err: Error) => reject(err));
         });
     }
 }

@@ -5,8 +5,8 @@ import * as fs from 'fs';
 dotenv.config()
 
 /** Request funds from the faucet API, if needed, and wait for them to show in the wallet. */
-export async function ensureAddressHasFunds(client: Client, addressBech32: string): Promise<Boolean> {
-    let balance = await getAddressBalance(client, addressBech32);
+export async function ensureAddressHasFunds(client: Client, addressBech32: string): Promise<boolean> {
+    const balance = await getAddressBalance(client, addressBech32);
     if (balance > 0) {
         return false;
     }
@@ -17,7 +17,7 @@ export async function ensureAddressHasFunds(client: Client, addressBech32: strin
         // Wait for the funds to reflect.
         await new Promise(f => setTimeout(f, 5000));
 
-        let balance = await getAddressBalance(client, addressBech32);
+        const balance = await getAddressBalance(client, addressBech32);
         if (balance > 0) {
             break;
         }
@@ -63,7 +63,6 @@ export async function requestFundsFromFaucet(addressBech32: string) {
             errorMessage = "too many requests, please try again later.";
         } else {
             data = await response.json();
-            // @ts-ignore
             errorMessage = data.error.message;
         }
     } catch (error) {

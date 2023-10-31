@@ -1,6 +1,6 @@
 import { IotaDID, X25519 } from '@iota/identity-wasm/node/index.js'
 import * as DbOperations from '../models/db-operations.js'
-import * as IdentityService from '../services/identity.js'
+import * as IdentityService from '../services/IdentityService.js'
 import { privKeytoBytes, stringToBytes, buf2hex, extractPubKeyFromDoc, readAsset } from '../utils.js'
 import { readFileSync } from 'fs';
 import { create } from 'ipfs-http-client'
@@ -44,14 +44,19 @@ function uploadFiles(req: Request, res: Response, next: NextFunction) {
 }
 
 async function uploadOnLAD(req: Request, res: Response) {
+    if (req.files === undefined) {
+        throw new Error("Request object without files found unexpectedly");
+    }
 
     try {
-        let additional = JSON.parse(req.body.additional);
+        const additional = JSON.parse(req.body.additional);
+        const files = req.files as Express.Multer.File[];
+
         /**  
          * load offering file's content of IPFS and get CID back
          */
-        const asset_content = readFileSync(req.files[0].path, 'utf-8');
-        const offering_content = readFileSync(req.files[1].path, 'utf-8');
+        const asset_content = readFileSync(files[0].path, 'utf-8');
+        const offering_content = readFileSync(files[1].path, 'utf-8');
         
         // connect to the default API address http://localhost:5001
         const client = create({
@@ -77,23 +82,26 @@ async function uploadOnLAD(req: Request, res: Response) {
         await DbOperations.insertLADentry({
             nft_name: additional.asset_alias,
             nft_sc_address: "",
-            asset_path: req.files[0].path,
+            asset_path: files[0].path,
             cid: cid.toString(),
             hash_asset: asset_hash,
             hash_offering: offering_hash,
-            offering_path: req.files[1].path,
+            offering_path: files[1].path,
             sign: tm_signature_hex
         })
         
         res.status(200).send({ cid: cid.toString() }).end();
     } catch (error) {
-        console.log(error.message)
-        // remove just saved files
-        // ...
-        // error.code == 23505 => duplicate key value violates unique constraint "local_asset_db_pkey"
-        res.status(500).send({error: error.message, error_code: error.code}).end();
+        if (error instanceof Error) {
+            console.log(error.message) 
+            // remove just saved files
+            // ...
+            // error.code == 23505 => duplicate key value violates unique constraint "local_asset_db_pkey"
+            res.status(500).send({error: error.message}).end();
+        }
 
     }
+    
 }
 
 async function addNFT_addressOnLAD(req: Request, res: Response) {
@@ -111,7 +119,7 @@ async function addNFT_addressOnLAD(req: Request, res: Response) {
 
 async function getAssetAliases(req: Request, res: Response) {
     try {
-        let lad_entries = await DbOperations._getAssetAliases();
+        const lad_entries = await DbOperations._getAssetAliases();
         const aliases: string[] = lad_entries.map(entry => {
             return entry.nft_name
         })
@@ -129,8 +137,11 @@ async function getLADentry_byAlias(req: Request, res: Response) {
         const lad_entry = await DbOperations._getLADentry_byAlias(asset_alias);
         if(lad_entry === null)
             throw "";
+
         const identity = await DbOperations.getIdentity(eth_address);
 
+        if(identity === null)
+            throw "";
         const gc_resp = await fetch(`${process.env.GLOBAL_CATALOGUE_ENDPOINT}/dids`);
         const gc_did = (await gc_resp.json())["did"]
         const gc_doc = await IdentityService.resolveDID(IotaDID.parse(gc_did))
@@ -182,27 +193,36 @@ async function downalodReq_sign(req: Request, res: Response) {
     //TODO: use req.params.assetId
     const h_nonce = req.body.h_nonce;
     const eth_signature = req.body.eth_signature;
-
+    console.log(req.body);
     try {
         const download_request = await DbOperations.getDownloadReq(h_nonce);
-        console.log(download_request);
-        const lad_entry = await DbOperations._getLADentry_byAlias(download_request.nft_name);
-        console.log(lad_entry);
-        
-        // TODO: missing abi parse of erc721 and call 'verify Proof of Purchase'
-        const provider = new ethers.JsonRpcProvider(process.env.RPC_PROVIDER);
-        const contractIstance = new ethers.Contract(lad_entry.nft_sc_address, abi.abi, provider);
-
-        const PoP = await contractIstance.verifyPoP(eth_signature, h_nonce);
-        console.log(PoP);
-        if (PoP) {
-            const asset_json = readAsset(`${lad_entry.asset_path}`);
-            console.log(asset_json);
-            res.status(200).send({asset: asset_json}).end();
+        if (download_request === null) {
+            res.status(404).send({error: "Download request not found"}).end();
         } else {
-            console.log("Proof of possesion failed!");
-            res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end();
+            console.log(download_request);
+            const lad_entry = await DbOperations._getLADentry_byAlias(download_request.nft_name as string);
+            console.log(lad_entry);
+            
+            if (lad_entry === null) {
+                res.status(404).send({error: "Asset not found"}).end();
+            } else {
+                // TODO: missing abi parse of erc721 and call 'verify Proof of Purchase'
+                const provider = new ethers.JsonRpcProvider(process.env.RPC_PROVIDER);
+                const contractIstance = new ethers.Contract(lad_entry.nft_sc_address as string, abi.abi, provider);
+
+                const PoP = await contractIstance.verifyPoP(eth_signature, h_nonce);
+                console.log(PoP);
+                if (PoP) {
+                    const asset_json = readAsset(`${lad_entry.asset_path}`);
+                    console.log(asset_json);
+                    res.status(200).send({asset: asset_json}).end();
+                } else {
+                    console.log("Proof of possesion failed!");
+                    res.status(400).send({asset: "NOT ALLOWED TO DOWNLOAD ASSET"}).end();
+                }
+            }
         }
+        
     } catch (error) {
         console.log("errore: ", error);
         res.status(400).send({error: error}).end();

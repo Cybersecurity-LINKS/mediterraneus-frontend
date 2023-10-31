@@ -20,7 +20,7 @@ export async function getIdentity(eth_address: string) {
 export async function insertVCintoExistingIdentity(eth_address: string, vc: JSON) {
     try{
         console.log(eth_address)
-        let id = await getIdentity(eth_address);
+        const id = await getIdentity(eth_address);
         if(id == null)
             throw "Identity not found in connector's db"
         await identity(db).update({eth_address: eth_address, did: id.did}, {vc: vc});

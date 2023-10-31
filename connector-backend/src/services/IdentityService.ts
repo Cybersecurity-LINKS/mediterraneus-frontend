@@ -14,6 +14,7 @@ import { ensureAddressHasFunds } from "../utils.js";
 
 export async function createIdentity(): Promise<{
     did: IotaDID,
+    didDoc: IotaDocument,
     keypair: KeyPair 
 }> {
     const didClient = new IotaIdentityClient(connectorWallet.client!);
@@ -25,8 +26,8 @@ export async function createIdentity(): Promise<{
     const document = new IotaDocument(networkHrp);
 
     // Insert a new Ed25519 verification method in the DID document.
-    let keypair = new KeyPair(KeyType.Ed25519);
-    let method = new IotaVerificationMethod(document.id(), keypair.type(), keypair.public(), "#key-1");
+    const keypair = new KeyPair(KeyType.Ed25519);
+    const method = new IotaVerificationMethod(document.id(), keypair.type(), keypair.public(), "#key-1");
     document.insertMethod(method, MethodScope.VerificationMethod());
 
     // Construct an Alias Output containing the DID document, with the wallet address
@@ -44,16 +45,17 @@ export async function createIdentity(): Promise<{
 
     return {
         did: published.id(),
+        didDoc: document,
         keypair: keypair,
     }
  }
 
- export async function resolveDID(did: IotaDID): Promise<IotaDocument> {
+export async function resolveDID(did: IotaDID): Promise<IotaDocument> {
     const didClient = new IotaIdentityClient(connectorWallet.client!);    
     // Resolve the associated Alias Output and extract the DID document from it.
     return await didClient.resolveDid(did);
- }
+}
 
- export function signData(message: Uint8Array, privkey: Uint8Array): Uint8Array {
+export function signData(message: Uint8Array, privkey: Uint8Array): Uint8Array {
     return Ed25519.sign(message, privkey)
- }
+}
