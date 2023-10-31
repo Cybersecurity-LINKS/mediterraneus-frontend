@@ -15,7 +15,7 @@ export const IdentityToast = () => {
             <Figure.Image
               width={80}
               height={50}
-              src="../fingerprint-seeklogo.com-3.svg"
+              src="../images/fingerprint-seeklogo.com-3.svg"
             />
           </Figure>
           <strong className="mb-auto me-auto mt-auto text-black">User Identity</strong>

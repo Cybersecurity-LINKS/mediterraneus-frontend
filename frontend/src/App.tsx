@@ -19,7 +19,7 @@ import { IdentityContextProvider } from './hooks/useIdentity';
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
 
-client.init("client_wasm_bg.wasm").then(() => identity.init("identity_wasm_bg.wasm"));
+client.init("libraries/client_wasm_bg.wasm").then(() => identity.init("libraries/identity_wasm_bg.wasm"));
 
 export const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);

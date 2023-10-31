@@ -12,12 +12,12 @@ export default defineConfig({
       targets: [
         {
           src: "node_modules/@iota/client-wasm/web/wasm/client_wasm_bg.wasm",
-          dest: "public",
+          dest: "public/libraries",
           rename: "client_wasm_bg.wasm",
         },
         {
           src: "node_modules/@iota/identity-wasm/web/identity_wasm_bg.wasm",
-          dest: "public",
+          dest: "public/libraries",
           rename: "identity_wasm_bg.wasm",
         },
       ],

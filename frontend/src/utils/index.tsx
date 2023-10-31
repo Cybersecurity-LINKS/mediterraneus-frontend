@@ -30,9 +30,9 @@ export const NETWORK_SYMBOL: { [k: string]: string } = {
 
 export const NETWORK_IMAGE: { [k: string]: string } = {
   1: "ETH",
-  1072: "../shimmerlogo.svg",
-  31337: "../hardhat-seeklogo.com.svg",
-  11155111: "../sepolia.png"
+  1072: "../images/shimmerlogo.svg",
+  31337: "../images/hardhat-seeklogo.com.svg",
+  11155111: "../images/sepolia.png"
 };
 
 export const NETWORK_BGCOLOR: { [k: string]: string } = {

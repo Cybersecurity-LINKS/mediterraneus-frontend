@@ -52,7 +52,7 @@ export const Navigation = (props: any) => {
         <OverlayTrigger placement="bottom" overlay={<Tooltip>Open in Block Explorer</Tooltip>}> 
           <Button variant="outline-primary" 
             target="_blank" href={`${baseExplorerURL+"/address/"+wallet.accounts[0]}`} >
-            <Image className="me-2"width={25} height={25} src="metamasklogo.svg"/> 
+            <Image className="me-2"width={25} height={25} src="images/metamasklogo.svg"/> 
             {formatAddress2(wallet.accounts[0])} 
           </Button>
         </OverlayTrigger>
