@@ -155,12 +155,13 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const providerConnectorUrl = props.NFTdataobj.AssetDownloadURL;
         try {
             const challenge = await connectorAPI.getChallenge(providerConnectorUrl, NFTname);
-            const hashedChallenge = keccak256(Buffer.from(challenge)); //TODO: remove this
+            console.log(challenge);
+            const hashedChallenge = keccak256(Buffer.from(challenge  as string )); //TODO: remove this
 
             const signer = await provider?.getSigner();
             const signature = await signer?.signMessage(ethers.toBeArray(`${hashedChallenge}`));
 
-            const asset = await connectorAPI.downloadAsset(providerConnectorUrl, NFTname, challenge, signature!);
+            const asset = await connectorAPI.downloadAsset(providerConnectorUrl, NFTname, hashedChallenge, signature!);
             // TODO: check trust metadata!!!! here is missing
             // anchor link
             const element = document.createElement("a");

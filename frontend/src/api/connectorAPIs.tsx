@@ -1,5 +1,9 @@
+import isUrl from 'is-url';
+
 const generatePresentation = async (connectorUrl: string, challenge: string, ethAddress: string) => {
-    
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${connectorUrl}/identities/${ethAddress}/gen-presentation`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc. ? LOL
         headers: {
@@ -21,12 +25,13 @@ const generatePresentation = async (connectorUrl: string, challenge: string, eth
 }
 
 const getIdentity = async (connectorUrl: string, ethAddress: string) => {
-
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${connectorUrl}/identities/${ethAddress}`);
     const json = await response.json();
 
     if(response.ok){
-        console.log(json);
         return json;
     } else {
         let err = {status: response.status, errObj: json};
@@ -35,6 +40,9 @@ const getIdentity = async (connectorUrl: string, ethAddress: string) => {
 }
 
 const createDID = async (connectorUrl: string, ethAddress: string) => {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${connectorUrl}/identities`, {
         method: 'POST',
         headers: {
@@ -42,7 +50,6 @@ const createDID = async (connectorUrl: string, ethAddress: string) => {
         },
         body: JSON.stringify({ethAddress: ethAddress}) 
     });
-    
     const did = (await response.json()).did;
 
     if(response.ok){
@@ -55,8 +62,11 @@ const createDID = async (connectorUrl: string, ethAddress: string) => {
 }
 
 const storeCredential = async (connectorUrl: string, ethAddress: string, credential: JSON) => {
-     // store VC in connector's backend.
-     const response = await fetch(`${connectorUrl}/identities/${ethAddress}`, {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
+    // store VC in connector's backend.
+    const response = await fetch(`${connectorUrl}/identities/${ethAddress}`, {
         method: 'PATCH',
         headers: {
             "Content-type": "application/json"
@@ -73,6 +83,9 @@ const storeCredential = async (connectorUrl: string, ethAddress: string, credent
 }
 
 const signData = async (connectorUrl: string, ethAddress: string, payload: any) => {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${connectorUrl}/identities/${ethAddress}/sign-data`, {
         method: 'POST',
         headers: {
@@ -91,22 +104,25 @@ const signData = async (connectorUrl: string, ethAddress: string, payload: any) 
 }
 
 const getChallenge = async (providerConnectorUrl: string, NFTname: string) => {
-    
+    if (!isUrl(providerConnectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${providerConnectorUrl}/assets/${NFTname}/challenge`);
-    const challenge = await response.json();
+    const json = await response.json();
 
     if(response.ok){
-        console.log(challenge);
-        return challenge.challenge;
+        return json.nonce;
     } else {
-        let err = {status: response.status, errObj: challenge};
+        let err = {status: response.status, errObj: json};
         throw err;  // An object with the error coming from the server
     }
 }
 
 //TODO: handle not only json file
 const downloadAsset = async (providerConnectorUrl: string, NFTname: string, challenge: string, signature: string) =>  {
-
+    if (!isUrl(providerConnectorUrl)) {
+        throw "Connector url undefined";
+    }
     const response = await fetch(`${providerConnectorUrl}/assets/${NFTname}/download`, {
         method: 'POST',
         headers: {
