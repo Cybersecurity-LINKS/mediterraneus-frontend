@@ -1,4 +1,4 @@
-import { Col, Button, Card, Container, Spinner } from "react-bootstrap";
+import { Col, Button, Card, Container, Spinner, Row } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 
@@ -79,7 +79,7 @@ export const Identity = () => {
     }
 
     return (
-        <>
+        <Row className="d-flex justify-content-center">
             {
                 loading ? 
                 <Container className="d-flex justify-content-center">
@@ -146,6 +146,6 @@ export const Identity = () => {
                     </Card>
                 </Container>
             }
-        </>
+        </Row>
     )
 }

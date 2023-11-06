@@ -32,6 +32,7 @@ export const Publish = () => {
     useEffect(() => {
         const getAssetAliases = async () => {
             try {
+                //TODO: move in connector API
                 const response = await fetch(`${connectorUrl}/assets?fields=alias`);
                 const body = await response.json();
                 if(response.status == 200) {
@@ -61,6 +62,7 @@ export const Publish = () => {
             return;
         }
         try {
+                //TODO: move in connector API
             const response = await fetch(`${connectorUrl}/assets/${chosen_alias}?eth_address=${wallet.accounts[0]}`)
             const body = await response.json();
 
@@ -138,6 +140,7 @@ export const Publish = () => {
                 let event = rc.logs[i];
                 if(event.eventName == 'NFTCreated' && event.eventSignature == "NFTCreated(address,address,string,address,string,string)"){
                 console.log(`event ${event.eventName}: address ${event.args[0]}`);
+                    //TODO: move in connector API
                     const resp = await fetch(`${connectorUrl}/assets/${NFTname}`, {
                         method: 'PATCH',
                         headers: {
@@ -162,7 +165,7 @@ export const Publish = () => {
     }
 
     return (
-        <>
+        <Row className="d-flex justify-content-center">
         {
             publishing ? <Container className="d-flex justify-content-center"><Spinner animation="border" variant="success" style={{
                 width: '5rem', 
@@ -290,6 +293,6 @@ export const Publish = () => {
             </Row>
             </>
         }
-        </>
+        </Row>
     );
 }

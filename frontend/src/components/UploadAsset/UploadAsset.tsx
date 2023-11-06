@@ -79,55 +79,55 @@ export const UploadAsset = () => {
     }
 
     return (
-        <>
-        <Card style={{width: '60rem'}} className='d-flex mb-5 mt-3'>
-            <Card.Body>
-                <Card.Title>Upload an Asset with its Offering Message on the Connector</Card.Title>
-            </Card.Body>
-            <Form className="mt-3 mb-3 ps-5 pe-5">
-                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
-                    <Form.Label column sm={4}>Asset Alias</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control type="input" placeholder="Enter a unique alias for the asset" onChange={(event) => { setAssetAlias(event.target.value) }}/>
-                    </Col>
-                </Form.Group>
+        <Row className="d-flex justify-content-center">
+            <Card style={{width: '60rem'}} className='d-flex mb-5 mt-3'>
+                <Card.Body>
+                    <Card.Title>Upload an Asset with its Offering Message on the Connector</Card.Title>
+                </Card.Body>
+                <Form className="mt-3 mb-3 ps-5 pe-5">
+                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
+                        <Form.Label column sm={4}>Asset Alias</Form.Label>
+                        <Col sm={8}>
+                            <Form.Control type="input" placeholder="Enter a unique alias for the asset" onChange={(event) => { setAssetAlias(event.target.value) }}/>
+                        </Col>
+                    </Form.Group>
 
-                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadAsset">
-                    <Form.Label column sm={4}>Upload Asset File</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control type="file" accept='.json'/>
-                    </Col>
-                </Form.Group>
+                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadAsset">
+                        <Form.Label column sm={4}>Upload Asset File</Form.Label>
+                        <Col sm={8}>
+                            <Form.Control type="file" accept='.json'/>
+                        </Col>
+                    </Form.Group>
 
-                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadOffering">
-                    <Form.Label column sm={4}>Upload Offering Message File</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control type="file" accept='.json'/>
-                    </Col>
-                </Form.Group>
+                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadOffering">
+                        <Form.Label column sm={4}>Upload Offering Message File</Form.Label>
+                        <Col sm={8}>
+                            <Form.Control type="file" accept='.json'/>
+                        </Col>
+                    </Form.Group>
 
-                <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
-                    <Form.Label column sm={4}>Offering CID</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control className="text-truncate"  disabled={true} type="text" placeholder="Upload Offering Message to get CID back" 
-                            value={OfferingCID.length == 0 ? "Upload Offering Message to get CID back" : OfferingCID} />
-                    </Col>
-                </Form.Group>
-            
-                <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { submitAssetUpload(event) }}>
-                    Upload
-                </Button>
-            </Form>
-        </Card>
-        <Row className="fixed-bottom">
-        {
-            error 
-                &&
-            <Alert className="me-5 ms-3" key='danger' variant='danger' onClick={() => { setError('') }}>
-                <strong>Error:</strong> { error }
-            </Alert>
-        }
+                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
+                        <Form.Label column sm={4}>Offering CID</Form.Label>
+                        <Col sm={8}>
+                            <Form.Control className="text-truncate"  disabled={true} type="text" placeholder="Upload Offering Message to get CID back" 
+                                value={OfferingCID.length == 0 ? "Upload Offering Message to get CID back" : OfferingCID} />
+                        </Col>
+                    </Form.Group>
+                
+                    <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { submitAssetUpload(event) }}>
+                        Upload
+                    </Button>
+                </Form>
+            </Card>
+            <Row className="fixed-bottom">
+            {
+                error 
+                    &&
+                <Alert className="me-5 ms-3" key='danger' variant='danger' onClick={() => { setError('') }}>
+                    <strong>Error:</strong> { error }
+                </Alert>
+            }
+            </Row>
         </Row>
-        </>
     );
 }
