@@ -3,17 +3,19 @@ import { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap"
 import './Login.css'
 import { getIdentitySC } from "@/utils";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import catalogueAPI from '@/api/catalogueAPIs';
 import connectorAPI from '@/api/connectorAPIs';
 
 import { useIdentity } from "@/hooks/useIdentity";
+import { useAuth } from "@/hooks/useAuth";
 import isUrl from "is-url";
 
 
 export const Login = (props: any) => {    
     const navigate = useNavigate();
 
+    const { isAuthenticated, setIsAuthenticated } = useAuth();
     const { wallet, isConnecting, connectMetaMask, provider } = useMetaMask();
     const { setTriggerTrue, connectorUrl, setConnector } = useIdentity()
 
@@ -33,11 +35,9 @@ export const Login = (props: any) => {
             // ask connector (identity key wallet) to create a vp
             let signed_vp = await connectorAPI.generatePresentation(connectorUrl, challenge, wallet.accounts[0]);
             // send vp to verifier (catalogue)
-            if((await catalogueAPI.login(signed_vp, wallet.accounts[0]))) { // login ok
-                props.setLoggedIn(true);
-                sessionStorage.setItem("loggedIn", "true");
-                // console.log("login trigger");
-                // setTriggerTrue();
+            if( await catalogueAPI.login(signed_vp, wallet.accounts[0]) ) { // login ok
+                setIsAuthenticated(true);
+                localStorage.setItem("token", "true");
             } else {
                 setErrorMessage('Login failed!');
             } 
@@ -59,22 +59,22 @@ export const Login = (props: any) => {
             if(is_active === true) {
                 setErrorMessage("Already registered. Please continue with Login")
             } else {
-                navigate("/register", {
-                    state: {fromLogin: true}
-                })
+                navigate("/register");
             }    
         } catch (error: any) {
             // if exception is thrown by the idsc call it means that the given
             // eth address does not have a vc. So it still lies in the case where
             // the navigate has to be called.
-            navigate("/register", {
-                state: {fromLogin: true}
-            })
+            navigate("/register");
         }
         
     }
 
-    return(
+    return( 
+        isAuthenticated 
+        ? 
+        <Navigate to="/home" /> 
+        :
         <Container className="mt-5 d-flex justify-content-center">
             <div className="login-container">
                 <div className="login-box">

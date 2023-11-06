@@ -3,6 +3,8 @@ import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
 import { Badge, Image, Row, Form, Col, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
 import { useIdentity } from '@/hooks/useIdentity';
+import { useAuth } from '@/hooks/useAuth';
+
 import { useEffect, useState } from 'react';
 import isUrl from 'is-url';
 
@@ -15,12 +17,13 @@ export const Navigation = (props: any) => {
   const { clearSessionStorage, setTriggerTrue, connectorUrl, setConnector } = useIdentity();
   const [disabled, setDisabled] = useState(false);
   const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
+  const {isAuthenticated, setIsAuthenticated}= useAuth();
 
   useEffect(() => {
     const logOut_accountchanged = () => {
       clearSessionStorage();
-      sessionStorage.setItem("loggedIn", "false");
-      props.setLoggedIn(false);
+      localStorage.setItem("token", "false");
+      setIsAuthenticated(false);
     } 
 
     window.ethereum.on('accountsChanged', logOut_accountchanged)
@@ -29,8 +32,8 @@ export const Navigation = (props: any) => {
   const handleLogout = () => {
     setDisabled(false);
     clearSessionStorage();
-    sessionStorage.setItem("loggedIn", "false");
-    props.setLoggedIn(false)
+    localStorage.setItem("token", "false");
+    setIsAuthenticated(false)
   }
 
   let metamaskNavItem;
@@ -95,7 +98,7 @@ export const Navigation = (props: any) => {
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link> :  "" }
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload</Nav.Link>  :  ""}
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>  :  ""}
-            {props.loggedIn ? <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue</Nav.Link> :  ""}
+            {isAuthenticated ? <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue</Nav.Link> :  ""}
           </Nav>  
         </Navbar.Collapse>
         
@@ -106,7 +109,7 @@ export const Navigation = (props: any) => {
               <Button variant="outline-success" className="me-2 my-auto" type="submit">{disabled ? "Edit" : "Connect"}</Button>
             </Form>
           {metamaskNavItem}
-          { props.loggedIn && 
+          { isAuthenticated && 
             <Nav.Item className='ms-2 my-auto'>
               <Button  variant='outline-danger' onClick={handleLogout}>
                 Log out
