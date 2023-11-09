@@ -1,5 +1,5 @@
 import { RefAttributes, MouseEvent, useState, useEffect} from "react";
-import { Modal, Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
@@ -8,28 +8,11 @@ import { useMetaMask } from "@/hooks/useMetaMask";
 import { IotaDID } from "@iota/identity-wasm/web";
 import { AbiCoder, ethers, keccak256 } from "ethers";
 import { Buffer } from 'buffer';
+import { VerticallyCenteredModal } from "../VerticallyCenteredModal/VerticallyCenteredModal";
 
 import catalogueAPI from "@/api/catalogueAPIs";
 import connectorAPI from "@/api/connectorAPIs";
 
-function VerticallyCenteredModal(props: any) {
-    return (
-        <Modal {...props} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
-            <Modal.Header closeButton>
-                <Modal.Title id="contained-modal-title-vcenter">
-                    Offering
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body style={{backgroundColor: "ThreeDLightShadow"}}>
-                <pre className="ms-2 mt-2" style={{color: "white"}}>
-                    {props.offering}
-                </pre>
-            </Modal.Body>
-            <Modal.Footer>
-            </Modal.Footer>
-        </Modal>
-    );
-}
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
@@ -104,8 +87,8 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 [props.NFTdataobj.DTcontractAddress, ownerAddress]
             )
         );
-        const res: BigInt = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
-        const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
+        const res: bigint = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
+        const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
         console.log(`Data token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
@@ -132,8 +115,8 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                     [props.NFTdataobj.DTcontractAddress, ownerAddress]
                 )
             );
-            const res: BigInt = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
-            const rate: BigInt = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
+            const res: bigint = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
+            const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
             console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${rate}`);  
             
             exchangeContractIstance.sellDT(exchangeID_forthisDT, ethers.parseEther("1"), {value: res});
@@ -239,9 +222,11 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         Show offering
                     </Button>
                     <VerticallyCenteredModal
+                        key={props.NFTdataobj.NFTname}
                         show={modalShow}
                         onHide={() => setModalShow(false)}
-                        offering={offering}
+                        title={"Offering"}
+                        body={JSON.stringify(offering, null, 3)}
                     />
                     </>    
                 }

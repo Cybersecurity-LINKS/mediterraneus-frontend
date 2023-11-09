@@ -2,7 +2,6 @@ import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
 import isUrl from 'is-url';
 import connectorAPI from "@/api/connectorAPIs";
-import { useMetaMask } from "./useMetaMask";
 
 interface IdentityData {
     did: IotaDID | undefined
@@ -27,7 +26,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
-    const { provider, wallet } = useMetaMask();
+    // const { wallet } = useMetaMask();
 
     useEffect(() => {
         // console.log("Use effect, use identity");
@@ -100,16 +99,16 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
         setVc(undefined);
     }
 
-    const createDID = async () => {
-        try {
-            console.log("Wallet address: ", wallet.accounts[0]);
-            await connectorAPI.createDID(connectorUrl,  wallet.accounts[0]);
+    // const createDID = async () => {
+    //     try {
+    //         console.log("Wallet address: ", wallet.accounts[0]);
+    //         await connectorAPI.createDID(connectorUrl,  wallet.accounts[0]);
             
-        } catch (error) {
-            console.log(error)
-            throw error;
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error)
+    //         throw error;
+    //     }
+    // }
 
     return (
     <IdentityContext.Provider

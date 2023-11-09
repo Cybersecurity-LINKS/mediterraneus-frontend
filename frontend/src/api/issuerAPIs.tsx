@@ -8,13 +8,13 @@ const getChallenge = async ( did: string ) => {
         throw response.json();
     }
     // TODO: throw and catch error if response is not ok
-    const nonce = (await response.json()).nonce;
+    const nonce = (await response.json()).nonce as string;
 
     if(response.ok){
         console.log("challenge: ", nonce);
         return nonce;
     } else {
-        let err = {status: response.status, errObj: nonce};
+        const err = {status: response.status, errObj: nonce};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -38,7 +38,7 @@ const requestCredential = async ( did: string, nonce: string, ssiSignature: stri
         console.log(credential);
         return credential;
     } else {
-        let err = {status: response.status, errObj: credential};
+        const err = {status: response.status, errObj: credential};
         throw err;  // An object with the error coming from the server
     }
 }

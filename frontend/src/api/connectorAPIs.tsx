@@ -19,7 +19,7 @@ const generatePresentation = async (connectorUrl: string, challenge: string, eth
         console.log(presentation);
         return presentation;
     } else {
-        let err = {status: response.status, errObj: presentation};
+        const err = {status: response.status, errObj: presentation};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -34,7 +34,7 @@ const getIdentity = async (connectorUrl: string, ethAddress: string) => {
     if(response.ok){
         return json;
     } else {
-        let err = {status: response.status, errObj: json};
+        const err = {status: response.status, errObj: json};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -56,7 +56,7 @@ const createDID = async (connectorUrl: string, ethAddress: string) => {
         console.log(did);
         return did;
     } else {
-        let err = {status: response.status, errObj: did};
+        const err = {status: response.status, errObj: did};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -77,12 +77,12 @@ const storeCredential = async (connectorUrl: string, ethAddress: string, credent
     });
     if(!response.ok){
         // Couldn't be able to store the credential
-        let err = {status: response.status, errObj: response.json()};
+        const err = {status: response.status, errObj: response.json()};
         throw err;  // An object with the error coming from the server
     }
 }
 
-const signData = async (connectorUrl: string, ethAddress: string, payload: any) => {
+const signData = async (connectorUrl: string, ethAddress: string, payload: string) => {
     if (!isUrl(connectorUrl)) {
         throw "Connector url undefined";
     }
@@ -98,7 +98,7 @@ const signData = async (connectorUrl: string, ethAddress: string, payload: any) 
         console.log("ssi signature: ", signature);
         return signature;
     } else {
-        let err = {status: response.status, errObj: signature};
+        const err = {status: response.status, errObj: signature};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -113,7 +113,7 @@ const getChallenge = async (providerConnectorUrl: string, NFTname: string) => {
     if(response.ok){
         return json.nonce;
     } else {
-        let err = {status: response.status, errObj: json};
+        const err = {status: response.status, errObj: json};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -139,10 +139,40 @@ const downloadAsset = async (providerConnectorUrl: string, NFTname: string, chal
         const asset_json = asset["asset"];
         return new Blob([JSON.stringify(asset_json)], {type: "text/json;charset=utf-8"});
     } else {
-        let err = {status: response.status, errObj: challenge};
+        const err = {status: response.status, errObj: challenge};
         throw err;  // An object with the error coming from the server
     }
 }
 
-const coonectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, downloadAsset };
+const getAssetInfo = async (connectorUrl: string, chosen_alias: string, ethAddress: string) => {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
+    const response = await fetch(`${connectorUrl}/assets/${chosen_alias}?eth_address=${ethAddress}`)
+    const json = await response.json();
+
+    if(response.ok){
+        return json.lad_entry; // TODO: return asset info
+    } else {
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const encryptCid = async (connectorUrl: string, NFTname: string, ethAddress: string ) => {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
+    const response = await fetch(`${connectorUrl}/assets/${NFTname}/encrypt-cid?ethAddress=${ethAddress}`);
+    const json = await response.json();  
+
+    if(response.ok){
+        return json.encryptedCid; // TODO: return cid
+    } else {
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const coonectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, downloadAsset, encryptCid, getAssetInfo };
 export default coonectorAPI;

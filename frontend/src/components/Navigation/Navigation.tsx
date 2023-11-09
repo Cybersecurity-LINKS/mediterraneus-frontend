@@ -1,17 +1,15 @@
 import { useMetaMask } from '@/hooks/useMetaMask'
 import { formatAddress2 } from '@/utils'
 import { Link } from 'react-router-dom';
-import { Badge, Image, Row, Form, Col, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, Card } from 'react-bootstrap';
+import { Badge, Image, Form, OverlayTrigger, Tooltip, Button, Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { useIdentity } from '@/hooks/useIdentity';
 import { useAuth } from '@/hooks/useAuth';
 
 import { useEffect, useState } from 'react';
 import isUrl from 'is-url';
+import { IoBagHandle } from "react-icons/io5";
 
-        
-const logo = <ion-icon size="large" name="bag-handle-outline"></ion-icon>;
-
-export const Navigation = (props: any) => {
+export function Navigation() {
 
   const { wallet, hasProvider, isConnecting, connectMetaMask } = useMetaMask()
   const { clearSessionStorage, setTriggerTrue, connectorUrl, setConnector } = useIdentity();
@@ -62,19 +60,18 @@ export const Navigation = (props: any) => {
       </Nav.Item>
   }
   
-  function handleSubmit(e: { preventDefault: () => void; target: any; }) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // Prevent the browser from reloading the page
-    e.preventDefault();
+    event.preventDefault();
 
     if (disabled == false) {
       // console.log("trigger");
       setTriggerTrue(); 
     }
-
     setDisabled(!disabled);
 
     // Read the form data
-    // const form = e.target;
+    // const form = event.target;
     // const formData = new FormData(form);
 
     // // Or you can work with it as a plain object:
@@ -88,17 +85,25 @@ export const Navigation = (props: any) => {
     <Navbar sticky="top" bg="light" variant="light">
       <Container fluid>
 
-        <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/">
-          {logo}
+        <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/home">
+          <IoBagHandle size="32"/>
           <h4 className="ms-2 mt-2">MARKETPLACE</h4>
         </Navbar.Brand>
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav>
-            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/identity" className='me-2 ms-2'>Identity</Nav.Link> :  "" }
-            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/uploadasset" className='me-2 ms-2'>Upload</Nav.Link>  :  ""}
-            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/publish" className='me-2 ms-2'>Publish</Nav.Link>  :  ""}
-            {isAuthenticated ? <Nav.Link as={Link} to="/catalogue" className='me-2 ms-2'>Catalogue</Nav.Link> :  ""}
+            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/issuer" className='me-2 ms-2'>Issuer</Nav.Link> :  "" }
+            { isUrl(connectorUrl) ? 
+              <NavDropdown title="Connector" id="basic-nav-dropdown">
+                <NavDropdown.Item as={Link} to="/uploadasset">Upload</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/publish">Publish</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/identity">Manage identity</NavDropdown.Item>
+              </NavDropdown>  
+              :  ""
+            }
+            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/public-catalogue" className='me-2 ms-2'>Public-Catalogue</Nav.Link> :  ""}
+            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/login" className='me-2 ms-2'>Verifier</Nav.Link> :  ""}
+            
           </Nav>  
         </Navbar.Collapse>
         

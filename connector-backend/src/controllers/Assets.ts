@@ -138,34 +138,7 @@ async function getLADentry_byAlias(req: Request, res: Response) {
         if(lad_entry === null)
             throw "";
 
-        const identity = await DbOperations.getIdentity(eth_address);
-
-        if(identity === null)
-            throw "";
-        const gc_resp = await fetch(`${process.env.GLOBAL_CATALOGUE_ENDPOINT}/dids`);
-        const gc_did = (await gc_resp.json())["did"]
-        const gc_doc = await IdentityService.resolveDID(IotaDID.parse(gc_did))
-
-        // the CID must be encrypted before returning it to the "front" connector.
-        // asymmetric crypto can be used to determine a common shared secret between two parties:
-        // the connector uses its private key and GC's public key to compute a shared secret.
-
-        // The shared secret, known only to those who know a relevant secret key (yours or theirs). It is not cryptographically random. Do not use it directly as a key.
-        const gc_pub_key = extractPubKeyFromDoc(gc_doc);
-        const priv_key_x25119 = X25519.Ed25519toX25519Private(privKeytoBytes(identity.privkey));
-        const gc_pub_key_x25119 = X25519.Ed25519toX25519Public(gc_pub_key);
-        const shared_key = X25519.keyExchange(priv_key_x25119, gc_pub_key_x25119);
-
-        let ciphertext;
-        crypto.hkdf('sha512', shared_key, '', '', 64, (err, derivedKey) => {
-            if (err) throw err;
-            console.log(Buffer.from(derivedKey).toString('hex'));  // '24156e2...5391653'
-        
-            ciphertext = pkg.AES.encrypt(lad_entry.cid, Buffer.from(derivedKey).toString('hex')).toString();
-            lad_entry.cid = ciphertext;  
-            
-            res.status(200).send({lad_entry: lad_entry}).end();
-        });
+        res.status(200).send({lad_entry: lad_entry}).end();
     } catch (error) {
         console.log(error);
         res.status(500).send({error: "Could not retreive any data from the DB"}).end();
@@ -230,5 +203,47 @@ async function downalodReq_sign(req: Request, res: Response) {
     
 }
 
-const AssetsController = { uploadFiles, uploadOnLAD, addNFT_addressOnLAD, getAssetAliases, getLADentry_byAlias, downloadRequest, downalodReq_sign };
+async function encryptCid(req: Request, res: Response) {
+    const nft_name = req.params.assetId;
+    const eth_address = req.query.ethAddress as string; // TODO: Define Request interface type?
+    try {
+        // check I actually own the asset
+        const lad_entry = await DbOperations._getLADentry_byAlias(nft_name);
+        if (lad_entry === null || lad_entry === undefined)
+            throw "Asset does not exist on this connector"
+
+            const identity = await DbOperations.getIdentity(eth_address);
+
+            if(identity === null)
+                throw "";
+            const gc_resp = await fetch(`${process.env.GLOBAL_CATALOGUE_ENDPOINT}/dids`);
+            const gc_did = (await gc_resp.json())["did"]
+            const gc_doc = await IdentityService.resolveDID(IotaDID.parse(gc_did))
+    
+            // the CID must be encrypted before returning it to the "front" connector.
+            // asymmetric crypto can be used to determine a common shared secret between two parties:
+            // the connector uses its private key and GC's public key to compute a shared secret.
+    
+            // The shared secret, known only to those who know a relevant secret key (yours or theirs). It is not cryptographically random. Do not use it directly as a key.
+            const gc_pub_key = extractPubKeyFromDoc(gc_doc);
+            const priv_key_x25119 = X25519.Ed25519toX25519Private(privKeytoBytes(identity.privkey));
+            const gc_pub_key_x25119 = X25519.Ed25519toX25519Public(gc_pub_key);
+            const shared_key = X25519.keyExchange(priv_key_x25119, gc_pub_key_x25119);
+    
+            let ciphertext;
+            crypto.hkdf('sha512', shared_key, '', '', 64, (err, derivedKey) => {
+                if (err) throw err;
+                console.log(Buffer.from(derivedKey).toString('hex'));  // '24156e2...5391653'
+            
+                ciphertext = pkg.AES.encrypt(lad_entry.cid, Buffer.from(derivedKey).toString('hex')).toString();
+                res.status(201).send({encryptedCid: ciphertext}).end();
+                
+            });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({error: error}).end();
+    }
+}
+
+const AssetsController = { uploadFiles, uploadOnLAD, addNFT_addressOnLAD, getAssetAliases, getLADentry_byAlias, downloadRequest, downalodReq_sign, encryptCid };
 export default AssetsController;

@@ -73,6 +73,10 @@ export const formatDid = (did: string | undefined) => {
   return `${did?.substring(0, 25)}...${did?.substring(70, did.length)}`
 }
 
+export const removeCenterOfStr= (str: string, a: number, b: number) => {
+  return `${str.substring(0, a)}...${str.substring(b, str.length)}`
+}
+
 export const getContractABI = async (contractName: string) => {
   try {
     // dynamic import
@@ -220,7 +224,7 @@ export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     //TODO: remove or fix the abi fetch
     // console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
 
-    let abi: InterfaceAbi = await getContractABI("IDentity")
+    const abi: InterfaceAbi = await getContractABI("IDentity")
     return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())
 }
 

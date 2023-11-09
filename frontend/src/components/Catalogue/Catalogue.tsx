@@ -35,7 +35,7 @@ export const Catalogue = () => {
             const [...DTcontractAddress] =  await contractIstance.getDTaddresses();
             const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, provider);
             
-            let NFTinfo: IDataOffering = {
+            const NFTinfo: IDataOffering = {
                 owner: await contractIstance.getNFTowner(),
                 NFTaddress: contractAddress,
                 NFTname: await contractIstance.name(),
@@ -54,12 +54,12 @@ export const Catalogue = () => {
             try {
                 const contractABI = await getContractABI("ERC721Factory");
                 const contractAddress = getContractAddress("ERC721Factory");
-                let contractIstance = new ethers.Contract(contractAddress!, contractABI, provider);
+                const contractIstance = new ethers.Contract(contractAddress!, contractABI, provider);
     
-                let [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();
-                let NFTobjs: IDataOffering[] = [];
+                const [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();
+                const NFTobjs: IDataOffering[] = [];
                 for(let i = 0; i < NFTaddresses.length; i++ ) {
-                    let l_dataoffering = await getNFTinfo(NFTaddresses[i]);
+                    const l_dataoffering = await getNFTinfo(NFTaddresses[i]);
                     NFTobjs.push(l_dataoffering);
                 }
                 setDataOfferings(NFTobjs);

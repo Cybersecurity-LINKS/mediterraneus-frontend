@@ -1,9 +1,8 @@
-import { useMetaMask } from '@/hooks/useMetaMask'
+import { useError } from '@/hooks/useError'
 import { Alert } from 'react-bootstrap'
-// import styles from './MetaMaskError.module.css'
 
-export const MetaMaskError = () => {
-  const { error, errorMessage, clearError } = useMetaMask()
+export const Error = () => {
+  const { error, errorMessage, clearError } = useError()
   return (
     <>
     {

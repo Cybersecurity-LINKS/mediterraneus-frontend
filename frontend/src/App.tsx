@@ -1,17 +1,16 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useState, useEffect } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { Navigate, Outlet, RouterProvider } from 'react-router';
+import { createBrowserRouter } from 'react-router-dom';
 
-import { MetaMaskError } from './components/MetaMaskError';
+import { Error } from './components/Error';
 import { Navigation } from './components/Navigation';
-import { Login } from './components/Login';
-import { Display } from './components/Display';
+import { Login } from './components/Verifier';
 import { UploadAsset } from './components/UploadAsset';
 import { Publish} from './components/Publish';
-import { Identity } from './components/Identity';
-import { IdentityToast } from './components/Identity/DisplayToast';
+import { Identity } from './components/Issuer';
 import { Catalogue } from './components/Catalogue';
+import { SideBar } from './components/Sidebar';
 
 import { MetaMaskContextProvider } from './hooks/useMetaMask';
 import { IdentityContextProvider } from './hooks/useIdentity';
@@ -19,32 +18,40 @@ import { AuthContextProvider, useAuth } from './hooks/useAuth';
 
 import * as client from "@iota/client-wasm/web";
 import * as identity from "@iota/identity-wasm/web";
-import { createBrowserRouter } from 'react-router-dom';
+import { ErrContextProvider } from './hooks/useError';
 
 client.init("libraries/client_wasm_bg.wasm").then(() => identity.init("libraries/identity_wasm_bg.wasm"));
 
-function Layout() { // TODO: create a sidebar
+function Layout() {
   return (
     <>
+      <ErrContextProvider>
       <MetaMaskContextProvider>
-        <AuthContextProvider>
-          <IdentityContextProvider>
+      <AuthContextProvider>
+      <IdentityContextProvider>
             <Navigation/>
-            <Container fluid>        
-              {/* 2️⃣ Render the app routes via the Layout Outlet */}
-              <Outlet />
+            <Container fluid>  
+              <Row>
+                <Col md={3}>
+                  <SideBar />
+                </Col>       
+                <Col md={9}>
+                  <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
+                </Col>
+              </Row>
               <Row className="fixed-bottom">
-                <MetaMaskError />
+                <Col className="mx-4 mb-2"><Error/></Col>
               </Row>
             </Container>
-          </IdentityContextProvider>
-        </AuthContextProvider>
+      </IdentityContextProvider>
+      </AuthContextProvider>
       </MetaMaskContextProvider>
+      </ErrContextProvider>
     </>
   );
 }
 
-const ProtectedRoute = (props: {redirectPath: string,  children?: any}) => {
+const ProtectedRoute = (props: {redirectPath: string,  children?:  React.ReactElement}) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
     return <Navigate to={props.redirectPath} replace />;
@@ -58,21 +65,16 @@ export const App = () => {
   const router = createBrowserRouter([  // 🆕
     { element: <Layout/>,  /* 1️⃣ Wrap your routes in a pathless layout route */
       children: [
-        { path: "/", Component: Login }, 
-        { path: "/register", Component: Identity },
-        { path: "/publish", Component: Publish },
-        { path: "/identity", Component: Identity },
+        { path: "/home", element: <></> }, 
+        { path: "/login", Component: Login }, 
+        { path: "/issuer", Component: Identity },
         { path: "/uploadasset", Component: UploadAsset },
-        { element: <ProtectedRoute redirectPath="/" />,
+        { path: "/publish", Component: Publish },
+        { path: "/register", Component: Identity },
+        { path: "/public-catalogue", element: <Catalogue/> },
+        { element: <ProtectedRoute redirectPath="/home" />,
           children: [
-            { path: "/home", 
-              element:  // TODO: create a sidebar and remove this
-                <Col>
-                  <Row><Display/></Row>
-                  <Row><IdentityToast/></Row>
-                </Col> 
-            },
-            { path: "/catalogue", element: <Catalogue/> },
+            { path: "/protected-catalogue", element: <Catalogue/> },
           ]
         },
       ]

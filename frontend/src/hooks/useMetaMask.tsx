@@ -1,33 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
 
 import detectEthereumProvider from '@metamask/detect-provider'
 import { formatBalance } from '@/utils'
-import { BrowserProvider, JsonRpcProvider, ethers } from 'ethers'
+import { BrowserProvider, ethers } from 'ethers'
+import { useError } from './useError'
 
 
 interface MetaMaskData {
   wallet: typeof initialState
   provider: BrowserProvider | null
   hasProvider: boolean | null
-  error: boolean
-  errorMessage: string
   isConnecting: boolean
   connectMetaMask: () => void
-  clearError: () => void
 }
 
 const initialState = { accounts: [], balance: '', chainId: '' }
 
 const MetaMaskContext = createContext<MetaMaskData>({} as MetaMaskData)
 
-export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: any) => {
+export const MetaMaskContextProvider = ({ children }: PropsWithChildren) => {
   const [hasProvider, setHasProvider] = useState<boolean | null>(null)
   const [wallet, setWallet] = useState(initialState)
 
   const [isConnecting, setIsConnecting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
+
+  const { setError } = useError();
 
   useEffect(() => {
     const refreshAccounts = (accounts: any) => {
@@ -62,7 +61,7 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
     }
 
     const initializeProvider = async() => {
-      let tmp = new ethers.BrowserProvider(window.ethereum)
+      const tmp = new ethers.BrowserProvider(window.ethereum)
       setProvider(tmp);
       // // Prompt user for account connections
       // await provider.send("eth_requestAccounts", []);
@@ -95,16 +94,14 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
       method: 'eth_requestAccounts',
     })
       .then((accounts: []) => {
-        setErrorMessage('')
+        setError('')
         updateWallet(accounts)
       })
       .catch((err: any) => {
-        setErrorMessage(err.message)
+        setError(err.message)
       })
     setIsConnecting(false)
   }
-
-  const clearError = () => setErrorMessage('')
 
   return (
     <MetaMaskContext.Provider
@@ -112,11 +109,8 @@ export const MetaMaskContextProvider = ({ children }: PropsWithChildren, props: 
         wallet,
         provider,
         hasProvider,
-        error: !!errorMessage,
-        errorMessage,
         isConnecting,
         connectMetaMask: connectMetaMask,
-        clearError
       }}
     >
       {children}

@@ -1,8 +1,9 @@
 import { useMetaMask } from '@/hooks/useMetaMask';
 import { MouseEvent, useEffect, useState } from 'react';
-import { Card, Button, Form, Col, Row, Alert } from 'react-bootstrap';
+import { Card, Button, Form, Col, Row, Container } from 'react-bootstrap';
 import { useIdentity } from "@/hooks/useIdentity";
 import isUrl from "is-url";
+import { useError } from '@/hooks/useError';
 
 
 export const UploadAsset = () => {
@@ -10,10 +11,10 @@ export const UploadAsset = () => {
     const [assetFile, setAssetFile] = useState<HTMLInputElement | null>(null);
     const [offeringFile, setOfferingFile] = useState<HTMLInputElement | null>(null);
     const [OfferingCID, setOfferingCID] = useState("");
-    const [error, setError] = useState("");
 
     const { wallet } = useMetaMask();
     const { did, vc, connectorUrl } = useIdentity();
+    const { setError }  = useError();
 
     useEffect(() => {
         setAssetFile(document.getElementById("uploadAsset") as HTMLInputElement);
@@ -47,9 +48,9 @@ export const UploadAsset = () => {
                 setError(err.message)
                 throw err;
             } else {  
-                let asset_file = assetFile!.files?.[0] as Blob
+                const asset_file = assetFile!.files?.[0] as Blob
                 formData.append("files", asset_file);
-                let offering_file = offeringFile!.files?.[0] as Blob
+                const offering_file = offeringFile!.files?.[0] as Blob
                 formData.append("files", offering_file);
                 formData.append("additional", JSON.stringify({
                     eth_address: wallet.accounts[0],
@@ -113,21 +114,13 @@ export const UploadAsset = () => {
                                 value={OfferingCID.length == 0 ? "Upload Offering Message to get CID back" : OfferingCID} />
                         </Col>
                     </Form.Group>
-                
-                    <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { submitAssetUpload(event) }}>
-                        Upload
-                    </Button>
+                    <Container className="d-flex justify-content-center">
+                        <Button variant="primary" type="submit" className='mt-3 mb-3' onClick={(event) => { submitAssetUpload(event) }}>
+                            Upload
+                        </Button>
+                    </Container>
                 </Form>
             </Card>
-            <Row className="fixed-bottom">
-            {
-                error 
-                    &&
-                <Alert className="me-5 ms-3" key='danger' variant='danger' onClick={() => { setError('') }}>
-                    <strong>Error:</strong> { error }
-                </Alert>
-            }
-            </Row>
         </Row>
     );
 }

@@ -17,6 +17,7 @@ router.get("/assets", AssetsController.getAssetAliases); // TODO: use query para
 router.patch("/assets/:assetId", AssetsController.addNFT_addressOnLAD); // TODO: add validator to modify only nft
 router.get("/assets/:assetId", AssetsController.getLADentry_byAlias); 
 router.get("/assets/:assetId/challenge", AssetsController.downloadRequest);
+router.get("/assets/:assetId/encrypt-cid", AssetsController.encryptCid);
 router.post("/assets/:assetId/download", AssetsController.downalodReq_sign);
 
 export default router;

@@ -9,7 +9,7 @@ const getChallenge = async (eth_address: string) => {
         console.log(challenge);
         return challenge;
     } else {
-        let err = {status: response.status, errObj: challenge};
+        const err = {status: response.status, errObj: challenge};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -31,7 +31,7 @@ const login = async (signed_vp: string, eth_addrres: string) => {
     if(response.ok){
         return true;
     } else {
-        let err = {status: response.status, errObj: result};
+        const err = {status: response.status, errObj: result};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -44,7 +44,7 @@ const getOfferingContent = async (encryptedCID: string, ownerDID: string) => {
     if (response.ok){
         return offering.offering;
     } else {
-        let err = {status: response.status, errObj: offering};
+        const err = {status: response.status, errObj: offering};
         throw err;  // An object with the error coming from the server
     }
     
