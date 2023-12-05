@@ -2,7 +2,8 @@ import { Button, Container, Spinner, Row} from "react-bootstrap";
 import { useState } from "react";
 
 import { ContractTransactionResponse, ethers } from "ethers";
-import { Credential } from "@iota/identity-wasm/web"
+import { Credential, EdDSAJwsVerifier, FailFast, IotaDID, IotaDocument, IotaIdentityClient, Jwt, JwtCredentialValidationOptions, JwtCredentialValidator } from "@iota/identity-wasm/web";
+import { Client } from "@iota/sdk-wasm/web";
 import { extractNumberFromVCid, getIdentitySC } from "@/utils";
 
 import { useMetaMask } from "@/hooks/useMetaMask";
@@ -12,9 +13,11 @@ import { useError } from "@/hooks/useError";
 import issuerAPI from "@/api/issuerAPIs";
 import connectorAPI from "@/api/connectorAPIs";
 
+export const iotaApiUrl = import.meta.env.VITE_NODE_API_URL as string;
+
 export const Identity = () => {
     const { provider, wallet,  } = useMetaMask();
-    const { did, vc, setTriggerTrue, loading, connectorUrl } = useIdentity();
+    const { id, did, vc, setTriggerTrue, loading, connectorUrl } = useIdentity();
 
     const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
     const [issuedCredential, setIssuedCredential] = useState(false);
@@ -22,7 +25,7 @@ export const Identity = () => {
 
     //TODO: why don't use hooks for setting the did and vc and do that call there? 
     const requestCredential = async () => {
-        if (did === undefined) {
+        if (did === undefined || id === undefined) {
             setError("DID missing");
             return;
         }
@@ -31,27 +34,48 @@ export const Identity = () => {
             const nonce = await issuerAPI.getChallenge(did!.toString());
             const identitySignature = await connectorAPI.signData(
                 connectorUrl, 
-                wallet.accounts[0], 
+                id,
                 nonce
             );
             const signer = await provider?.getSigner();
             const walletSignature = await signer?.signMessage(nonce);
-            const credential = await issuerAPI.requestCredential(
+            console.log("wallet signature: ", walletSignature);
+            const credentialResponse = await issuerAPI.requestCredential(
                 did!.toString(), 
                 nonce, 
                 identitySignature,
                 walletSignature!
             );
-            const credentialId = extractNumberFromVCid(Credential.fromJSON(credential));
-            console.log("VC id:", ethers.toBigInt(credentialId))
+            const credentialJwt = credentialResponse.credentialJwt;
+            console.log("Issuer message: ", credentialResponse.message);
+            console.log("Credential JWT: ", credentialJwt);
+            
+            
+            // TODO: simplify this process
+            const client = new Client({
+                primaryNode: iotaApiUrl,
+                localPow: true,
+            });
+            const didClient = new IotaIdentityClient(client);
+            
+            // Resolve the issuer DID document.
+            const issuerDocument: IotaDocument = await didClient.resolveDid(IotaDID.parse(credentialResponse.issuerDid));
+            const decoded_credential = new JwtCredentialValidator(new EdDSAJwsVerifier()).validate(
+                new Jwt(credentialJwt),
+                issuerDocument,
+                new JwtCredentialValidationOptions(),
+                FailFast.FirstError,
+            );
 
+            const credentialId = extractNumberFromVCid(decoded_credential.credential());
+            console.log("Credential id:", ethers.toBigInt(credentialId));
             const IDSC_istance = await getIdentitySC(provider!);
             const tx: ContractTransactionResponse = await IDSC_istance.activateVC(ethers.toBigInt(credentialId));
             await tx.wait();
             await connectorAPI.storeCredential(
                 connectorUrl,
                 wallet.accounts[0],
-                credential
+                credentialJwt
             );
             setTriggerTrue();
             setCreatingIdentity(false);

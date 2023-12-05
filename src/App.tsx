@@ -15,12 +15,13 @@ import { SideBar } from './components/Sidebar';
 import { MetaMaskContextProvider } from './hooks/useMetaMask';
 import { IdentityContextProvider } from './hooks/useIdentity';
 import { AuthContextProvider, useAuth } from './hooks/useAuth';
-
-import * as client from "@iota/client-wasm/web";
-import * as identity from "@iota/identity-wasm/web";
 import { ErrContextProvider } from './hooks/useError';
 
-client.init("libraries/client_wasm_bg.wasm").then(() => identity.init("libraries/identity_wasm_bg.wasm"));
+import init from "@iota/sdk-wasm/web";
+import * as identity from "@iota/identity-wasm/web";
+
+init()
+.then(() => identity.init()).catch(console.error);
 
 function Layout() {
   return (
@@ -79,10 +80,10 @@ export const App = () => {
             { path: "/protected-catalogue", element: <Catalogue/> },
           ]
         },
-        { path:"*", Component: () => <h1>404</h1> }
-      ]
+      ], 
     },
-   
+    { path:"*", Component: () => <h1 className='position-absolute top-50 start-50 translate-middle'>404</h1> }
+ 
   ]);
 
   return <RouterProvider router={router} />;

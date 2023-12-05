@@ -4,6 +4,7 @@ import isUrl from 'is-url';
 import connectorAPI from "@/api/connectorAPIs";
 
 interface IdentityData {
+    id: number | undefined
     did: IotaDID | undefined
     didDoc: IotaDocument | undefined
     vc: Credential | undefined
@@ -20,6 +21,7 @@ const IdentityContext = createContext<IdentityData>({} as IdentityData);
 
 export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const [connectorUrl, setConnectorUrl] = useState("");
+    const [id, setId] = useState<number>();
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Credential>();
@@ -51,11 +53,15 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
                 console.log("Get DID and VC from Connector");
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const identity = await connectorAPI.getIdentity(connectorUrl, accounts[0]);
+                setId(identity.id);
                 setDid(identity.did);
-                setDidDoc(identity.did_doc);
-                if(identity.vc != null)
-                    setVc(Credential.fromJSON(identity.vc));
+                setDidDoc(identity.did_doc); // TODO: new api or contact directly the node
+                if(identity.vcredential != null) { // TODO: show the json
+                    // setVc(Credential.fromJSON(identity.vc)); 
+                    setVc(identity.vcredential);
+                }
             } catch (err) {
+                setId(undefined);
                 setDid(undefined);
                 setDidDoc(undefined);
                 setVc(undefined);
@@ -69,6 +75,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             if(connectorUrl !== "") {
                 getIDfromBackend();   
             } else {
+                setId(undefined);
                 setDid(undefined);
                 setDidDoc(undefined);
                 setVc(undefined);
@@ -94,6 +101,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const clearSessionStorage = () => {
         sessionStorage.setItem("connectorUrl", "");
         setConnectorUrl("");
+        setId(undefined);
         setDid(undefined);
         setDidDoc(undefined);
         setVc(undefined);
@@ -113,6 +121,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     return (
     <IdentityContext.Provider
         value={{
+            id,
             did,
             didDoc,
             vc,

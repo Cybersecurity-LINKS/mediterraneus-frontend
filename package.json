@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@iota/identity-wasm": "^0.7.0-alpha.5",
+    "@iota/identity-wasm": "^1.0.0",
+    "@iota/sdk-wasm": "^1.1.1",
     "@metamask/detect-provider": "^2.0.0",
     "@noble/ed25519": "^2.0.0",
     "@types/node": "^20.4.2",
@@ -32,7 +33,6 @@
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react": "^3.1.0",
-    "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",

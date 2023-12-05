@@ -29,16 +29,15 @@ const requestCredential = async ( did: string, nonce: string, ssiSignature: stri
         body: JSON.stringify({
             did: did,
             nonce: nonce,
-            ssi_signature: ssiSignature,
-            pseudo_sign: walletSignature
+            identitySignature: ssiSignature,
+            walletSignature: walletSignature
         })
     });  
-    const credential: JSON = JSON.parse((await response.json()).vc); // the returned credential is not activated yet
+    const json = await response.json();
     if(response.ok){
-        console.log(credential);
-        return credential;
+        return json; // the returned credential is not activated yet
     } else {
-        const err = {status: response.status, errObj: credential};
+        const err = {status: response.status, errObj: json};
         throw err;  // An object with the error coming from the server
     }
 }

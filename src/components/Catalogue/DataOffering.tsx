@@ -1,5 +1,5 @@
 import { RefAttributes, MouseEvent, useState, useEffect} from "react";
-import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row } from "react-bootstrap";
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
@@ -126,7 +126,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                 setDownloadable(true);
                 console.log(newBalance);
             })
-        }catch(err) {
+        } catch(err) {
             console.log(err);
         }
     }
@@ -161,7 +161,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     }
 
     return (
-        <Card className="m-2" style={{ width: '30rem' }}>
+        <Card className="m-2">
             <Card.Header>
                 <Card.Title>Owner</Card.Title>
                 <Card.Subtitle className="mb-2">
@@ -209,25 +209,22 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             </Card.Body>
             <Card.Footer>
                 {
-                    loadingOffering ? <Spinner animation="border" variant="info" style={{
-                        width: '2rem', 
-                        height: '2rem', 
-                        marginLeft: '13rem',
-                        position: 'relative',
-                        justifyContent: 'center',
-                        flex: 1,
-                    }}/> :
+                    loadingOffering ? 
+                        <Row className='justify-content-center'>
+                            <Spinner animation="grow" variant="primary" className="my-auto"/>
+                        </Row> 
+                    :
                     <>
-                    <Button variant="outline-secondary" className="me-2" onClick={() => setModalShow(true)}>
-                        Show offering
-                    </Button>
-                    <VerticallyCenteredModal
-                        key={props.NFTdataobj.NFTname}
-                        show={modalShow}
-                        onHide={() => setModalShow(false)}
-                        title={"Offering"}
-                        body={JSON.stringify(offering, null, 3)}
-                    />
+                        <Button variant="outline-secondary" className="me-2" onClick={() => setModalShow(true)}>
+                            Show offering
+                        </Button>
+                        <VerticallyCenteredModal
+                            key={props.NFTdataobj.NFTname}
+                            show={modalShow}
+                            onHide={() => setModalShow(false)}
+                            title={"Offering"}
+                            body={JSON.stringify(offering, null, 2)}
+                        />
                     </>    
                 }
                 {

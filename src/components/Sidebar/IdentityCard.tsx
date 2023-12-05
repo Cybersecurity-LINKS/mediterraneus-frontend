@@ -5,7 +5,7 @@ import isUrl from 'is-url';
 import { useState } from 'react';
 import { Alert, Button, Card, Col, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { Link } from 'react-router-dom';
-import connectorAPI from "@/api/connectorAPIs";
+import connectorAPI from '@/api/connectorAPIs';
 import { VerticallyCenteredModal } from '../VerticallyCenteredModal';
 import { IoFingerPrint, IoIdCard } from "react-icons/io5";
 
@@ -22,7 +22,7 @@ function CardContent() {
     try {
         setCreatingIdentity(true);
         console.log("Wallet address: ", wallet.accounts[0]);
-        await connectorAPI.createDID(connectorUrl,  wallet.accounts[0]);
+        await connectorAPI.createDID(connectorUrl, wallet.accounts[0]);
         setTriggerTrue();
         setCreatingIdentity(false);
     } catch (error) {

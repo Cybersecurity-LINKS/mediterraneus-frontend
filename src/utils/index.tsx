@@ -4,7 +4,7 @@ import contractAddresses from '../addresses/contractAddresses.json'
 
 const EVM_EXPLORER = import.meta.env.VITE_EVM_EXPLORER as string;
 
-const enum CONTRACT_ADRRESS{
+const enum CONTRACT_ADRRESS {
   "Deployer" = 0,
   "ERC721Base" = 1,
   "ERC20Base" = 2,
@@ -228,8 +228,8 @@ export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
     return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())
 }
 
-export const extractNumberFromVCid = (vc: Credential): number => {
-  const id = (vc as Credential).id();
+export const extractNumberFromVCid = (credential: Credential): number => {
+  const id = credential.id();
   if(id === undefined)
       return -1;
   const spliced = id.split("/");
