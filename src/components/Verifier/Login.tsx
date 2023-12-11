@@ -74,7 +74,7 @@ export function Login() {
         <>
             <h1 className="text-center">Verifier</h1>
             <Container className="d-flex justify-content-center mt-5">
-                <Button variant="primary" onClick={handleLogin}>Log in with credential</Button>  
+                <Button variant="primary" onClick={handleLogin}>Log in with marketplace credential</Button>  
             </Container>     
         </>
     )

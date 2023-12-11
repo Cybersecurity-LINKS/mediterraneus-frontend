@@ -3,3 +3,8 @@ export type Identity = {
 
 
 }
+
+export type CredentialSubject = {
+    name: string;
+    surname: string;
+}

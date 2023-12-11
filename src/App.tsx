@@ -8,7 +8,7 @@ import { Navigation } from './components/Navigation';
 import { Login } from './components/Verifier';
 import { UploadAsset } from './components/UploadAsset';
 import { Publish} from './components/Publish';
-import { Identity } from './components/Issuer';
+import { Issuer } from './components/Issuer';
 import { Catalogue } from './components/Catalogue';
 import { SideBar } from './components/Sidebar';
 
@@ -69,11 +69,11 @@ export const App = () => {
     { element: <Layout/>,  /* 1️⃣ Wrap your routes in a pathless layout route */
       children: [
         { path: "/home", element: <></> }, 
-        { path: "/login", Component: Login }, 
-        { path: "/issuer", Component: Identity },
+        { path: "/login", Component: Login }, // Verifier page
+        { path: "/issuer", Component: Issuer },
         { path: "/uploadasset", Component: UploadAsset },
         { path: "/publish", Component: Publish },
-        { path: "/register", Component: Identity },
+        { path: "/register", Component: Issuer },
         { path: "/self-catalogue", element: <Catalogue/> },
         { element: <ProtectedRoute redirectPath="/home" />,
           children: [

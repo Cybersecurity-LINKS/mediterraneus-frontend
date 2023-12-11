@@ -1,3 +1,5 @@
+import { CredentialSubject } from "@/types/connectorTypes";
+
 export const issuerApiEndpoint = import.meta.env.VITE_ISSUER_API as string;
 
 const getChallenge = async ( did: string ) => {
@@ -20,7 +22,7 @@ const getChallenge = async ( did: string ) => {
 }
 
 // TODO: create structure DTOs
-const requestCredential = async ( did: string, nonce: string, ssiSignature: string, walletSignature: string ) => {
+const requestCredential = async ( did: string, nonce: string, ssiSignature: string, walletSignature: string, credentialSubject: CredentialSubject ) => {
     const response = await fetch(`${issuerApiEndpoint}/credentials`, {
         method: 'POST',
         headers: {
@@ -30,7 +32,8 @@ const requestCredential = async ( did: string, nonce: string, ssiSignature: stri
             did: did,
             nonce: nonce,
             identitySignature: ssiSignature,
-            walletSignature: walletSignature
+            walletSignature: walletSignature,
+            credentialSubject: credentialSubject
         })
     });  
     const json = await response.json();

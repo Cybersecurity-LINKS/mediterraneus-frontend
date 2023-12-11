@@ -43,6 +43,7 @@ export const UploadAsset = () => {
                 throw err;
             } 
 
+            //TODO: remove this, just use required in the form
             if(offeringFile != null && assetFile != null && (offeringFile?.files!.length > 1 || offeringFile?.files!.length <= 0) && (assetFile?.files!.length > 1 || assetFile?.files!.length <= 0)) {
                 const err = new Error("Asset and Offeirng files must be chosen in order to proceed");
                 setError(err.message)

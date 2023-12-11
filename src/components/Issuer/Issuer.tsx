@@ -1,4 +1,4 @@
-import { Button, Container, Spinner, Row} from "react-bootstrap";
+import { Button, Container, Spinner, Row, Modal, Form} from "react-bootstrap";
 import { useState } from "react";
 
 import { ContractTransactionResponse, ethers } from "ethers";
@@ -15,16 +15,20 @@ import connectorAPI from "@/api/connectorAPIs";
 
 export const iotaApiUrl = import.meta.env.VITE_NODE_API_URL as string;
 
-export const Identity = () => {
+export const Issuer = () => {
     const { provider, wallet,  } = useMetaMask();
     const { id, did, vc, setTriggerTrue, loading, connectorUrl } = useIdentity();
+
+    const [modalShow, setModalShow] = useState(false);
+    const [formData, setFormData] = useState({name: "", surname: ""});
 
     const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
     const [issuedCredential, setIssuedCredential] = useState(false);
     const { setError } = useError();
 
     //TODO: why don't use hooks for setting the did and vc and do that call there? 
-    const requestCredential = async () => {
+    const requestCredential = async (event: React.FormEvent) => {
+        event.preventDefault();
         if (did === undefined || id === undefined) {
             setError("DID missing");
             return;
@@ -44,7 +48,8 @@ export const Identity = () => {
                 did!.toString(), 
                 nonce, 
                 identitySignature,
-                walletSignature!
+                walletSignature!,
+                { name: formData.name, surname: formData.surname }
             );
             const credentialJwt = credentialResponse.credentialJwt;
             console.log("Issuer message: ", credentialResponse.message);
@@ -78,6 +83,7 @@ export const Identity = () => {
                 credentialJwt
             );
             setTriggerTrue();
+            setModalShow(false);
             setCreatingIdentity(false);
             setIssuedCredential(true);
         } catch (error) {
@@ -87,11 +93,17 @@ export const Identity = () => {
         }
     }
 
+    const handleChange = (event: React.FormEvent) => {
+
+        const { name, value } = event.target as HTMLInputElement;
+        setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
+    };
+
     return (
         <>
             <h1 className="text-center">Issuer</h1>
             {
-                loading || cretingIdentityLoading 
+                loading 
                 ? // true
                     <Row className='justify-content-center mt-5'>
                         <Spinner animation="grow" variant="primary" className="my-auto"/>
@@ -104,7 +116,7 @@ export const Identity = () => {
                     <>
                         <span className="text-center">It seems that you don&apos;t own a credential yet. Request one to the Issuer.</span>
                         <Container className="d-flex justify-content-center mt-5">
-                            <Button className="mx-auto my-auto" onClick={requestCredential}>Sign up</Button>
+                            <Button className="mx-auto my-auto" onClick={() => {setModalShow(true)}}>Sign up</Button>
                         </Container>                            
                     </>
                     : // false
@@ -112,6 +124,43 @@ export const Identity = () => {
                 }
                 </Row>
             }
+            
+            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false);}}>
+                <Form onSubmit={requestCredential}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Register</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group className="mb-3" controlId="formName">
+                            <Form.Label><strong>Name</strong></Form.Label>
+                            <Form.Control 
+                            type="text"
+                            name="name"
+                            placeholder="Insert your name"
+                            onChange={handleChange}
+                            value={formData.name}
+                            required
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formSurname">
+                            <Form.Label><strong>Surname</strong></Form.Label>
+                            <Form.Control 
+                            type="text"
+                            name="surname"
+                            placeholder="Insert your surname"
+                            onChange={handleChange}
+                            value={formData.surname}
+                            required
+                            />
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer className="justify-content-center">
+                        <Button variant="primary" type="submit">
+                        { cretingIdentityLoading  ? <Spinner animation="border" variant="light" size="sm"/> :"Request credential" }
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
         </>
     )
 }
