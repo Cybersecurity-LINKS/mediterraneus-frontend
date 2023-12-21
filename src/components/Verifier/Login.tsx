@@ -10,13 +10,14 @@ import { useError } from "@/hooks/useError";
 import { useMetaMask } from "@/hooks/useMetaMask";
 
 import isUrl from "is-url";
+import verifierAPI from '@/api/verifierAPIs';
 
 
 export function Login() {    
 
     const { isAuthenticated, setIsAuthenticated } = useAuth();
     const { wallet } = useMetaMask();
-    const { connectorUrl } = useIdentity()
+    const { connectorUrl, did, id } = useIdentity()
     const { setError } = useError();
 
     const handleLogin = async () => {
@@ -25,13 +26,32 @@ export function Login() {
             throw "Connector url missing";
         }
 
+        // try {
+        //     // login to backend, receive challenge
+        //     const challenge = await catalogueAPI.getChallenge(wallet.accounts[0]);
+        //     // ask connector (identity key wallet) to create a vp
+        //     const signed_vp = await connectorAPI.generatePresentation(connectorUrl, challenge, wallet.accounts[0]);
+        //     // send vp to verifier (catalogue)
+        //     if( await catalogueAPI.login(signed_vp, wallet.accounts[0]) ) { // login ok 
+        //         setIsAuthenticated(true);
+        //         localStorage.setItem("token", "true");
+        //     } else {
+        //         setError('Login failed!');
+        //     } 
+        // } catch (error) {
+        //     setError('Login failed!');
+        //     console.log(error)
+        // }
+
+        // Verifier test
         try {
+            console.log(did!.toString());
             // login to backend, receive challenge
-            const challenge = await catalogueAPI.getChallenge(wallet.accounts[0]);
+            const challenge = await verifierAPI.getChallenge(did!.toString());
             // ask connector (identity key wallet) to create a vp
-            const signed_vp = await connectorAPI.generatePresentation(connectorUrl, challenge, wallet.accounts[0]);
+            const presentationJwt = await connectorAPI.generatePresentation(connectorUrl, challenge, id!);
             // send vp to verifier (catalogue)
-            if( await catalogueAPI.login(signed_vp, wallet.accounts[0]) ) { // login ok 
+            if( await verifierAPI.helloWorld(presentationJwt.presentation) ) { // login ok 
                 setIsAuthenticated(true);
                 localStorage.setItem("token", "true");
             } else {
