@@ -13,7 +13,7 @@ import connectorAPI from '@/api/connectorAPIs';
 
 
 export const Publish = () => {
-    const [NFTname, setNFTname] = useState("");
+    const [assetAlias, setAssetAlias] = useState("");
     const [NFTnames, setNFTnames] = useState([]);
     const [NFTsymbol, setNFTsymbol] = useState("");
     const [cid, setCid] = useState("");
@@ -35,54 +35,48 @@ export const Publish = () => {
     const { setError } = useError();
 
     useEffect(() => {
-        const getAssetAliases = async () => {
+        const fetchData = async () => {
             try {
-                //TODO: move in connector API
-                const response = await fetch(`${connectorUrl}/assets?fields=alias`);
-                const body = await response.json();
-                if(response.status == 200) {
-                    console.log("Available asset inside Connector:", body.aliases);
-                    setNFTnames(body.aliases);
-                } else {
-                    const err = new Error(body["error"]);
-                    setError(err.message);
-                    throw err;
+                const aliases = await connectorAPI.getAssetAliases(connectorUrl,  wallet.accounts[0]);
+                setNFTnames(aliases);   
+            } catch (e) {
+                if (e instanceof Error) {
+                    console.log(e.message);
+                    setError(e.message);
                 }
-            } catch (error) {
-                console.log(error);
             }
         }
-
-        getAssetAliases();
+        fetchData();
     }, [connectorUrl, setError]);
 
-    const handleAssetChoice = async (chosen_alias: string) => {
-
+    const handleAssetChoice = async (chosenAssetAlias: string) => {
+       
         try {
-            // if(chosen_alias === "no-selection") {
-            //     throw new Error("No asset selected");
-            // }
+            
+            if ( chosenAssetAlias === "no-selection" ) {
+                throw new Error("No asset selected")
+            }
+
             console.log("Reading NFT info...");
-            //TODO: move in connector API
-            const lad_entry = await connectorAPI.getAssetInfo(connectorUrl, chosen_alias, wallet.accounts[0]);
-            setNFTname(chosen_alias);
-            setCid(lad_entry.cid);
-            setAssetHash(lad_entry.hash_asset);
-            setOfferingHash(lad_entry.hash_offering);
-            setTrustSign(lad_entry.sign);
-           
+            const assetInfo = await connectorAPI.getAssetInfo(connectorUrl, chosenAssetAlias);
+            setAssetAlias(chosenAssetAlias);
+            setCid(assetInfo.cid);
+            setAssetHash(assetInfo.asset_hash);
+            setOfferingHash(assetInfo.offering_hash);
+            setTrustSign(assetInfo.sign);
+        
         } catch (error) {
-            console.log(error);
-            setNFTname("");
+            setAssetAlias("");
             setCid("");
             setAssetHash("");
             setOfferingHash("");
             setTrustSign("");
             setEncrypt(true);
-            if ( error instanceof Error ) {
+            if ( chosenAssetAlias != "no-selection" && error instanceof Error ) {
+                console.log(error);
                 setError(error.message)
             }
-        }
+        } 
     }
 
     const handleSubmit = async (event: React.MouseEvent<HTMLElement>) => {
@@ -103,7 +97,7 @@ export const Publish = () => {
             return;
         } 
 
-        if ( NFTname === "" ) {
+        if ( assetAlias === "" ) {
             setError("No asset selected");
             return;
         }
@@ -112,7 +106,7 @@ export const Publish = () => {
             setPublishing(true);
             let tokenURI = cid;
             if (encrypt) {
-                tokenURI = await connectorAPI.encryptCid(connectorUrl, NFTname, wallet.accounts[0]);
+                tokenURI = await connectorAPI.encryptCid(connectorUrl, assetAlias, wallet.accounts[0]);
                 console.log("Encrypted cid: ",tokenURI);
             }
 
@@ -123,7 +117,7 @@ export const Publish = () => {
             const contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
             
             const tx = await contractIstance.publishAllinOne({
-                name: NFTname,
+                name: assetAlias,
                 symbol: NFTsymbol,
                 tokenURI: tokenURI,
                 asset_download_URL: DownloadURL,
@@ -142,7 +136,7 @@ export const Publish = () => {
                 if(contractEvent.eventName == 'NFTCreated' && contractEvent.eventSignature == "NFTCreated(address,address,string,address,string,string)"){
                 console.log(`event ${contractEvent.eventName}: address ${contractEvent.args[0]}`);
                     //TODO: move in connector API
-                    const resp = await fetch(`${connectorUrl}/assets/${NFTname}`, {
+                    const resp = await fetch(`${connectorUrl}/assets/${assetAlias}`, {
                         method: 'PATCH',
                         headers: {
                             "Content-type": "application/json"

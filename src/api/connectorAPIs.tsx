@@ -173,15 +173,15 @@ const downloadAsset = async (providerConnectorUrl: string, NFTname: string, chal
     }
 }
 
-const getAssetInfo = async (connectorUrl: string, chosen_alias: string, ethAddress: string) => {
+const getAssetInfo = async (connectorUrl: string, chosenAssetAlias: string) => {
     if (!isUrl(connectorUrl)) {
         throw "Connector url undefined";
     }
-    const response = await fetch(`${connectorUrl}/api/assets/${chosen_alias}?eth_address=${ethAddress}`)
+    const response = await fetch(`${connectorUrl}/api/assets?alias=${chosenAssetAlias}`)
     const json = await response.json();
 
     if(response.ok){
-        return json.lad_entry; // TODO: return asset info
+        return json; // TODO: return asset info, maybe define a type
     } else {
         const err = {status: response.status, errObj: json};
         throw err;  // An object with the error coming from the server
@@ -203,5 +203,20 @@ const encryptCid = async (connectorUrl: string, NFTname: string, ethAddress: str
     }
 }
 
-const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, encryptCid, getAssetInfo };
+const getAssetAliases = async (connectorUrl: string, ethAddress: string) => {
+
+    //TODO: move in connector API
+    const response = await fetch(`${connectorUrl}/api/assets/aliases?ethAddress=${ethAddress}`);
+    const json = await response.json();
+
+    if(response.ok){
+        console.log("Available asset inside Connector:", json.aliases);
+        return json.aliases; 
+    } else {
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, encryptCid, getAssetInfo, getAssetAliases };
 export default connectorAPI;

@@ -88,7 +88,10 @@ export const Issuer = () => {
             setIssuedCredential(true);
         } catch (error) {
             console.log(error);
+            setTriggerTrue();
+            setModalShow(false);
             setCreatingIdentity(false);
+            setIssuedCredential(true);
             throw error;
         }
     }
