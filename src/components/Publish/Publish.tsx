@@ -3,7 +3,7 @@ import { Button, Form, Col, Row, OverlayTrigger, Tooltip, Container, Spinner, Ba
 import { ethers } from 'ethers';
 import isUrl from "is-url";
 
-import { extractNumberFromVCid, getContractABI, getContractAddress } from '@/utils';
+import { getContractABI, getContractAddress } from '@/utils';
 
 import { useIdentity } from '@/hooks/useIdentity';
 import { useMetaMask } from '@/hooks/useMetaMask';
@@ -17,7 +17,7 @@ export const Publish = () => {
     const [NFTnames, setNFTnames] = useState([]);
     const [NFTsymbol, setNFTsymbol] = useState("");
     const [cid, setCid] = useState("");
-    const [encrypt, setEncrypt] = useState(true);
+    const [encrypt, setEncrypt] = useState(false);
 
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
@@ -93,7 +93,7 @@ export const Publish = () => {
         }
 
         if ( did === undefined || vc == undefined ) {
-            setError("DID undefined");
+            setError("DID or Credential undefined");
             return;
         } 
 
@@ -127,26 +127,15 @@ export const Publish = () => {
                 dt_name: DTname,
                 dt_symbol: DTsymbol,
                 maxSupply_: ethers.parseEther(DTmaxSupply.toString()),
-                vc_id: extractNumberFromVCid(vc!)
+                // vc_id: extractNumberFromVCid(vc!)
             });
             const rc = await tx.wait(1);
             console.log(rc.logs);
             for(let i = 0; i < rc.logs.length; i++) {
                 const contractEvent = rc.logs[i];
                 if(contractEvent.eventName == 'NFTCreated' && contractEvent.eventSignature == "NFTCreated(address,address,string,address,string,string)"){
-                console.log(`event ${contractEvent.eventName}: address ${contractEvent.args[0]}`);
-                    //TODO: move in connector API
-                    const resp = await fetch(`${connectorUrl}/assets/${assetAlias}`, {
-                        method: 'PATCH',
-                        headers: {
-                            "Content-type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            nft_sc_address: contractEvent.args[0],
-                        })
-                    });
-                    if(resp.status != 200)
-                        throw "Cannot update LAD"
+                    console.log(`event ${contractEvent.eventName}: address ${contractEvent.args[0]}`);
+                    connectorAPI.setAssetNftAddress(connectorUrl, assetAlias, contractEvent.args[0] );
                 }
             }
             setPublishing(false);
@@ -198,8 +187,8 @@ export const Publish = () => {
 
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
                         <Form.Label column sm={4}>Offering&apos;s CID</Form.Label>
-                        <Col sm={8}>
-                            <Form.Check type="switch" id="custom-switch" label="Encrypt" onChange={() => { setEncrypt(!encrypt) }}/> 
+                        <Col sm={8}> 
+                            <Form.Check type="switch" id="custom-switch" label="Encrypt" onChange={() => { setEncrypt(!encrypt) }}/>  {/* checked */}
                             <Form.Control className="text-truncate"  disabled type="text" placeholder="CID" value={cid.length == 0 ? "" : cid}/>
                         </Col>
                     </Form.Group>

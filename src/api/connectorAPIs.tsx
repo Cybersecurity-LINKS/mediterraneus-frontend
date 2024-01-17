@@ -205,7 +205,6 @@ const encryptCid = async (connectorUrl: string, NFTname: string, ethAddress: str
 
 const getAssetAliases = async (connectorUrl: string, ethAddress: string) => {
 
-    //TODO: move in connector API
     const response = await fetch(`${connectorUrl}/api/assets/aliases?ethAddress=${ethAddress}`);
     const json = await response.json();
 
@@ -218,5 +217,28 @@ const getAssetAliases = async (connectorUrl: string, ethAddress: string) => {
     }
 }
 
-const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, encryptCid, getAssetInfo, getAssetAliases };
+const setAssetNftAddress = async (connectorUrl: string, assetAlias: string, nftAddress: string) => {
+    
+    const response = await fetch(`${connectorUrl}/api/assets?alias=${assetAlias}`, {
+        method: 'PATCH',
+        headers: {
+            "Content-type": "application/json"
+        },
+        body: JSON.stringify({
+            nftAddress: nftAddress,
+        })
+    });
+    const json = await response.json();
+
+    if(response.ok){
+        console.log("Updated asset:", json);
+        return json; 
+    } else {
+        console.log("Cannot update nft address");
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, encryptCid, getAssetInfo, getAssetAliases, setAssetNftAddress };
 export default connectorAPI;
