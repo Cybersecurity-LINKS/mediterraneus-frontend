@@ -1,22 +1,22 @@
 import isUrl from 'is-url';
 
-const generatePresentation = async (connectorUrl: string, challenge: string, idenityId: number,) => {
+const generatePresentation = async (connectorUrl: string, challenge: string, idenityId: number, ethSignature: string | null ) => {
     if (!isUrl(connectorUrl)) {
         throw "Connector url undefined";
     }
+
+    const body = ethSignature ? {challenge: challenge, ethSignature: ethSignature} : {challenge: challenge};
+
     const response = await fetch(`${connectorUrl}/api/identities/${idenityId}/gen-presentation`, {
         method: "POST", // *GET, POST, PUT, DELETE, etc. ? LOL
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            challenge: challenge
-        }), // body data type must match "Content-Type" header
+        body: JSON.stringify(body), // body data type must match "Content-Type" header
     });
     const presentation = await response.json();
 
     if(response.ok){
-        console.log(presentation);
         return presentation;
     } else {
         const err = {status: response.status, errObj: presentation};
@@ -105,11 +105,11 @@ const signData = async (connectorUrl: string, idenityId: number, payload: string
     }
 }
 
-const getChallenge = async (providerConnectorUrl: string, NFTname: string) => {
+const getChallenge = async (providerConnectorUrl: string, userDid: string) => {
     if (!isUrl(providerConnectorUrl)) {
         throw "Connector url undefined";
     }
-    const response = await fetch(`${providerConnectorUrl}/api/assets/${NFTname}/challenge`);
+    const response = await fetch(`${providerConnectorUrl}/api/challenges?did=${userDid}`);
     const json = await response.json();
 
     if(response.ok){
@@ -148,27 +148,24 @@ const uploadAsset = async (connectorUrl: string, offeringFile: Blob, assetFile: 
 }
 
 //TODO: handle not only json file
-const downloadAsset = async (providerConnectorUrl: string, NFTname: string, challenge: string, signature: string) =>  {
+const downloadAsset = async (providerConnectorUrl: string, assetAlias: string, presentation: string) =>  {
     if (!isUrl(providerConnectorUrl)) {
         throw "Connector url undefined";
     }
-    const response = await fetch(`${providerConnectorUrl}/api/assets/${NFTname}/download`, {
-        method: 'POST',
+    const response = await fetch(`${providerConnectorUrl}/api/assets/download?alias=${assetAlias}`, {
+        method: 'GET',
         headers: {
-            "Content-type": "application/json"
-        },
-        body: JSON.stringify({
-            h_nonce: challenge,
-            eth_signature: signature
-        })
-    })
+            "Content-type": "application/json", 
+            "Authorization": `Bearer ${presentation}`,
+        }
+    });
     const asset = await response.json();
-
+    
     if(response.ok){
         const asset_json = asset["asset"];
         return new Blob([JSON.stringify(asset_json)], {type: "text/json;charset=utf-8"});
     } else {
-        const err = {status: response.status, errObj: challenge};
+        const err = {status: response.status, errObj: asset};
         throw err;  // An object with the error coming from the server
     }
 }
@@ -228,8 +225,8 @@ const setAssetNftAddress = async (connectorUrl: string, assetAlias: string, nftA
             nftAddress: nftAddress,
         })
     });
-    const json = await response.json();
-
+    const json = await response.json();    
+    
     if(response.ok){
         console.log("Updated asset:", json);
         return json; 

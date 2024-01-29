@@ -43,7 +43,7 @@ export const Issuer = () => {
             );
             const signer = await provider?.getSigner();
             const walletSignature = await signer?.signMessage(nonce);
-            console.log("wallet signature: ", walletSignature);
+            console.log("eth signature: ", walletSignature);
             const credentialResponse = await issuerAPI.requestCredential(
                 did!.toString(), 
                 nonce, 

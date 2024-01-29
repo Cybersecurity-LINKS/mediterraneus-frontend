@@ -1,13 +1,13 @@
 import './Login.css'
 import { Button, Container, } from "react-bootstrap"
 import { Navigate } from "react-router";
-import catalogueAPI from '@/api/catalogueAPIs';
+// import catalogueAPI from '@/api/catalogueAPIs'; 
 import connectorAPI from '@/api/connectorAPIs';
 
 import { useIdentity } from "@/hooks/useIdentity";
 import { useAuth } from "@/hooks/useAuth";
 import { useError } from "@/hooks/useError";
-import { useMetaMask } from "@/hooks/useMetaMask";
+// import { useMetaMask } from "@/hooks/useMetaMask"; 
 
 import isUrl from "is-url";
 import verifierAPI from '@/api/verifierAPIs';
@@ -16,7 +16,7 @@ import verifierAPI from '@/api/verifierAPIs';
 export function Login() {    
 
     const { isAuthenticated, setIsAuthenticated } = useAuth();
-    const { wallet } = useMetaMask();
+    // const { wallet } = useMetaMask();
     const { connectorUrl, did, id } = useIdentity()
     const { setError } = useError();
 
@@ -49,7 +49,7 @@ export function Login() {
             // login to backend, receive challenge
             const challenge = await verifierAPI.getChallenge(did!.toString());
             // ask connector (identity key wallet) to create a vp
-            const presentationJwt = await connectorAPI.generatePresentation(connectorUrl, challenge, id!);
+            const presentationJwt = await connectorAPI.generatePresentation(connectorUrl, challenge, id!, null);
             // send vp to verifier (catalogue)
             if( await verifierAPI.helloWorld(presentationJwt.presentation) ) { // login ok 
                 setIsAuthenticated(true);

@@ -7,16 +7,17 @@ import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractA
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { IotaDID } from "@iota/identity-wasm/web";
 import { AbiCoder, ethers, keccak256 } from "ethers";
-import { Buffer } from 'buffer';
 import { VerticallyCenteredModal } from "../VerticallyCenteredModal/VerticallyCenteredModal";
 
 import catalogueAPI from "@/api/catalogueAPIs";
 import connectorAPI from "@/api/connectorAPIs";
+import { useIdentity } from "@/hooks/useIdentity";
 
 
 export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
     const { provider, wallet } = useMetaMask();
+    const { id, did, connectorUrl } = useIdentity();
 
     const [ownerDID, setOwnerDID] = useState<IotaDID>();
     const [offering, setOffering] = useState("");
@@ -137,14 +138,23 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const NFTname = props.NFTdataobj.NFTname; 
         const providerConnectorUrl = props.NFTdataobj.AssetDownloadURL;
         try {
-            const challenge = await connectorAPI.getChallenge(providerConnectorUrl, NFTname);
-            console.log(challenge);
-            const hashedChallenge = keccak256(Buffer.from(challenge  as string )); //TODO: remove this
+            const challenge = await connectorAPI.getChallenge(providerConnectorUrl, did!.toString());
+            console.log("Download chaallenge: ", challenge);
+            // const hashedChallenge = keccak256(Buffer.from(challenge  as string )); //TODO: remove this
+            // const signature = await signer?.signMessage(ethers.toBeArray(`${hashedChallenge}`));
 
             const signer = await provider?.getSigner();
-            const signature = await signer?.signMessage(ethers.toBeArray(`${hashedChallenge}`));
+            const walletSignature = await signer?.signMessage(challenge);
+            console.log("Eth signature: ", walletSignature);
+        
+            // ask connector (identity key wallet) to create a verifiable presentation
+            const presentationJwt = await connectorAPI.generatePresentation(connectorUrl, challenge, id!, walletSignature!.toString());
+            console.log("Presentation JWT: ", presentationJwt);
+            
+            // authnticated download request to provider
+            // await verifierAPI.helloWorld(presentationJwt.presentation)
 
-            const asset = await connectorAPI.downloadAsset(providerConnectorUrl, NFTname, hashedChallenge, signature!);
+            const asset = await connectorAPI.downloadAsset(providerConnectorUrl, NFTname, presentationJwt.presentation);
             // TODO: check trust metadata!!!! here is missing
             // anchor link
             const element = document.createElement("a");
