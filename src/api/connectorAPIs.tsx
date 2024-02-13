@@ -185,21 +185,6 @@ const getAssetInfo = async (connectorUrl: string, chosenAssetAlias: string) => {
     }
 }
 
-const encryptCid = async (connectorUrl: string, NFTname: string, ethAddress: string ) => {
-    if (!isUrl(connectorUrl)) {
-        throw "Connector url undefined";
-    }
-    const response = await fetch(`${connectorUrl}/api/assets/${NFTname}/encrypt-cid?ethAddress=${ethAddress}`);
-    const json = await response.json();  
-
-    if(response.ok){
-        return json.encryptedCid; // TODO: return cid
-    } else {
-        const err = {status: response.status, errObj: json};
-        throw err;  // An object with the error coming from the server
-    }
-}
-
 const getAssetAliases = async (connectorUrl: string, ethAddress: string) => {
 
     const response = await fetch(`${connectorUrl}/api/assets/aliases?ethAddress=${ethAddress}`);
@@ -237,5 +222,5 @@ const setAssetNftAddress = async (connectorUrl: string, assetAlias: string, nftA
     }
 }
 
-const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, encryptCid, getAssetInfo, getAssetAliases, setAssetNftAddress };
+const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, getAssetInfo, getAssetAliases, setAssetNftAddress };
 export default connectorAPI;

@@ -95,6 +95,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 
+    // buy asset access
     const handleSubmit = async (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
         try{
             event.preventDefault();
@@ -120,7 +121,8 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
             console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${rate}`);  
             
-            exchangeContractIstance.sellDT(exchangeID_forthisDT, ethers.parseEther("1"), {value: res});
+            // sell DT since the subject is the smart contract, not the user
+            exchangeContractIstance.sellDT(exchangeID_forthisDT, ethers.parseEther("1"), {value: res}); // user buy DT from the exchange SC
             exchangeContractIstance.on("SuccessfulSwap", async (exchangeId, caller, exchangeOwner, dtamount, smrsent, event) => {
                 console.log(exchangeId, caller, exchangeOwner, dtamount, smrsent, event);
                 const newBalance = await DTcontractIstance.balanceOf(signerAddress);

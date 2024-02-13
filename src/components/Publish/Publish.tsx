@@ -17,7 +17,6 @@ export const Publish = () => {
     const [NFTnames, setNFTnames] = useState([]);
     const [NFTsymbol, setNFTsymbol] = useState("");
     const [cid, setCid] = useState("");
-    const [encrypt, setEncrypt] = useState(false);
 
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
@@ -71,7 +70,6 @@ export const Publish = () => {
             setAssetHash("");
             setOfferingHash("");
             setTrustSign("");
-            setEncrypt(true);
             if ( chosenAssetAlias != "no-selection" && error instanceof Error ) {
                 console.log(error);
                 setError(error.message)
@@ -104,11 +102,6 @@ export const Publish = () => {
 
         try{
             setPublishing(true);
-            let tokenURI = cid;
-            if (encrypt) {
-                tokenURI = await connectorAPI.encryptCid(connectorUrl, assetAlias, wallet.accounts[0]);
-                console.log("Encrypted cid: ",tokenURI);
-            }
 
             const signer = await provider!.getSigner(wallet.accounts[0]);
 
@@ -119,7 +112,7 @@ export const Publish = () => {
             const tx = await contractIstance.publishAllinOne({
                 name: assetAlias,
                 symbol: NFTsymbol,
-                tokenURI: tokenURI,
+                tokenURI: cid,
                 asset_download_URL: DownloadURL,
                 asset_hash: Assethash,
                 offering_hash: OfferingHash,
@@ -188,7 +181,6 @@ export const Publish = () => {
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTuri">
                         <Form.Label column sm={4}>Offering&apos;s CID</Form.Label>
                         <Col sm={8}> 
-                            <Form.Check type="switch" id="custom-switch" label="Encrypt" onChange={() => { setEncrypt(!encrypt) }}/>  {/* checked */}
                             <Form.Control className="text-truncate"  disabled type="text" placeholder="CID" value={cid.length == 0 ? "" : cid}/>
                         </Col>
                     </Form.Group>
