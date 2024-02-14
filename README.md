@@ -1,5 +1,7 @@
 # Marketplace frontend for the Mediterraneus Protocol
 
+![Iota](https://img.shields.io/badge/iota-29334C?style=for-the-badge&logo=iota&logoColor=white)
+
 To run the frontend application follow these steps:
 
 1. Install the dependencies `npm install`
@@ -63,3 +65,7 @@ import * as identity from "@iota/identity-wasm/web";
 init("sdk_wasm_bg.wasm") // fix with the right path
 .then(() => identity.init("identity_wasm_bg.wasm")); // fix with the right path
 ```
+
+## License
+
+[GPL-3.0-or-later](https://spdx.org/licenses/GPL-3.0-or-later.html)

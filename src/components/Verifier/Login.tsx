@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import './Login.css'
 import { Button, Container, } from "react-bootstrap"
 import { Navigate } from "react-router";

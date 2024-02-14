@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // https://stackoverflow.com/questions/66592593/global-screen-loader-in-react
 import { PropsWithChildren, createContext, useContext, useState } from "react";
 

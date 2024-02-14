@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { useMetaMask } from '@/hooks/useMetaMask';
 import { useEffect, useState } from 'react';
 import { Button, Form, Col, Row, Container, OverlayTrigger, Tooltip } from 'react-bootstrap';

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { useIdentity } from '@/hooks/useIdentity'
 import { useMetaMask } from '@/hooks/useMetaMask';
 import { removeCenterOfStr } from '@/utils';

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { RefAttributes, MouseEvent, useState, useEffect} from "react";
 import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row } from "react-bootstrap";
 import { Link } from 'react-router-dom';

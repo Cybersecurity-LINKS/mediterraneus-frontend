@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { InterfaceAbi, ethers } from 'ethers'
 // import { AbiCoder, BigNumberish, keccak256, solidityPacked, toUtf8Bytes } from 'ethers'
 import { Credential } from "@iota/identity-wasm/web";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { useEffect, useState } from 'react';
 import { Button, Form, Col, Row, OverlayTrigger, Tooltip, Container, Spinner, Badge } from 'react-bootstrap';
 import { ethers } from 'ethers';

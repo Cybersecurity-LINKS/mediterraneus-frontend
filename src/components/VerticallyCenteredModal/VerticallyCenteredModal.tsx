@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { Modal } from "react-bootstrap";
 
 export function VerticallyCenteredModal(props: {show: boolean, onHide: () => void, title: string, body: string}) {

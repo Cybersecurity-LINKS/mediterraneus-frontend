@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Fondazione LINKS
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { Alert, Col, Row, Spinner } from "react-bootstrap";
 import { DataOffering } from "./DataOffering";
 import { useEffect, useState } from "react";
