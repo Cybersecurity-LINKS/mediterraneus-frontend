@@ -2,18 +2,20 @@
 
 ![Iota](https://img.shields.io/badge/iota-29334C?style=for-the-badge&logo=iota&logoColor=white)
 
-To run the frontend application follow these steps:
+# Running the Application
 
-1. Install the dependencies `npm install`
+To run the frontend application, follow these steps:
 
-2. Copy the `.env.example` file in a `.env` file
+1. Install the dependencies by running `npm install`.
 
-3. Copy the `addresses` and the `artifact` folder from the Smart Contracts repo (these folders are obtained after deploying the SCs)
+2. Copy the `.env.example` file and rename it to `.env`. Make any necessary modifications to the `.env` file.
 
-4. Execute the application `npm run dev`
+3. Copy both the `addresses` and `artifact` folders from the [`mediterraneus-smart-contracts`](https://github.com/Cybersecurity-LINKS/mediterraneus-smart-contracts) repository (these folders are obtained after deploying the smart contracts) into the `src` folder of the frontend application.
+
+4. Finally, execute the application by running `npm run dev`.
 
 ## IOTA Identity Framework 
-The identity bindings include all the modules needed for creating and managing a self sovereign identity. 
+The identity bindings include all the modules needed for creating and managing a Self-Sovereign Identity. 
 This results in having also the **iota-client** dependency, that is automatically included in the bindings itself.
 
 ### Install the bindings
