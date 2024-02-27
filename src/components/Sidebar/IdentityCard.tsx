@@ -18,7 +18,6 @@ function CardContent() {
   const { wallet } = useMetaMask();
   const { did, didDoc, vc, setTriggerTrue, connectorUrl } = useIdentity();
   const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
-  const [documentModalShow, setDocumentModalShow] = useState(false);
   const [credentialModalShow, setCredentialModalShow] = useState(false);
 
   //TODO: why don't use hooks for setting the did and vc and do that call there? 
@@ -56,20 +55,6 @@ function CardContent() {
             <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Open in explorer</Tooltip>}>          
               <Link target="_blank" to={`https://explorer.shimmer.network/testnet/identity-resolver/${did?.toString()}`} style={{ textDecoration: 'none' }}>{removeCenterOfStr(did!.toString(), 21, 74)}</Link> 
             </OverlayTrigger>
-            <Row className='justify-content-md-center'>
-              <Col md="auto">
-                <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Show DID document</Tooltip>}>     
-                  <Button className="mt-2 me-2" variant="outline-secondary" onClick={() => setDocumentModalShow(true)}>Show</Button>
-                </OverlayTrigger>
-              </Col>  
-            </Row>   
-              
-            <VerticallyCenteredModal 
-              show={documentModalShow}
-              onHide={() => setDocumentModalShow(false)}
-              title={"DID Document"}
-              body={JSON.stringify(didDoc, null, 2)}
-            />
           </>
           
         }
