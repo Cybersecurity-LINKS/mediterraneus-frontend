@@ -11,7 +11,6 @@ import { useAuth } from '@/hooks/useAuth';
 
 import { useEffect, useState } from 'react';
 import isUrl from 'is-url';
-import { IoBagHandle } from "react-icons/io5";
 
 export function Navigation() {
 
