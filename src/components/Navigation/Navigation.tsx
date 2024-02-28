@@ -90,8 +90,7 @@ export function Navigation() {
       <Container fluid>
 
         <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/home">
-          <IoBagHandle size="32"/>
-          <h4 className="ms-2 mt-2">MARKETPLACE</h4>
+          <h4 className="ms-2 mt-2">MEDITERRANEUS</h4>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

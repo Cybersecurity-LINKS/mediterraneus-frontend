@@ -123,7 +123,7 @@ export const Issuer = () => {
                     <>
                         <span className="text-center">It seems that you don&apos;t own a credential yet. Request one to the Issuer.</span>
                         <Container className="d-flex justify-content-center mt-5">
-                            <Button className="mx-auto my-auto" onClick={() => {setModalShow(true)}}>Sign up</Button>
+                            <Button className="mx-auto my-auto" onClick={() => {setModalShow(true)}}>Claim credential</Button>
                         </Container>                            
                     </>
                     : // false
@@ -135,7 +135,7 @@ export const Issuer = () => {
             <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false);}}>
                 <Form onSubmit={requestCredential}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Register</Modal.Title>
+                        <Modal.Title>About you</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="mb-3" controlId="formName">

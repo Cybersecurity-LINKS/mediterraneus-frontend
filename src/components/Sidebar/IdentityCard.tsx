@@ -74,7 +74,7 @@ function CardContent() {
                   </Col>
                   <Col md="8">
                     <Card.Body>
-                      <Card.Title> Marketplace <br/> Credential </Card.Title>
+                      <Card.Title> Your <br/> Credential </Card.Title>
                       <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Show Credential</Tooltip>}>          
                         <Button variant="outline-secondary" className="me-2" onClick={() => setCredentialModalShow(true)}>Show</Button>
                       </OverlayTrigger>

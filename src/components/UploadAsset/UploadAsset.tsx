@@ -78,14 +78,14 @@ export const UploadAsset = () => {
             </Form.Group>
 
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadAsset">
-                <Form.Label column sm={4}>Upload Asset File</Form.Label>
+                <Form.Label column sm={4}>Upload Asset</Form.Label>
                 <Col sm={8}>
                     <Form.Control type="file" accept='.json' required/>
                 </Col>
             </Form.Group>
 
             <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="uploadOffering">
-                <Form.Label column sm={4}>Upload Offering Message File</Form.Label>
+                <Form.Label column sm={4}>Upload Offering</Form.Label>
                 <Col sm={8}>
                     <Form.Control type="file" accept='.json' required/>
                 </Col>
