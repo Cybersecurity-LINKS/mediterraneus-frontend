@@ -72,7 +72,7 @@ export const App = () => {
   const router = createBrowserRouter([  // 🆕
     { element: <Layout/>,  /* 1️⃣ Wrap your routes in a pathless layout route */
       children: [
-        { path: "/home", element: <></> }, 
+        { path: "/", element: <></> }, 
         { path: "/login", Component: Login }, // Verifier page
         { path: "/issuer", Component: Issuer },
         { path: "/uploadasset", Component: UploadAsset },

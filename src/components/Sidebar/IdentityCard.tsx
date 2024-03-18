@@ -53,7 +53,7 @@ function CardContent() {
           : // false
           <>
             <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Open in explorer</Tooltip>}>          
-              <Link target="_blank" to={`https://explorer.shimmer.network/testnet/identity-resolver/${did?.toString()}`} style={{ textDecoration: 'none' }}>{removeCenterOfStr(did!.toString(), 21, 74)}</Link> 
+              <Link target="_blank" to={`https://explorer.iota.org/testnet/search/${did?.toString()}`} style={{ textDecoration: 'none' }}>{removeCenterOfStr(did!.toString(), 21, 74)}</Link> 
             </OverlayTrigger>
           </>
           
@@ -64,7 +64,7 @@ function CardContent() {
         { 
           vc == undefined 
           ? // true
-          <Link style={{textDecoration: 'none'}} to="/issuer">Contact the Issuer and sign up</Link>
+          <Link style={{textDecoration: 'none'}} to="/issuer">Contact the Issuer and join</Link>
           : // false
           <>  
             <Card key="Credential" bg="light" border="secondary" style={{ width: '16rem'}} className="mx-auto">

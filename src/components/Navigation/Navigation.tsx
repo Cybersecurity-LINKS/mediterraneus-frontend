@@ -88,13 +88,12 @@ export function Navigation() {
     <Navbar expand="lg" sticky="top" bg="light" variant="light">
       <Container fluid>
 
-        <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/home">
-          <h4 className="ms-2 mt-2">MEDITERRANEUS</h4>
+        <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/">
+          <h4 className="ms-2 mt-2">Mediterraneus</h4>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav>
-            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/issuer" className='me-2 ms-2'>Issuer</Nav.Link> :  "" }
             { isUrl(connectorUrl) ? 
               <NavDropdown title="Connector" id="basic-nav-dropdown">
                 <NavDropdown.Item as={Link} to="/uploadasset">Upload</NavDropdown.Item>
@@ -103,6 +102,7 @@ export function Navigation() {
               </NavDropdown>  
               :  ""
             }
+            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/issuer" className='me-2 ms-2'>Issuer</Nav.Link> :  "" }
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/self-catalogue" className='me-2 ms-2'>Self-Catalogue</Nav.Link> :  ""}
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/login" className='me-2 ms-2'>Verifier</Nav.Link> :  ""}
             

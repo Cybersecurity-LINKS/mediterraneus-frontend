@@ -109,8 +109,8 @@ export const Publish = () => {
 
             const signer = await provider!.getSigner(wallet.accounts[0]);
 
-            const contractABI = await getContractABI("ERC721Factory");
-            const contractAddress = getContractAddress("ERC721Factory");
+            const contractABI = await getContractABI("Factory");
+            const contractAddress = getContractAddress("Factory");
             const contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
             
             const tx = await contractIstance.publishAllinOne({

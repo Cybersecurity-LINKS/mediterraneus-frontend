@@ -47,7 +47,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         }
         const isDownloadable = async () => {
             const signerAddress = (await provider?.getSigner())!.address;
-            const DTcontractABI = await getContractABI("ERC20Base");
+            const DTcontractABI = await getContractABI("AccessTokenBase");
             const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, await provider?.getSigner());
     
             const currentUserBalance = await DTcontractIstance.balanceOf(signerAddress);
@@ -75,7 +75,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     }
 
     const getDT_Price = async () => {
-        const DTcontractABI = await getContractABI("ERC20Base");
+        const DTcontractABI = await getContractABI("AccessTokenBase");
         const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, provider);
         // get owner of DT
         const ownerAddress = await DTcontractIstance.getDTowner();
@@ -95,7 +95,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const res: bigint = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
         const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
-        console.log(`Data token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 DT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
+        console.log(`Data token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 AT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 
@@ -104,7 +104,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         try{
             event.preventDefault();
             const signerAddress = (await provider?.getSigner())!.address;
-            const DTcontractABI = await getContractABI("ERC20Base");
+            const DTcontractABI = await getContractABI("AccessTokenBase");
             const DTcontractIstance = new ethers.Contract(props.NFTdataobj.DTcontractAddress, DTcontractABI, await provider?.getSigner());
             
             // get owner of DT
@@ -123,7 +123,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
             );
             const res: bigint = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
             const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
-            console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 DT = ${Number(res)/(1e18)} with rate ${rate}`);  
+            console.log(`exchangeID = ${exchangeID_forthisDT}, cost for 1 ST = ${Number(res)/(1e18)} with rate ${rate}`);  
             
             // sell DT since the subject is the smart contract, not the user
             exchangeContractIstance.sellDT(exchangeID_forthisDT, ethers.parseEther("1"), {value: res}); // user buy DT from the exchange SC

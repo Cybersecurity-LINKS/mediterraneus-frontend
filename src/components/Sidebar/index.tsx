@@ -8,7 +8,6 @@ export const SideBar = () => {
     return (
         <>  
             <IdentityCard/>
-            {/* <Row><Display/></Row> */}
         </>
     );
     

@@ -32,10 +32,10 @@ export const Catalogue = () => {
     useEffect(() => {
 
         const getNFTinfo = async (contractAddress: string): Promise<IDataOffering> => {
-            const contractABI = await getContractABI("ERC721Base");
+            const contractABI = await getContractABI("ServiceBase");
             const contractIstance = new ethers.Contract(contractAddress, contractABI, provider);
             
-            const DTcontractABI = await getContractABI("ERC20Base");
+            const DTcontractABI = await getContractABI("AccessTokenBase");
             const [...DTcontractAddress] =  await contractIstance.getDTaddresses();
             const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, provider);
             
@@ -56,8 +56,8 @@ export const Catalogue = () => {
         const getDataOfferings = async () => {
             // call to SC
             try {
-                const contractABI = await getContractABI("ERC721Factory");
-                const contractAddress = getContractAddress("ERC721Factory");
+                const contractABI = await getContractABI("Factory");
+                const contractAddress = getContractAddress("Factory");
                 const contractIstance = new ethers.Contract(contractAddress!, contractABI, provider);
     
                 const [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();

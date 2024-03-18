@@ -91,14 +91,14 @@ export const getContractAddress = (contractName: string) => {
       case "Deployer":
         ret = contractAddresses.addresses.Deployer?.toString()
         break;
-      case "ERC721Base":
-        ret = contractAddresses.addresses.ERC721Base?.toString()
+      case "ServiceBase":
+        ret = contractAddresses.addresses.ServiceBase?.toString()
         break;
-      case "ERC20Base":
-        ret = contractAddresses.addresses.ERC20Base?.toString()
+      case "AccessTokenBase":
+        ret = contractAddresses.addresses.AccessTokenBase?.toString()
         break;
-      case "ERC721Factory":
-        ret = contractAddresses.addresses.ERC721Factory?.toString()
+      case "Factory":
+        ret = contractAddresses.addresses.Factory?.toString()
         break;
       case "RouterFactory":
         ret = contractAddresses.addresses.RouterFactory?.toString()
@@ -106,8 +106,8 @@ export const getContractAddress = (contractName: string) => {
       case "FixedRateExchange":
         ret = contractAddresses.addresses.FixedRateExchange?.toString()
         break;
-      case "IDentity":
-          ret = contractAddresses.addresses.IDentityAddress?.toString()
+      case "Identity":
+          ret = contractAddresses.addresses.Identity?.toString()
           break;
       default:
         ret = "";
@@ -203,24 +203,24 @@ export const privKeytoBytes = (text: string): Uint8Array => {
 };
 
 export const fetchIDentityABI = async () => {
-  const IDentity_address = getContractAddress("IDentity");
-  console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+  const identityAddr = getContractAddress("Identity");
+  console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${identityAddr}`);
 
   // TODO: SEPOLIA etherscan needs an API key
-  const response = await fetch(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+  const response = await fetch(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${identityAddr}`);
   const json = await response.json();
   return json.result;
 }
 
 export const getIdentitySC = async (provider: ethers.BrowserProvider) => {
-    const IDentity_address = getContractAddress("IDentity");
+    const identityAddr = getContractAddress("Identity");
     // let abi: InterfaceAbi = await fetchIDentityABI();
     // if(abi == null)
     //TODO: remove or fix the abi fetch
-    // console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${IDentity_address}`);
+    // console.log(`${EVM_EXPLORER}/api?module=contract&action=getabi&address=${ientityAddr}`);
 
-    const abi: InterfaceAbi = await getContractABI("IDentity")
-    return new ethers.Contract(`${IDentity_address}`, abi, await provider.getSigner())
+    const abi: InterfaceAbi = await getContractABI("Identity")
+    return new ethers.Contract(`${identityAddr}`, abi, await provider.getSigner())
 }
 
 export const extractNumberFromVCid = (credential: Credential): number => {
