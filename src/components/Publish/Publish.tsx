@@ -25,11 +25,7 @@ export const Publish = () => {
     const [DTname, setDTname] = useState("");
     const [DTsymbol, setDTsymbol] = useState("");
     const [DTmaxSupply, setDTmaxSupply] = useState<bigint>(BigInt(0));
-    const [DownloadURL, setDownloadURL] = useState("");
-
-    const [Assethash, setAssetHash] = useState("");
-    const [OfferingHash, setOfferingHash] = useState("");
-    const [TrustSign, setTrustSign] = useState("");
+    const [serviceUrl, setServiceUrl] = useState("");
 
     const [publishing, setPublishing] = useState(false);
 
@@ -64,16 +60,10 @@ export const Publish = () => {
             const assetInfo = await connectorAPI.getAssetInfo(connectorUrl, chosenAssetAlias);
             setAssetAlias(chosenAssetAlias);
             setCid(assetInfo.cid);
-            setAssetHash(assetInfo.asset_hash);
-            setOfferingHash(assetInfo.offering_hash);
-            setTrustSign(assetInfo.sign);
         
         } catch (error) {
             setAssetAlias("");
             setCid("");
-            setAssetHash("");
-            setOfferingHash("");
-            setTrustSign("");
             if ( chosenAssetAlias != "no-selection" && error instanceof Error ) {
                 console.log(error);
                 setError(error.message)
@@ -109,18 +99,15 @@ export const Publish = () => {
 
             const signer = await provider!.getSigner(wallet.accounts[0]);
 
-            const contractABI = await getContractABI("Factory");
-            const contractAddress = getContractAddress("Factory");
-            const contractIstance = new ethers.Contract(contractAddress!, contractABI, signer);
+            const factoryAbi = await getContractABI("Factory");
+            const factoryAddr = getContractAddress("Factory");
+            const factoryIstance = new ethers.Contract(factoryAddr!, factoryAbi, signer);
             
-            const tx = await contractIstance.publishAllinOne({
+            const tx = await factoryIstance.tokenizeService({
                 name: assetAlias,
                 symbol: NFTsymbol,
-                tokenURI: cid,
-                asset_download_URL: DownloadURL,
-                asset_hash: Assethash,
-                offering_hash: OfferingHash,
-                trust_sign: TrustSign,
+                descriptionUri: cid,
+                serviceUrl: serviceUrl,
                 dt_name: DTname,
                 dt_symbol: DTsymbol,
                 maxSupply_: ethers.parseEther(DTmaxSupply.toString()),
@@ -178,7 +165,7 @@ export const Publish = () => {
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetProviderURL">
                             <Form.Label column sm={4}>Download URL</Form.Label>
                             <Col sm={8}>
-                                <Form.Control type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setDownloadURL(event.target.value) }} />
+                                <Form.Control type="input" placeholder="Enter the URL of your asset provider" onChange={(event) => { setServiceUrl(event.target.value) }} />
                             </Col>
                     </Form.Group>
 
@@ -208,31 +195,6 @@ export const Publish = () => {
                         <Form.Label column sm={4}>Maximum Supply</Form.Label>
                         <Col sm={8}>
                             <Form.Control type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
-                        </Col>
-                    </Form.Group>
-
-                    <h4 className='text-primary'><Badge bg="dark">Trust Metadata</Badge></h4>
-                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="assetHash">
-                        <Form.Label column sm={4}>Asset Hash</Form.Label>
-                        <Col sm={8}>
-                            <Form.Control className="text-truncate" type="input" placeholder="Hash of the Asset" disabled 
-                            value={Assethash.length == 0 ? "" : Assethash}/>
-                        </Col>
-                    </Form.Group>
-
-                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="offeringHash">
-                        <Form.Label column sm={4}>Offering Hash</Form.Label>
-                        <Col sm={8}>
-                            <Form.Control className="text-truncate" type="input" placeholder="Hash of the Offering" disabled
-                            value={OfferingHash.length == 0 ? "" : OfferingHash}/>
-                        </Col>
-                    </Form.Group>
-
-                    <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="trustSign">
-                        <Form.Label column sm={4}>Trust Signature</Form.Label>
-                        <Col sm={8}>
-                            <Form.Control className="text-truncate" type="input" placeholder="Trust Signature" disabled
-                            value={TrustSign.length == 0 ? "" : TrustSign}/>
                         </Col>
                     </Form.Group>
 

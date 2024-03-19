@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Credential, IotaDID, IotaDocument } from "@iota/identity-wasm/web"
+import { IotaDID, IotaDocument, Jwt } from "@iota/identity-wasm/web"
 import { useState, useEffect, createContext, PropsWithChildren, useContext } from 'react'
 import isUrl from 'is-url';
 import connectorAPI from "@/api/connectorAPIs";
@@ -11,7 +11,7 @@ interface IdentityData {
     id: number | undefined
     did: IotaDID | undefined
     didDoc: IotaDocument | undefined
-    vc: Credential | undefined
+    vc: Jwt | undefined
     trigger: boolean
     loading: boolean
     connectorUrl: string
@@ -28,7 +28,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const [id, setId] = useState<number>();
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
-    const [vc, setVc] = useState<Credential>();
+    const [vc, setVc] = useState<Jwt>();
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -60,9 +60,9 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
                 setId(identity.id);
                 setDid(identity.did);
                 setDidDoc(identity.did_doc); // TODO: new api or contact directly the node
-                if(identity.vcredential != null) { // TODO: show the json
+                if(identity.vcredential != undefined && identity.vcredential != null) { // TODO: show the json
                     // setVc(Credential.fromJSON(identity.vc)); 
-                    setVc(identity.vcredential);
+                    setVc(new Jwt(identity.vcredential as string));
                 }
             } catch (err) {
                 setId(undefined);

@@ -13,7 +13,6 @@ import connectorAPI from '@/api/connectorAPIs';
 import { VerticallyCenteredModal } from '../VerticallyCenteredModal';
 import { IoFingerPrint, IoIdCard } from "react-icons/io5";
 
-
 function CardContent() {
   const { wallet } = useMetaMask();
   const { did, didDoc, vc, setTriggerTrue, connectorUrl } = useIdentity();
