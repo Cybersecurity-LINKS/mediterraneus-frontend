@@ -4,7 +4,7 @@
 
 import { useIdentity } from '@/hooks/useIdentity'
 import { useMetaMask } from '@/hooks/useMetaMask';
-import { removeCenterOfStr } from '@/utils';
+import { parseJwt, removeCenterOfStr } from '@/utils';
 import isUrl from 'is-url';
 import { useState } from 'react';
 import { Alert, Button, Card, Col, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
@@ -81,7 +81,7 @@ function CardContent() {
                         show={credentialModalShow}
                         onHide={() => setCredentialModalShow(false)}
                         title={"Verifiable Credential"}
-                        body={JSON.stringify(vc, null, 2)}
+                        body={parseJwt(vc.toString())}
                       />
                     </Card.Body>
                   </Col>

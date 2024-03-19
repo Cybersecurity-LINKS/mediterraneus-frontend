@@ -231,3 +231,24 @@ export const extractNumberFromVCid = (credential: Credential): number => {
   const lastString = spliced[spliced.length - 1];
   return parseInt(lastString);
 }
+
+export function parseJwtSubStr (base64Url: string) {
+
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+export function parseJwt (token: string) {
+  const [header, payload, signature] = token.split('.');
+  const parsedCredential = 
+  "------------------------ JWT header -----------------------\n" + 
+  JSON.stringify(parseJwtSubStr(header), null, 2) +
+  "\n------------------------ JWT Payload ----------------------\n" +
+  JSON.stringify(parseJwtSubStr(payload), null, 2) +
+  "\n------------------------ signature ------------------------\n" +
+  signature;
+  return parsedCredential;
+}
