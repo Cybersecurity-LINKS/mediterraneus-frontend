@@ -7,7 +7,7 @@ import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row } fro
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
-import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress, getIdentitySC } from "@/utils";
+import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { IotaDID } from "@iota/identity-wasm/web";
 import { AbiCoder, ethers, keccak256 } from "ethers";
@@ -39,12 +39,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     );
     
     useEffect(() => {
-        // const getVCownerDID = async (owner: string) => {
-        //     const IDSC_istance = await getIdentitySC(provider!);
-        //     const did: string = await IDSC_istance.getVCownerDID_Addr(owner);
-        //     setOwnerDID(IotaDID.parse(did));
-        //     setLoading(false);
-        // }
+    
         const isDownloadable = async () => {
             const signerAddress = (await provider?.getSigner())!.address;
             const accessTokenABI = await getContractABI("AccessTokenBase");
@@ -199,14 +194,6 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         </Link>
                     </OverlayTrigger>
                 </Card.Subtitle>
-                {/* <Card.Title>DID Owner</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">
-                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
-                        <Link to={`https://explorer.shimmer.network/testnet/identity-resolver/${ownerDID?.toString()}`} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
-                            {formatDid(ownerDID?.toString())}
-                        </Link>
-                    </OverlayTrigger>
-                </Card.Subtitle> */}
             </Card.Header>
             <Card.Body>
                 <Card.Text> NFT name<span className="float-end">{props.NFTdataobj.NFTname}</span> </Card.Text>
