@@ -73,15 +73,21 @@ export const App = () => {
     { element: <Layout/>,  /* 1️⃣ Wrap your routes in a pathless layout route */
       children: [
         { path: "/", element: <></> }, 
-        { path: "/login", Component: Login }, // Verifier page
+        { path: "/verifier", Component: Login }, // Verifier page
         { path: "/issuer", Component: Issuer },
         { path: "/uploadasset", Component: UploadAsset },
         { path: "/publish", Component: Publish },
         { path: "/register", Component: Issuer },
         { path: "/self-catalogue", element: <Catalogue/> },
-        { element: <ProtectedRoute redirectPath="/home" />,
+        { element: <ProtectedRoute redirectPath="/" />,
           children: [
-            { path: "/protected-catalogue", element: <Catalogue/> },
+            { path: "/protected-catalogue", element: 
+            <>
+              <h1 className="text-center">Verifier</h1>
+              <Row className="mt-3">
+                <span className="text-center">Hello from verifier!</span>
+              </Row>
+            </> },
           ]
         },
       ], 

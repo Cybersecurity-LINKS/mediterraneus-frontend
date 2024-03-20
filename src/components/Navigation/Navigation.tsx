@@ -104,7 +104,7 @@ export function Navigation() {
             }
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/issuer" className='me-2 ms-2'>Issuer</Nav.Link> :  "" }
             { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/self-catalogue" className='me-2 ms-2'>Self-Catalogue</Nav.Link> :  ""}
-            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/login" className='me-2 ms-2'>Verifier</Nav.Link> :  ""}
+            { isUrl(connectorUrl) ? <Nav.Link as={Link} to="/verifier" className='me-2 ms-2'>Verifier</Nav.Link> :  ""}
             
           </Nav>  
         </Navbar.Collapse>

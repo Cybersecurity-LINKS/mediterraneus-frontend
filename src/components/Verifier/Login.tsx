@@ -93,7 +93,7 @@ export function Login() {
     return( 
         isAuthenticated 
         ? 
-        <Navigate to="/self-catalogue" /> 
+        <Navigate to="/protected-catalogue" /> 
         :
         <>
             <h1 className="text-center">Verifier</h1>
