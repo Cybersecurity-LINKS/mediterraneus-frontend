@@ -31,26 +31,38 @@ export const Catalogue = () => {
 
     useEffect(() => {
 
-        const getNFTinfo = async (contractAddress: string): Promise<IDataOffering> => {
-            const contractABI = await getContractABI("ServiceBase");
-            const contractIstance = new ethers.Contract(contractAddress, contractABI, provider);
-            
-            const DTcontractABI = await getContractABI("AccessTokenBase");
-            const [...DTcontractAddress] =  await contractIstance.getDTaddresses();
-            const DTcontractIstance = new ethers.Contract(DTcontractAddress[0], DTcontractABI, provider);
-            
-            const NFTinfo: IDataOffering = {
-                owner: await contractIstance.getNFTowner(),
-                NFTaddress: contractAddress,
-                NFTname: await contractIstance.name(),
-                NFTsymbol: await contractIstance.symbol(),
-                NFTmetadataURI: await contractIstance.tokenURI(1),
-                DTname: await DTcontractIstance.name(),
-                DTsymbol: await DTcontractIstance.symbol(),
-                DTcontractAddress: DTcontractAddress[0],
-                AssetDownloadURL: await contractIstance.getAssetDownloadURL()
-            };
-            return NFTinfo;
+        const getNFTinfo = async (contractAddress: string): Promise<IDataOffering | undefined> => {
+            try {
+                const serviceBaseABI = await getContractABI("ServiceBase");
+                const serviceBaseIstance = new ethers.Contract(
+                    contractAddress, 
+                    serviceBaseABI, 
+                    provider
+                );
+                const [...DTcontractAddress] =  await serviceBaseIstance.getATaddresses();
+
+                const accessTokenABI = await getContractABI("AccessTokenBase");
+                const accessTokenIstance = new ethers.Contract(
+                    DTcontractAddress[0], 
+                    accessTokenABI, 
+                    provider
+                );
+                
+                const NFTinfo: IDataOffering = {
+                    owner: await serviceBaseIstance.getServiceOwner(),
+                    NFTaddress: contractAddress,
+                    NFTname: await serviceBaseIstance.name(),
+                    NFTsymbol: await serviceBaseIstance.symbol(),
+                    NFTmetadataURI: await serviceBaseIstance.tokenURI(1),
+                    DTname: await accessTokenIstance.name(),
+                    DTsymbol: await accessTokenIstance.symbol(),
+                    DTcontractAddress: DTcontractAddress[0],
+                    AssetDownloadURL: await serviceBaseIstance.getAssetDownloadURL()
+                };
+                return NFTinfo;
+            } catch (error) {
+                console.log(error);
+            }
         }
     
         const getDataOfferings = async () => {
@@ -63,8 +75,10 @@ export const Catalogue = () => {
                 const [...NFTaddresses]: string[] = await contractIstance.getAllNFTCreatedAddress();
                 const NFTobjs: IDataOffering[] = [];
                 for(let i = 0; i < NFTaddresses.length; i++ ) {
-                    const l_dataoffering = await getNFTinfo(NFTaddresses[i]);
-                    NFTobjs.push(l_dataoffering);
+                    const serviceInfo = await getNFTinfo(NFTaddresses[i]);
+                    if (serviceInfo != undefined) {
+                        NFTobjs.push(serviceInfo);
+                    }
                 }
                 setDataOfferings(NFTobjs);
                 setLoading(false); 

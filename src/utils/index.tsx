@@ -242,6 +242,7 @@ export function parseJwtSubStr (base64Url: string) {
 }
 
 export function parseJwt (token: string) {
+  // This is for display purposes only and is not verified.
   const [header, payload, signature] = token.split('.');
   const parsedCredential = 
   "------------------------ JWT header -----------------------\n" + 
