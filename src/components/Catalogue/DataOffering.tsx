@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { RefAttributes, MouseEvent, useState, useEffect} from "react";
-import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row, Stack } from "react-bootstrap";
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
-import { NETWORK_SYMBOL, formatAddress2, formatDid, getContractABI, getContractAddress } from "@/utils";
+import { NETWORK_SYMBOL, formatAddress, formatAddress2, formatDid, getContractABI, getContractAddress } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
 import { IotaDID } from "@iota/identity-wasm/web";
 import { AbiCoder, ethers, keccak256 } from "ethers";
@@ -31,6 +31,11 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     const [loadingOffering, setLoadingOffering] = useState(true); 
     const [downloadable, setDownloadable] = useState(false); 
     const [modalShow, setModalShow] = useState(false);
+
+    const [ownerAddrCopied, setOwnerAddrCopied] = useState(false);
+    const [nftAddrCopied, setNftAddrCopied] = useState(false);
+    const [tokenAddrCopied, setTokenAddrCopied] = useState(false);
+
 
     const renderTooltip = (props: JSX.IntrinsicAttributes & TooltipProps & RefAttributes<HTMLDivElement>) => (
         <Tooltip id="button-tooltip" {...props}>
@@ -186,32 +191,80 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     return (
         <Card className="m-2">
             <Card.Header>
-                <Card.Title>Owner</Card.Title>
-                <Card.Subtitle className="mb-2">
-                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
-                        <Link to={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
-                            {formatDid(props.NFTdataobj.owner)}
-                        </Link>
-                    </OverlayTrigger>
-                </Card.Subtitle>
+                <Card.Title>
+                Owner:
+                <span className="float-end">
+
+                <Stack direction="horizontal" gap={3}>
+                        <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
+                            <Link to={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
+                                {formatAddress(props.NFTdataobj.owner)}
+                            </Link>
+                        </OverlayTrigger>
+                        <OverlayTrigger placement="bottom" 
+                        delay={{ show: 250, hide: 400 }} 
+                        overlay={<Tooltip id="button-tooltip">{ownerAddrCopied ? "Copied!" : "Copy"}</Tooltip>}
+                        onExited={()=>setOwnerAddrCopied(false)}
+                        >
+                        <Button size="sm" variant="outline-dark" onClick={() => {
+                            navigator.clipboard.writeText(props.NFTdataobj.NFTaddress); 
+                            setOwnerAddrCopied(true);
+                        }}>
+                            <i className="bi bi-copy"/>
+                        </Button>
+                        </OverlayTrigger>
+                    </Stack>
+                    </span>
+
+                </Card.Title>
             </Card.Header>
             <Card.Body>
                 <Card.Text> NFT name<span className="float-end">{props.NFTdataobj.NFTname}</span> </Card.Text>
                 <Card.Text> NFT symbol<span className="float-end">{props.NFTdataobj.NFTsymbol}</span> </Card.Text>
                 <Card.Text> NFT address
                     <span className="float-end">
+                    <Stack direction="horizontal" gap={3}>
                         <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
                             <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
                         </OverlayTrigger>
+                        <OverlayTrigger placement="bottom" 
+                        delay={{ show: 250, hide: 400 }} 
+                        overlay={<Tooltip id="button-tooltip">{nftAddrCopied ? "Copied!" : "Copy"}</Tooltip>}
+                        onExited={()=>setNftAddrCopied(false)}
+                        >
+                        <Button size="sm" variant="outline-dark" onClick={() => {
+                            navigator.clipboard.writeText(props.NFTdataobj.NFTaddress); 
+                            setNftAddrCopied(true);
+                        }}>
+                            <i className="bi bi-copy"/>
+                        </Button>
+                        </OverlayTrigger>
+                    </Stack>
+                        
                     </span>
                 </Card.Text>
-                <Card.Text>Data Token name<span className="float-end">{props.NFTdataobj.DTname}</span></Card.Text>
-                <Card.Text>Data Token symbol<span className="float-end">{props.NFTdataobj.DTsymbol}</span></Card.Text>
-                <Card.Text>Data Token address 
+                <Card.Text>Access Token name<span className="float-end">{props.NFTdataobj.DTname}</span></Card.Text>
+                <Card.Text>Access Token symbol<span className="float-end">{props.NFTdataobj.DTsymbol}</span></Card.Text>
+                <Card.Text>Access Token address 
                     <span className="float-end">
-                    <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip}>
-                        <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
-                    </OverlayTrigger>
+                    <Stack direction="horizontal" gap={3}>
+                        <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip}>
+                            <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
+                        </OverlayTrigger>
+                        <OverlayTrigger placement="bottom" 
+                            delay={{ show: 250, hide: 400 }} 
+                            overlay={<Tooltip id="button-tooltip">{tokenAddrCopied ? "Copied!" : "Copy"}</Tooltip>}
+                            onExited={()=>setTokenAddrCopied(false)}
+                            >
+                            <Button size="sm" variant="outline-dark" onClick={() => {
+                                navigator.clipboard.writeText(props.NFTdataobj.DTcontractAddress); 
+                                setTokenAddrCopied(true);
+                            }}>
+                                <i className="bi bi-copy"/>
+                            </Button>
+                        </OverlayTrigger>
+                    </Stack>
+
                     </span> 
                 </Card.Text>
                 <Card.Text>Asset access price

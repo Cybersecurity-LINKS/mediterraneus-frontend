@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Col, Container, Row } from 'react-bootstrap';
 import { Navigate, Outlet, RouterProvider } from 'react-router';
 import { createBrowserRouter } from 'react-router-dom';

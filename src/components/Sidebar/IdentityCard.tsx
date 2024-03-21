@@ -7,18 +7,18 @@ import { useMetaMask } from '@/hooks/useMetaMask';
 import { parseJwt, removeCenterOfStr } from '@/utils';
 import isUrl from 'is-url';
 import { useState } from 'react';
-import { Alert, Button, Card, Col, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
+import { Alert, Button, Card, Col, OverlayTrigger, Row, Spinner, Stack, Tooltip } from 'react-bootstrap'
 import { Link } from 'react-router-dom';
 import connectorAPI from '@/api/connectorAPIs';
 import { VerticallyCenteredModal } from '../VerticallyCenteredModal';
-import { IoFingerPrint, IoIdCard } from "react-icons/io5";
 
 function CardContent() {
   const { wallet } = useMetaMask();
   const { did, didDoc, vc, setTriggerTrue, connectorUrl } = useIdentity();
   const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
   const [credentialModalShow, setCredentialModalShow] = useState(false);
-
+  const [copied, setCopied] = useState(false);
+  
   //TODO: why don't use hooks for setting the did and vc and do that call there? 
   const createDID = async () => {
     try {
@@ -51,9 +51,26 @@ function CardContent() {
             </Row> 
           : // false
           <>
-            <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Open in explorer</Tooltip>}>          
-              <Link target="_blank" to={`https://explorer.iota.org/testnet/search/${did?.toString()}`} style={{ textDecoration: 'none' }}>{removeCenterOfStr(did!.toString(), 21, 74)}</Link> 
-            </OverlayTrigger>
+          <Row>
+            <Stack direction="horizontal" gap={3}>
+              <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Open in explorer</Tooltip>}>          
+                <Link className="text-truncate" target="_blank" to={`https://explorer.iota.org/testnet/search/${did?.toString()}`} style={{ textDecoration: 'none' }}>
+                  {did!.toString()}</Link> 
+              </OverlayTrigger>
+              <OverlayTrigger placement="bottom" 
+                delay={{ show: 250, hide: 400 }} 
+                overlay={<Tooltip id="button-tooltip">{copied ? "Copied!" : "Copy"}</Tooltip>}
+                onExited={()=>setCopied(false)}
+              >
+                <Button size="sm" variant="outline-dark" onClick={() => {
+                  navigator.clipboard.writeText(did!.toString()); 
+                  setCopied(true);
+                }}>
+                  <i className="bi bi-copy"/>
+                </Button>
+              </OverlayTrigger>
+            </Stack>
+          </Row>
           </>
           
         }
@@ -66,27 +83,23 @@ function CardContent() {
           <Link style={{textDecoration: 'none'}} to="/issuer">Contact the Issuer and join</Link>
           : // false
           <>  
-            <Card key="Credential" bg="light" border="secondary" style={{ width: '16rem'}} className="mx-auto">
-              <Row className='g-0'>
-                  <Col md="4" className="my-auto">
-                    <IoIdCard size="64"/>
-                  </Col>
-                  <Col md="8">
-                    <Card.Body>
-                      <Card.Title> Your <br/> Credential </Card.Title>
-                      <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Show Credential</Tooltip>}>          
-                        <Button variant="outline-secondary" className="me-2" onClick={() => setCredentialModalShow(true)}>Show</Button>
-                      </OverlayTrigger>
-                      <VerticallyCenteredModal 
-                        show={credentialModalShow}
-                        onHide={() => setCredentialModalShow(false)}
-                        title={"Verifiable Credential"}
-                        body={parseJwt(vc.toString())}
-                      />
-                    </Card.Body>
-                  </Col>
+              <Row >
+                <Stack direction="horizontal" gap={3}>
+                  
+                  {/* <i className="bi bi-person-vcard"/>Credential */}
+                  <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Show Credential</Tooltip>}>          
+                    <Button size="sm" variant="outline-dark" onClick={() => setCredentialModalShow(true)}>
+                    <i className="bi bi-person-vcard"/>
+                    </Button>
+                  </OverlayTrigger>
+                  <VerticallyCenteredModal 
+                    show={credentialModalShow}
+                    onHide={() => setCredentialModalShow(false)}
+                    title={"Verifiable Credential"}
+                    body={parseJwt(vc.toString())}
+                  />
+                </Stack>
               </Row>
-            </Card>
           </>
         }        
       </Row>
@@ -98,7 +111,7 @@ export const IdentityCard = () => {
   const { connectorUrl } = useIdentity();
   return (
       <Card className='mt-3 ms-3' >
-        <Card.Header><IoFingerPrint size="32"/><strong className="ms-2">Identity</strong></Card.Header>
+        <Card.Header><i className="bi bi-fingerprint"/><strong>Identity</strong></Card.Header>
         <Card.Body>
           { isUrl(connectorUrl) ? <CardContent/> : <Alert className="my-auto" variant="danger">Connector URL missing or not connected!</Alert> }
         </Card.Body>
