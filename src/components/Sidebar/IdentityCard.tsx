@@ -54,7 +54,7 @@ function CardContent() {
           <Row>
             <Stack direction="horizontal" gap={3}>
               <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Open in explorer</Tooltip>}>          
-                <Link  target="_blank" to={`https://explorer.iota.org/testnet/search/${did?.toString()}`} style={{ textDecoration: 'none' }}>
+                <Link className="text-truncate" target="_blank" to={`https://explorer.iota.org/testnet/search/${did?.toString()}`} style={{ textDecoration: 'none' }}>
                   {did!.toString()}</Link> 
               </OverlayTrigger>
               <OverlayTrigger placement="bottom" 
