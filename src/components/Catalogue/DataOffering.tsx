@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { RefAttributes, MouseEvent, useState, useEffect} from "react";
-import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row, Stack } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row, Stack, ListGroup } from "react-bootstrap";
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
@@ -191,11 +191,8 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
     return (
         <Card className="m-2">
             <Card.Header>
-                <Card.Title>
-                Owner:
-                <span className="float-end">
-
-                <Stack direction="horizontal" gap={3}>
+                <Card.Title> Owner:
+                    <Stack className="float-end" direction="horizontal" gap={3}>
                         <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
                             <Link to={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ color: 'gray', textDecoration: 'none' }}>
                                 {formatAddress(props.NFTdataobj.owner)}
@@ -214,15 +211,13 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         </Button>
                         </OverlayTrigger>
                     </Stack>
-                    </span>
-
                 </Card.Title>
             </Card.Header>
-            <Card.Body>
-                <Card.Text> NFT name<span className="float-end">{props.NFTdataobj.NFTname}</span> </Card.Text>
-                <Card.Text> NFT symbol<span className="float-end">{props.NFTdataobj.NFTsymbol}</span> </Card.Text>
-                <Card.Text> NFT address
-                    <span className="float-end">
+            <ListGroup variant="flush">
+                <ListGroup.Item> NFT name <span className="float-end">{props.NFTdataobj.NFTname}</span> </ListGroup.Item>
+                <ListGroup.Item> NFT symbol<span className="float-end">{props.NFTdataobj.NFTsymbol}</span> </ListGroup.Item>
+                <ListGroup.Item> NFT address
+                    <div className="float-end">
                     <Stack direction="horizontal" gap={3}>
                         <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip} >
                             <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.NFTaddress} target="_blank" className="info ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.NFTaddress)}</Card.Link>
@@ -240,13 +235,12 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                         </Button>
                         </OverlayTrigger>
                     </Stack>
-                        
-                    </span>
-                </Card.Text>
-                <Card.Text>Access Token name<span className="float-end">{props.NFTdataobj.DTname}</span></Card.Text>
-                <Card.Text>Access Token symbol<span className="float-end">{props.NFTdataobj.DTsymbol}</span></Card.Text>
-                <Card.Text>Access Token address 
-                    <span className="float-end">
+                    </div>
+                </ListGroup.Item>
+                <ListGroup.Item>Access Token name<div className="float-end">{props.NFTdataobj.DTname}</div></ListGroup.Item>
+                <ListGroup.Item>Access Token symbol<div className="float-end">{props.NFTdataobj.DTsymbol}</div></ListGroup.Item>
+                <ListGroup.Item>Access Token address 
+                    <div className="float-end">
                     <Stack direction="horizontal" gap={3}>
                         <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltip}>
                             <Card.Link href={baseExplorerURL+"/address/"+props.NFTdataobj.DTcontractAddress} target="_blank" className="ms-2" style={{ textDecoration: 'none' }}>{formatAddress2(props.NFTdataobj.DTcontractAddress)}</Card.Link>
@@ -264,17 +258,16 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
                             </Button>
                         </OverlayTrigger>
                     </Stack>
-
-                    </span> 
-                </Card.Text>
-                <Card.Text>Asset access price
-                    <span className="float-end">
+                    </div> 
+                </ListGroup.Item>
+                <ListGroup.Item>Asset access price
+                    <div className="float-end">
                         <OverlayTrigger delay={{ show: 250, hide: 400 }} overlay={<Tooltip><strong>Exchange Rate:</strong><br/>1 {`${props.NFTdataobj.DTsymbol} = ${price} ${native}`}</Tooltip>}>          
                             <a>1 {`${props.NFTdataobj.DTsymbol}`} </a>
                         </OverlayTrigger>
-                    </span>  
-                </Card.Text>
-            </Card.Body>
+                    </div>  
+                </ListGroup.Item>
+            </ListGroup>
             <Card.Footer>
                 {
                     loadingOffering ? 
