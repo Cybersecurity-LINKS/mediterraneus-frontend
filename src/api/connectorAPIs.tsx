@@ -222,5 +222,17 @@ const setAssetNftAddress = async (connectorUrl: string, assetAlias: string, nftA
     }
 }
 
-const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, getAssetInfo, getAssetAliases, setAssetNftAddress };
+const getCidContent = async (connectorUrl: string, cid: string) => {
+    const response = await fetch(`${connectorUrl}/api/cids/${cid}`);
+    const json = await response.json();
+
+    if(response.ok){
+        return json; 
+    } else {
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, getAssetInfo, getAssetAliases, setAssetNftAddress, getCidContent };
 export default connectorAPI;

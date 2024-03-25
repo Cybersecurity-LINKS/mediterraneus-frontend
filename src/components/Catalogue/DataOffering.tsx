@@ -68,15 +68,9 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
 
     const getOfferingFromIPFS = async () => {
 
-        console.log("todo get offering from ipfs");
-        //TODO: handle err
-        // 
-        // if ( ownerDID !== undefined) {
-        //     const offering = await catalogueAPI.getOfferingContent(props.NFTdataobj.NFTmetadataURI, ownerDID.toString());
-        //     setOffering(offering);
-        // } else {
-        //     console.log("DID of the owner not defined");
-        // }   
+        console.log("Get description from ipfs");
+        const offering = await connectorAPI.getCidContent(connectorUrl, props.NFTdataobj.NFTmetadataURI);
+        setOffering(offering);   
     }
 
     const getTokenPrice = async () => {
