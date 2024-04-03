@@ -24,6 +24,7 @@ export function Login() {
     const { connectorUrl, did, id } = useIdentity()
     const { setError } = useError();
 
+    // WARNING: this is just for testing
     const handleLogin = async () => {
         if (!isUrl(connectorUrl)) {
             setError('Connector url missing');
@@ -56,8 +57,8 @@ export function Login() {
             const presentationJwt = await connectorAPI.generatePresentation(connectorUrl, challenge, id!, null);
             // send vp to verifier (catalogue)
             if( await verifierAPI.helloWorld(presentationJwt.presentation) ) { // login ok 
-                setIsAuthenticated(true);
-                localStorage.setItem("token", "true");
+                setIsAuthenticated(true); // WARNING: this is just for testing
+                localStorage.setItem("token", "true"); // WARNING: this is just for testing
             } else {
                 setError('Login failed!');
             } 

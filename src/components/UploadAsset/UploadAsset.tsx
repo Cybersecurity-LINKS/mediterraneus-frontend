@@ -95,14 +95,14 @@ export const UploadAsset = () => {
                 <Form.Label column sm={4}>Offering CID</Form.Label>
                 <Col sm={8}>
                     <Form.Control className="text-truncate"  disabled={true} type="text" placeholder="Upload Offering Message to get CID back" 
-                        value={offeringCID.length == 0 ? "Upload Offering Message to get CID back" : offeringCID} />
+                        value={offeringCID.length == 0 ? "Upload Offering Message to get CID back" : offeringCID} isValid={offeringCID.length > 0}/>
                 </Col>
             </Form.Group>
             <Container className="d-flex justify-content-center">
                 <OverlayTrigger placement="bottom" overlay={<Tooltip>Upload an asset with its offering message on the Connector</Tooltip>}>
                     <Button variant="primary" type="submit" className='mt-3 mb-3'>Upload</Button>
                 </OverlayTrigger>
-            </Container>
+            </Container>           
         </Form>
         </>
     );
