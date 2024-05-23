@@ -51,7 +51,7 @@ export const Issuer = () => {
                 { name: formData.name, surname: formData.surname }
             );
             const credentialJwt = credentialResponse.credentialJwt;
-            console.log("Credential JWT: ", credentialJwt);
+            console.log(`Credential [${credentialResponse.credentialId}], JWT: ${credentialJwt}`);
                         
             await connectorAPI.storeCredential(
                 connectorUrl,
@@ -106,7 +106,7 @@ export const Issuer = () => {
                 </Row>
             }
             
-            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false);}}>
+            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false); setFormData({name: "", surname: ""});}}>
                 <Form onSubmit={requestCredential}>
                     <Modal.Header closeButton>
                         <Modal.Title>About you</Modal.Title>

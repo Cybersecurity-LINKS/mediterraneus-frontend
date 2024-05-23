@@ -44,5 +44,19 @@ const requestCredential = async ( did: string, nonce: string, ssiSignature: stri
         throw err;  // An object with the error coming from the server
     }
 }
-const issuerAPI = { getChallenge, requestCredential };
+
+const revokeCredential = async ( credentialId: number ) => {
+    const response = await fetch(`${issuerApiEndpoint}/credentials/${credentialId}`, {
+        method: 'DELETE',
+    });  
+    if(response.ok){
+        return;
+    } else {
+        const json = await response.json();
+        const err = {status: response.status, errObj: json};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
+const issuerAPI = { getChallenge, requestCredential, revokeCredential };
 export default issuerAPI;

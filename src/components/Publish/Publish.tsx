@@ -142,7 +142,7 @@ export const Publish = () => {
             : 
             <>
                 <Form className="mt-3 mb-3 ps-3 pe-3">
-                    <h4 className='text-primary'><Badge bg="dark">Create your NFT</Badge></h4>
+                    <h4 className='text-primary'><Badge bg="dark">Create your Service Token (NFT)</Badge></h4>
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTname">
                         <OverlayTrigger  placement="left" overlay={<Tooltip>Unique alias representing the asset and it is used as NFT Name</Tooltip>}>  
                             <Form.Label column sm={4}>Asset</Form.Label>
@@ -156,7 +156,7 @@ export const Publish = () => {
                     </Form.Group>
 
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formNFTsymbol">
-                        <Form.Label column sm={4}>NFT Symbol</Form.Label> 
+                        <Form.Label column sm={4}>Symbol</Form.Label> 
                         <Col sm={8}>
                             <Form.Control type="input" placeholder="Choose an NFT symbol" onChange={(event) => { setNFTsymbol(event.target.value) }} />
                         </Col>
@@ -176,25 +176,25 @@ export const Publish = () => {
                         </Col>
                     </Form.Group>
 
-                    <h4 className='text-primary'><Badge bg="dark">Create your fungible Data Token</Badge></h4>
+                    <h4 className='text-primary'><Badge bg="dark">Create your fungible Access Token (ERC-20)</Badge></h4>
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTname">
-                        <Form.Label column sm={4}>DataToken Name</Form.Label>
+                        <Form.Label column sm={4}>Name</Form.Label>
                         <Col sm={8}>
-                            <Form.Control type="input" placeholder="Enter the DT Name" onChange={(event) => { setDTname(event.target.value) }}/>
+                            <Form.Control type="input" placeholder="Enter the AT Name" onChange={(event) => { setDTname(event.target.value) }}/>
                         </Col>
                     </Form.Group>
 
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTsymbol">
-                        <Form.Label column sm={4}>DataToken Symbol</Form.Label>
+                        <Form.Label column sm={4}>Symbol</Form.Label>
                         <Col sm={8}>
-                            <Form.Control type="input" placeholder="Enter the DT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
+                            <Form.Control type="input" placeholder="Enter the AT symbol" onChange={(event) => { setDTsymbol(event.target.value) }} />
                         </Col>
                     </Form.Group>
 
                     <Form.Group as={Row} className="flex-fill align-items-center mb-3" controlId="formDTmaxSupply">
                         <Form.Label column sm={4}>Maximum Supply</Form.Label>
                         <Col sm={8}>
-                            <Form.Control type="input" placeholder="Enter the DT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
+                            <Form.Control type="input" placeholder="Enter the AT maximum supply" onChange={(event) => { setDTmaxSupply(BigInt(event.target.value)) }} />
                         </Col>
                     </Form.Group>
 

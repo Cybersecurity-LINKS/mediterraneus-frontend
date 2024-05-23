@@ -12,6 +12,7 @@ interface IdentityData {
     did: IotaDID | undefined
     didDoc: IotaDocument | undefined
     vc: Jwt | undefined
+    credentialId: number | undefined
     trigger: boolean
     loading: boolean
     connectorUrl: string
@@ -29,6 +30,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
     const [did, setDid] = useState<IotaDID>();
     const [didDoc, setDidDoc] = useState<IotaDocument>();
     const [vc, setVc] = useState<Jwt>();
+    const [credentialId, setCredentialId] = useState<number>();
 
     const [trigger, setTrigger] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -63,12 +65,17 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
                 if(identity.vcredential != undefined && identity.vcredential != null) { // TODO: show the json
                     // setVc(Credential.fromJSON(identity.vc)); 
                     setVc(new Jwt(identity.vcredential as string));
+                    setCredentialId(identity.credentialId);
+                } else {
+                    setVc(undefined);
+                    setCredentialId(undefined);
                 }
             } catch (err) {
                 setId(undefined);
                 setDid(undefined);
                 setDidDoc(undefined);
                 setVc(undefined);
+                setCredentialId(undefined);
             }
             setLoading(false);
         };
@@ -129,6 +136,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
             did,
             didDoc,
             vc,
+            credentialId,
             trigger,
             loading,
             connectorUrl,

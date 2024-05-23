@@ -75,10 +75,9 @@ export const App = () => {
       children: [
         { path: "/", element: <></> }, 
         { path: "/verifier", Component: Login }, // Verifier page
-        { path: "/issuer", Component: Issuer },
+        { path: "/issuer", Component: Issuer }, 
         { path: "/uploadasset", Component: UploadAsset },
         { path: "/publish", Component: Publish },
-        { path: "/register", Component: Issuer },
         { path: "/self-catalogue", element: <Catalogue/> },
         { element: <ProtectedRoute redirectPath="/" />,
           children: [

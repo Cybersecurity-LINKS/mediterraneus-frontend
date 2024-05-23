@@ -24,7 +24,7 @@ export function AuthContextProvider({ children }: PropsWithChildren) {
   
     useEffect(() => {
       const token = localStorage.getItem('token'); // TODO: remove/change sessionStorage usage, if you change manually the session storage you can navigate within the other web pages
-      if (token != null &&  JSON.parse(token)) {
+      if (token != null &&  JSON.parse(token)) { // this was just for testing
         setIsAuthenticated(true);
       }
     }, []);

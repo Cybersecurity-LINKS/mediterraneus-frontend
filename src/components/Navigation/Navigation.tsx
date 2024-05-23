@@ -89,7 +89,7 @@ export function Navigation() {
       <Container fluid>
 
         <Navbar.Brand className="d-flex align-items-center ms-2" as={Link} to="/">
-          <h4 className="ms-2 mt-2">Mediterraneus</h4>
+          <h4 className="ms-2 mt-2">Demo</h4>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -98,7 +98,6 @@ export function Navigation() {
               <NavDropdown title="Connector" id="basic-nav-dropdown">
                 <NavDropdown.Item as={Link} to="/uploadasset">Upload</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/publish">Publish</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/identity">Manage identity</NavDropdown.Item>
               </NavDropdown>  
               :  ""
             }

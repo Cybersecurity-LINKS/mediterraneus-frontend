@@ -19,7 +19,7 @@
     "bootstrap-icons": "^1.11.3",
     "buffer": "^6.0.3",
     "dotenv": "^16.3.1",
-    "ethers": "6.6.5",
+    "ethers": "^6.12.1",
     "is-url": "^1.2.4",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { Alert, Col, Row, Spinner } from "react-bootstrap";
-import { DataOffering } from "./DataOffering";
+import { Offering } from "./Offering";
 import { useEffect, useState } from "react";
 import { getContractABI, getContractAddress } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
@@ -101,7 +101,7 @@ export const Catalogue = () => {
                     :
                     <Row md={columnsPerRow}> 
                         {
-                            dataOfferings.map((NFTdataobj, index) => (<Col key={index}><DataOffering key={index} NFTdataobj={NFTdataobj} /></Col>))
+                            dataOfferings.map((NFTdataobj, index) => (<Col key={index}><Offering key={index} NFTdataobj={NFTdataobj} /></Col>))
                         }
                     </Row>
             }

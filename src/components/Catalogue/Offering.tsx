@@ -7,18 +7,16 @@ import { Card, OverlayTrigger, Tooltip, TooltipProps, Button, Spinner, Row, Stac
 import { Link } from 'react-router-dom';
 
 import { IDataOffering } from "./Catalogue";
-import { NETWORK_SYMBOL, formatAddress, formatAddress2, formatDid, getContractABI, getContractAddress } from "@/utils";
+import { NETWORK_SYMBOL, formatAddress, formatAddress2, getContractABI, getContractAddress } from "@/utils";
 import { useMetaMask } from "@/hooks/useMetaMask";
-import { IotaDID } from "@iota/identity-wasm/web";
 import { AbiCoder, ethers, keccak256 } from "ethers";
 import { VerticallyCenteredModal } from "../VerticallyCenteredModal/VerticallyCenteredModal";
 
-import catalogueAPI from "@/api/catalogueAPIs";
 import connectorAPI from "@/api/connectorAPIs";
 import { useIdentity } from "@/hooks/useIdentity";
 
 
-export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
+export const Offering = (props: { NFTdataobj: IDataOffering } ) => {
     const baseExplorerURL = import.meta.env.VITE_EVM_EXPLORER;
     const { provider, wallet } = useMetaMask();
     const { id, did, connectorUrl } = useIdentity();
@@ -102,7 +100,7 @@ export const DataOffering = (props: { NFTdataobj: IDataOffering } ) => {
         const res: bigint = await exchangeContractIstance.getSMRcostFor1DT(exchangeID_forthisDT);
         const rate: bigint = await exchangeContractIstance.getExchangeFixedRate(exchangeID_forthisDT);
         setPrice(Number(res)/(1e18));
-        console.log(`Data token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 AT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
+        console.log(`Access token info:\n -Owner balance: ${ownerBalance}\n -ExchangeID: ${exchangeID_forthisDT}\n -Cost for 1 AT = ${Number(res)/(1e18)} with rate ${Number(rate)/(1e18)}`);  
         setNative(NETWORK_SYMBOL[Number((await provider!.getNetwork()).chainId)])
     }
 

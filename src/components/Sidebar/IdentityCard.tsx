@@ -4,21 +4,51 @@
 
 import { useIdentity } from '@/hooks/useIdentity'
 import { useMetaMask } from '@/hooks/useMetaMask';
-import { parseJwt, removeCenterOfStr } from '@/utils';
+import { parseJwt } from '@/utils';
 import isUrl from 'is-url';
 import { useState } from 'react';
-import { Alert, Button, Card, Col, OverlayTrigger, Row, Spinner, Stack, Tooltip } from 'react-bootstrap'
+import { Alert, Button, Card, Col, Modal, OverlayTrigger, Row, Spinner, Stack, Tooltip } from 'react-bootstrap'
 import { Link } from 'react-router-dom';
 import connectorAPI from '@/api/connectorAPIs';
 import { VerticallyCenteredModal } from '../VerticallyCenteredModal';
+import { useError } from '@/hooks/useError';
+import issuerAPI from '@/api/issuerAPIs';
 
 function CardContent() {
   const { wallet } = useMetaMask();
-  const { did, didDoc, vc, setTriggerTrue, connectorUrl } = useIdentity();
+  const { setError } = useError();
+  const { id, did, didDoc, vc, credentialId, setTriggerTrue, connectorUrl } = useIdentity();
   const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
   const [credentialModalShow, setCredentialModalShow] = useState(false);
   const [copied, setCopied] = useState(false);
   
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const revokeAndRemoveCredential = async () => {
+    if ( wallet.accounts[0] === undefined ) {
+      setError("Please connect your wallet!"); 
+      return;
+    } 
+
+    if (!isUrl(connectorUrl)) {
+      setError('Connector url error');
+      return;
+    }
+
+    if ( id == undefined || vc == undefined || credentialId == undefined) {
+      setError('Credential undefined');
+      return;
+    }
+
+    issuerAPI.revokeCredential(credentialId);
+    connectorAPI.removeCredential(connectorUrl, wallet.accounts[0]);
+    handleClose();
+    setTriggerTrue();
+  }
+
   //TODO: why don't use hooks for setting the did and vc and do that call there? 
   const createDID = async () => {
     try {
@@ -92,6 +122,11 @@ function CardContent() {
                     <i className="bi bi-person-vcard"/>
                     </Button>
                   </OverlayTrigger>
+                  <OverlayTrigger placement="right" delay={{ show: 200, hide: 200 }} overlay={<Tooltip>Revoke and delete</Tooltip>}>          
+                    <Button size="sm" variant="outline-danger" onClick={handleShow}>
+                      <i className="bi bi-trash"/>
+                    </Button>
+                  </OverlayTrigger>
                   <VerticallyCenteredModal 
                     show={credentialModalShow}
                     onHide={() => setCredentialModalShow(false)}
@@ -103,6 +138,21 @@ function CardContent() {
           </>
         }        
       </Row>
+      <Modal show={show} onHide={handleClose}>
+        {/* <Modal.Header closeButton>
+          <Modal.Title>Modal heading</Modal.Title>
+        </Modal.Header> */}
+        <Modal.Body>Do you want to confirm?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={revokeAndRemoveCredential}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       </>
   );
 }

@@ -83,6 +83,27 @@ const storeCredential = async (connectorUrl: string, ethAddress: string, credent
     }
 }
 
+const removeCredential = async (connectorUrl: string, ethAddress: string) => {
+    if (!isUrl(connectorUrl)) {
+        throw "Connector url undefined";
+    }
+    // store VC in connector's backend.
+    const response = await fetch(`${connectorUrl}/api/identities?ethAddress=${ethAddress}`, {
+        method: 'PATCH',
+        headers: {
+            "Content-type": "application/json"
+        },
+        body: JSON.stringify({
+            credentialJwt: null,
+        })
+    });
+    if(!response.ok){
+        // Couldn't be able to store the credential
+        const err = {status: response.status, errObj: response.json()};
+        throw err;  // An object with the error coming from the server
+    }
+}
+
 const signData = async (connectorUrl: string, idenityId: number, payload: string) => {
     if (!isUrl(connectorUrl)) {
         throw "Connector url undefined";
@@ -234,5 +255,5 @@ const getCidContent = async (connectorUrl: string, cid: string) => {
     }
 }
 
-const connectorAPI = { createDID, getIdentity, storeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, getAssetInfo, getAssetAliases, setAssetNftAddress, getCidContent };
+const connectorAPI = { createDID, getIdentity, storeCredential, removeCredential, generatePresentation, signData, getChallenge, uploadAsset, downloadAsset, getAssetInfo, getAssetAliases, setAssetNftAddress, getCidContent };
 export default connectorAPI;
