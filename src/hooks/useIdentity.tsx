@@ -153,7 +153,7 @@ export const IdentityContextProvider = ({ children }: PropsWithChildren) => {
 export const useIdentity = () => {
     const context = useContext(IdentityContext)
     if (context === undefined) {
-        throw new Error('useMetaMask must be used within a "MetaMaskContextProvider"')
+        throw new Error('useIdentity must be used within a "IdentityContextProvider"')
     }
     return context
 }

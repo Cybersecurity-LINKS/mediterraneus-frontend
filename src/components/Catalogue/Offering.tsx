@@ -286,6 +286,7 @@ export const Offering = (props: { NFTdataobj: IDataOffering } ) => {
                         Download Asset
                     </Button> 
                     :
+                    // TODO: fix error wallet.account[0] may be undefined
                     ((wallet.accounts[0] as string).toString().toLowerCase() !== props.NFTdataobj.owner.toLowerCase()) &&
                     <Button type="submit" onClick={(event) => { handleSubmit(event)}}>
                         Buy Asset access
