@@ -20,6 +20,7 @@ export const Issuer = () => {
 
     const [modalShow, setModalShow] = useState(false);
     const [formData, setFormData] = useState({name: "", surname: ""});
+    const [isConsentChecked, setIsConsentChecked] = useState(false); // state for consensus checkbox
 
     const [cretingIdentityLoading, setCreatingIdentity] = useState(false);
     const [issuedCredential, setIssuedCredential] = useState(false);
@@ -80,6 +81,10 @@ export const Issuer = () => {
         setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
     };
 
+    const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIsConsentChecked(event.target.checked);
+    }
+
     return (
         <>
             <h1 className="text-center">Issuer</h1>
@@ -106,7 +111,7 @@ export const Issuer = () => {
                 </Row>
             }
             
-            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false); setFormData({name: "", surname: ""});}}>
+            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false); setFormData({name: "", surname: ""}); setIsConsentChecked(false);}}>
                 <Form onSubmit={requestCredential}>
                     <Modal.Header closeButton>
                         <Modal.Title>About you</Modal.Title>
@@ -134,12 +139,13 @@ export const Issuer = () => {
                             required
                             />
                         </Form.Group>
-                        <Alert key="info-modal" variant="info" >
-                            This information is only stored within the credential.
+                        <Alert key="info-modal" variant="warning">
+                            Please do not enter personal data in this test form. We ask you to enter only pseudonyms and/or made-up names or text strings.
                         </Alert>
+                        <Form.Check id="consent-checkbox" label="I hereby declare that I have read the above instructions." onChange={handleCheckChange}/>
                     </Modal.Body>
                     <Modal.Footer className="justify-content-center">
-                        <Button variant="primary" type="submit">
+                        <Button variant="primary" type="submit" disabled={!isConsentChecked}>
                         { cretingIdentityLoading  ? <Spinner animation="border" variant="light" size="sm"/> :"Request credential" }
                         </Button>
                     </Modal.Footer>
