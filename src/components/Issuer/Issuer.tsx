@@ -111,7 +111,10 @@ export const Issuer = () => {
                 </Row>
             }
             
-            <Modal key="registerForm" show={modalShow} onHide={() => {setModalShow(false); setFormData({name: "", surname: ""}); setIsConsentChecked(false);}}>
+            <Modal key="registerForm" 
+                show={modalShow}
+                onHide={() => {setModalShow(false); setFormData({name: "", surname: ""});}}
+                onShow={() => {setIsConsentChecked(false)}}>
                 <Form onSubmit={requestCredential}>
                     <Modal.Header closeButton>
                         <Modal.Title>About you</Modal.Title>
